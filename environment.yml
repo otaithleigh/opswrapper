@@ -1,0 +1,7 @@
+name: opswrapper
+dependencies:
+  - python >= 3.7
+  - numpy
+  - ipython
+  - yapf
+  - pytest
