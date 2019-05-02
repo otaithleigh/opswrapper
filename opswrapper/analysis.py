@@ -1,7 +1,5 @@
 """Helpers for running OpenSees."""
 
-from __future__ import annotations
-
 import dataclasses
 import logging
 import os

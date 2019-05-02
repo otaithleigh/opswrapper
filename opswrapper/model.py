@@ -1,7 +1,5 @@
 """Basic OpenSees modeling commands."""
 
-from __future__ import annotations
-
 import dataclasses
 
 from . import base

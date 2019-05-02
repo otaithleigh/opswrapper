@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import abc
+
 
 class OpenSeesObject(abc.ABC):
     """Base class for wrapping OpenSees Tcl objects/commands."""
