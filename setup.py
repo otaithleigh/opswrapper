@@ -5,6 +5,7 @@ setup(
     version="0.0.1",
 
     packages=["opswrapper"],
+    package_dir={'': "src"},
 
     python_requires=">=3.7",
     install_requires=["numpy"],
