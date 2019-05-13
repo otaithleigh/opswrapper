@@ -46,6 +46,10 @@ class Node(base.OpenSeesObject):
     coords: tuple
     mass: tuple = None
 
+    def __post_init__(self):
+        if not isinstance(self.coords, tuple):
+            self.coords = (float(self.coords), )
+
     def tcl_code(self) -> str:
         code = [f"node {self.tag}", *[f" {c:g}" for c in self.coords]]
         if self.mass is not None:
