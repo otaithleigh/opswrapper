@@ -3,7 +3,8 @@
 import dataclasses
 import pathlib
 import subprocess as sub
-import tempfile
+
+from . import config
 
 
 @dataclasses.dataclass
@@ -32,11 +33,11 @@ class OpenSeesAnalysis():
     delete_files : bool, optional
         If True, delete temporary files after each run. (default: True)
     opensees_path : pathlib.Path, optional
-        Path to the OpenSees binary to use. If None, looks for 'OpenSees' on the
-        system PATH. (default: None)
+        Path to the OpenSees binary to use. If None, uses the value from the
+        global configuration. (default: None)
     scratch_path : pathlib.Path, optional
         Path to the directory for storing temporary files. If None, uses the
-        system temp directory. (default: None)
+        value from the global configuration. (default: None)
     """
 
     echo_output: bool
@@ -61,7 +62,7 @@ class OpenSeesAnalysis():
     @opensees_path.setter
     def opensees_path(self, value):
         if value is None:
-            value = 'OpenSees'
+            value = config.path_of.opensees
         self._opensees_path = pathlib.Path(value)
 
     @property
@@ -71,7 +72,7 @@ class OpenSeesAnalysis():
     @scratch_path.setter
     def scratch_path(self, value):
         if value is None:
-            value = tempfile.gettempdir()
+            value = config.path_of.scratch
         self._scratch_path = pathlib.Path(value)
 
     def scratch_file(self, filename: str) -> pathlib.Path:
