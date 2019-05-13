@@ -29,7 +29,7 @@ class Model(base.OpenSeesObject):
         return code
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(init=False)
 class Node(base.OpenSeesObject):
     """Node in the model.
     
@@ -37,14 +37,20 @@ class Node(base.OpenSeesObject):
     ----------
     tag : int
         Integer tag identifying the node.
-    coords : tuple
-        Tuple of coordinates of the node.
+    *coords : float
+        NDM coordinates of the node.
     mass : tuple, optional
         NDF-length tuple of nodal masses.
     """
     tag: int
     coords: tuple
     mass: tuple = None
+
+    def __init__(self, tag, *coords, mass=None):
+        super().__init__(self)
+        self.tag = tag
+        self.coords = coords
+        self.mass = mass
 
     def __post_init__(self):
         if not isinstance(self.coords, tuple):
