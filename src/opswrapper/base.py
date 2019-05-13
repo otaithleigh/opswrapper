@@ -9,6 +9,9 @@ class OpenSeesObject(abc.ABC):
         """Return the corresponding Tcl code to create this object."""
         pass
 
+    def __str__(self):
+        return self.tcl_code()
+
     def dump(self, fid):
         """Write the Tcl code for this object to the given file descriptor.
         
