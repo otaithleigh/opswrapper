@@ -1,0 +1,120 @@
+import pathlib
+
+import numpy as np
+
+
+def print_model(model, file=None):
+    """Print a model definition to a file.
+
+    Parameters
+    ----------
+    model : list
+        List of strings and/or OpenSeesObjects that define a model and/or its
+        analysis routine.
+    file : file-like, optional
+        Name of a file or an open file descriptor. If None, print to stdout.
+        (default: None)
+    """
+    try:
+        file = pathlib.Path(file)
+        file_is_descriptor = False
+    except TypeError:
+        file_is_descriptor = True
+
+    modeltext = '\n'.join([str(line) for line in model])
+    if file_is_descriptor:
+        print(modeltext, file=file)
+    else:
+        with open(file, 'w') as f:
+            print(modeltext, file=f)
+
+
+def fill_out_numbers(peaks, rate):
+    """Fill in numbers between peaks.
+    
+    Parameters
+    ----------
+    peaks : array-like
+        Peaks to fill between.
+    rate : float
+        Rate to use between peaks.
+
+    Examples
+    --------
+    >>> fill_out_numbers([0, 1, -1], rate=0.25)
+    array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ,  0.75,  0.5 ,  0.25,  0.  ,
+           -0.25, -0.5 , -0.75, -1.  ])
+    >>> fill_out_numbers([[0, 1, -1], [1, 2, -2]], rate=0.25)
+    array([[ 0.  ,  1.  , -1.  ],
+           [ 0.25,  1.25, -1.25],
+           [ 0.5 ,  1.5 , -1.5 ],
+           [ 0.75,  1.75, -1.75],
+           [ 1.  ,  2.  , -2.  ]])
+    
+    Ported from the MATLAB function written by Mark Denavit.
+    """
+    peaks = np.array(peaks)
+
+    if len(peaks.shape) == 1:
+        peaks = peaks.reshape(peaks.size, 1)
+
+    if peaks.shape[0] == 1:
+        peaks = peaks.T
+
+    numpeaks = peaks.shape[0]
+    numbers = [peaks[0, :]]
+
+    for i in range(numpeaks - 1):
+        diff = peaks[i + 1, :] - peaks[i, :]
+        numsteps = int(np.maximum(2, 1 + np.ceil(np.max(np.abs(diff/rate)))))
+        numbers_to_add = super_linspace(peaks[i, :], peaks[i + 1, :], numsteps)
+        numbers.append(numbers_to_add[1:, :])
+
+    numbers = np.vstack(numbers)
+    if 1 in numbers.shape:
+        numbers = numbers.flatten()
+
+    return numbers
+
+
+def super_linspace(a, b, n):
+    """Create a 2-d array whose values are linearly spaced between two vectors.
+
+    Parameters
+    ----------
+    a : np.ndarray
+        First vector.
+    b : np.ndarray
+        Last vector.
+    n : int
+        Number of rows to create.
+
+    Returns
+    -------
+    y : np.ndarray
+        2-d array whose first row is `a`, last row is `b`, and whose columns are
+        linspace-d vectors between the corresponding values of `a` and `b`.    
+
+    Example
+    -------
+    >>> a = np.ndarray([1, 2, 3, 4, 5])
+    >>> b = np.ndarray([2, 3, 4, 5, 6])
+    >>> super_linspace(a, b, 5)
+    array([[1.  , 2.  , 3.  , 4.  , 5.  ],
+           [1.25, 2.25, 3.25, 4.25, 5.25],
+           [1.5 , 2.5 , 3.5 , 4.5 , 5.5 ],
+           [1.75, 2.75, 3.75, 4.75, 5.75],
+           [2.  , 3.  , 4.  , 5.  , 6.  ]])
+
+    Ported from the MATLAB function written by Mark Denavit.    
+    """
+    if len(a.shape) != 1 or len(b.shape) != 1:
+        raise ValueError("super_linspace: a and b must be vectors")
+    if a.size != b.size:
+        raise ValueError("super_linspace: a and b must be the same length")
+
+    y = np.empty((n, a.size))
+    for i in range(a.size):
+        y[:, i] = np.linspace(a[i], b[i], n)
+
+    return y
