@@ -42,3 +42,6 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel('Strain (in/in)')
 ax.set_ylabel('Stress (ksi)')
+fig.tight_layout()
+
+plt.show()
