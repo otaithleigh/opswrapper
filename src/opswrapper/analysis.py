@@ -206,7 +206,9 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         force = np.loadtxt(filename_output_force)
         results['force'] = xr.DataArray(force[:, 1], dims='time')
 
-        stiff = np.loadtxt(filename_output_stiff)
+        with warnings.catch_warnings() as cw:
+            warnings.simplefilter('ignore')
+            stiff = np.loadtxt(filename_output_stiff)
         if len(stiff) != 0:
             results['stiff'] = xr.DataArray(stiff, dims='time')
 
