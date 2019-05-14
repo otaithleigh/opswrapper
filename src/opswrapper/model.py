@@ -47,7 +47,7 @@ class Node(base.OpenSeesObject):
     mass: tuple = None
 
     def __init__(self, tag, *coords, mass=None):
-        super().__init__(self)
+        super().__init__()
         self.tag = tag
         self.coords = coords
         self.mass = mass
