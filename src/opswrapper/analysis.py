@@ -108,7 +108,7 @@ class OpenSeesAnalysis():
         if echo is None:
             echo = self.echo_output
 
-        cmd = [str(self.opensees_path), inputfile]
+        cmd = [str(self.opensees_path), str(inputfile)]
         stdout = []
 
         with sub.Popen(cmd, bufsize=1, stdout=sub.PIPE, stderr=sub.STDOUT, text=True) as p:
@@ -169,7 +169,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             'fix 1 1',
             self.material,
             f'element truss 1 1 2 1.0 {self.tag:d}',
-            f'pattern Plain 1 "Series -dt 1.0 -filePath {{{filename_pattern!s}}} -factor 1.0" {{',
+            f'pattern Plain 1 "Series -dt 1.0 -filePath {{{utils.path_for_tcl(filename_pattern)!s}}} -factor 1.0" {{',
             '    sp 2 1 1.0',
             '}',
             ElementRecorder(file=filename_output_force, precision=10, elements=1, response='force'),

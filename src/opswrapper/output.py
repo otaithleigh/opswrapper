@@ -3,13 +3,12 @@ import dataclasses
 import numpy as np
 
 from . import base
+from . import utils
 
 
 @dataclasses.dataclass
 class ElementRecorder(base.OpenSeesObject):
-    """Element recorder.
-
-    All parameters are keyword-only.
+    R"""Element recorder.
 
     Parameters
     ----------
@@ -17,7 +16,9 @@ class ElementRecorder(base.OpenSeesObject):
         Filename to record to. This is printed to the file within braces, so no
         variable substitution on the Tcl side is supported. If not given,
         '{{file}}' is printed instead, allowing for substitution later using
-        ``.format(file='/path/to/file')``.
+        ``.format(file='/path/to/file')``. Note that Tcl interprets backslashes
+        as escape characters, so a more complete format might be ``.format(file=
+        filename.replace('\\', '/'))``. (default: None)
     fileformat : str, optional
         File format to use. Options: 'file' (ASCII), 'xml', 'binary'.
         (default: 'file')
@@ -46,7 +47,8 @@ class ElementRecorder(base.OpenSeesObject):
 
     def tcl_code(self) -> str:
         if self.file is not None:
-            command = f"recorder Element -{self.fileformat} {{{self.file!s}}}"
+            file = utils.path_for_tcl(self.file)
+            command = f"recorder Element -{self.fileformat} {{{file!s}}}"
         else:
             command = f"recorder Element -{self.fileformat}" " {{{file!s}}}"
 
@@ -73,7 +75,9 @@ class NodeRecorder(base.OpenSeesObject):
         Filename to record to. This is printed to the file within braces, so no
         variable substitution on the Tcl side is supported. If not given,
         '{{file}}' is printed instead, allowing for substitution later using
-        ``.format(file='/path/to/file')``. (default: None)
+        ``.format(file='/path/to/file')``. Note that Tcl interprets backslashes
+        as escape characters, so a more complete format might be ``.format(file=
+        filename.replace('\\', '/'))``. (default: None)
     fileformat : str, optional
         File format to use. Options: 'file' (ASCII), 'xml', 'binary'.
         (default: 'file')
@@ -132,7 +136,8 @@ class NodeRecorder(base.OpenSeesObject):
 
     def tcl_code(self):
         if self.file is not None:
-            command = f"recorder Node -{self.fileformat} {{{self.file!s}}}"
+            file = utils.path_for_tcl(self.file)
+            command = f"recorder Node -{self.fileformat} {{{file!s}}}"
         else:
             command = f"recorder Node -{self.fileformat}" " {{{file!s}}}"
 

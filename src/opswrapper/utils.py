@@ -4,6 +4,10 @@ import pathlib
 import numpy as np
 
 
+def path_for_tcl(path) -> str:
+    return str(path).replace('\\', '/')
+
+
 def print_model(model, file=None):
     """Print a model definition to a file.
 
