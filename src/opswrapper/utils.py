@@ -1,3 +1,4 @@
+import dataclasses
 import pathlib
 
 import numpy as np
@@ -27,6 +28,42 @@ def print_model(model, file=None):
     else:
         with open(file, 'w') as f:
             print(modeltext, file=f)
+
+
+def list_dataclass_fields(name, object, pad='', end='\n', exclude=None) -> str:
+    """Represent the fields of a dataclass object.
+
+    Parameters
+    ----------
+    name : str
+        The name to use for the object in the representation.
+    object : dataclass
+        Object to describe.
+    pad : str, optional
+        String to pad the left side with. (default: '')
+    end : str, optional
+        String to end each entry with. (default: '\\n')
+    exclude : list[str], optional
+        Field names to exclude. (default: None)
+
+    Example
+    -------
+    >>> print(list_dataclass_fields('gravity_columns', self.gravity_columns, pad=' '*8))
+            gravity_columns.include          : True
+            gravity_columns.num_points       : 4
+            gravity_columns.material_model   : Steel01
+            gravity_columns.strain_hardening : 0.01
+    """
+    fields = dataclasses.fields(object)
+    lenname = lambda f: len(getattr(f, 'name'))
+    max_key_len = max(map(lenname, fields))
+    l = []
+    for field in fields:
+        if exclude is not None and field.name in exclude:
+            continue
+        l.append(f'{pad}{name}.{field.name.ljust(max_key_len)} : {getattr(object, field.name)!r}')
+
+    return end.join(l)
 
 
 def fill_out_numbers(peaks, rate):
