@@ -12,3 +12,7 @@ dependencies:
   - matplotlib
   # Documentation
   - sphinx
+  # Development install
+  - pip
+  - pip:
+    - "-e ."
