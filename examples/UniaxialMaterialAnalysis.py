@@ -14,7 +14,7 @@ Fy = 50
 E = 29000
 b = 0.01
 
-steel = ops.materials.Steel02(1, Fy, E, b, R0=5, sigma_i=0.3*Fy)
+steel = ops.material.Steel02(1, Fy, E, b, R0=5, sigma_i=0.3*Fy)
 
 #--[ Define loading ]-----------------------------------------------------------
 yield_strain = Fy/E

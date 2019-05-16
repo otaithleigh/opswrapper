@@ -10,6 +10,7 @@ import numpy as np
 import xarray as xr
 
 from . import config
+from . import element
 from . import utils
 from .model import Model, Node
 from .output import ElementRecorder
@@ -168,7 +169,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             Node(2, 1.0),
             'fix 1 1',
             self.material,
-            f'element truss 1 1 2 1.0 {self.tag:d}',
+            element.Truss(1, 1, 2, 1.0, mat=self.tag),
             f'pattern Plain 1 "Series -dt 1.0 -filePath {{{utils.path_for_tcl(filename_pattern)!s}}} -factor 1.0" {{',
             '    sp 2 1 1.0',
             '}',

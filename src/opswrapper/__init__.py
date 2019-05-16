@@ -2,8 +2,8 @@
 
 from . import analysis
 from . import base
-from . import elements
+from . import element
 from . import integration
-from . import materials
+from . import material
 from . import section
 from .model import *
