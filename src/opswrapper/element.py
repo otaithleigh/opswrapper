@@ -93,7 +93,7 @@ class ForceBeamColumn(base.OpenSeesObject):
         Tag of the i node.
     jnode : int
         Tag of the j node.
-    transftag : int
+    transf : int
         Tag of the geometric transformation to use.
     integration : integration.Integration
         Integration method to use for the element.
@@ -109,7 +109,7 @@ class ForceBeamColumn(base.OpenSeesObject):
     tag: int
     inode: int
     jnode: int
-    transftag: int
+    transf: int
     integration: integration.Integration
     mass: float = None
     iterative: bool = False
@@ -118,7 +118,7 @@ class ForceBeamColumn(base.OpenSeesObject):
 
     def tcl_code(self):
         code = [
-            f"element forceBeamColumn {self.tag:d} {self.inode:d} {self.jnode:d} {self.transftag:d}"
+            f"element forceBeamColumn {self.tag:d} {self.inode:d} {self.jnode:d} {self.transf:d}"
         ]
         code.append(str(self.integration))
         if self.mass is not None:

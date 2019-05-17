@@ -17,16 +17,16 @@ class Lobatto(base.OpenSeesObject, Integration):
 
     Parameters
     ----------
-    sectag : int
+    section : int
         Tag of the section.
     npoints: int
         Number of integration points to use.
     """
-    sectag: int
+    section: int
     npoints: int
 
     def tcl_code(self):
-        return f'Lobatto {self.sectag:d} {self.npoints:d}'
+        return f'Lobatto {self.section:d} {self.npoints:d}'
 
 
 @dataclasses.dataclass
@@ -39,16 +39,16 @@ class Legendre(base.OpenSeesObject, Integration):
 
     Parameters
     ----------
-    sectag : int
+    section : int
         Tag of the section.
     npoints: int
         Number of integration points to use.
     """
-    sectag: int
+    section: int
     npoints: int
 
     def tcl_code(self):
-        return f'Legendre {self.sectag:d} {self.npoints:d}'
+        return f'Legendre {self.section:d} {self.npoints:d}'
 
 
 @dataclasses.dataclass
@@ -62,16 +62,16 @@ class Radau(base.OpenSeesObject, Integration):
 
     Parameters
     ----------
-    sectag : int
+    section : int
         Tag of the section.
     npoints: int
         Number of integration points to use.
     """
-    sectag: int
+    section: int
     npoints: int
 
     def tcl_code(self):
-        return f'Radau {self.sectag:d} {self.npoints:d}'
+        return f'Radau {self.section:d} {self.npoints:d}'
 
 
 @dataclasses.dataclass
@@ -83,30 +83,30 @@ class NewtonCotes(base.OpenSeesObject, Integration):
 
     Parameters
     ----------
-    sectag : int
+    section : int
         Tag of the section.
     npoints: int
         Number of integration points to use.
     """
-    sectag: int
+    section: int
     npoints: int
 
     def tcl_code(self):
-        return f'NewtonCotes {self.sectag:d} {self.npoints:d}'
+        return f'NewtonCotes {self.section:d} {self.npoints:d}'
 
 
 @dataclasses.dataclass()
 class FixedLocation(base.OpenSeesObject, Integration):
-    sectags: tuple
+    sections: tuple
     locations: tuple
 
     def __post_init__(self):
-        if len(self.sectags) != len(self.locations):
-            raise ValueError("FixedLocation: len(sectags) must equal len(locations)")
+        if len(self.sections) != len(self.locations):
+            raise ValueError("FixedLocation: len(sections) must equal len(locations)")
 
     def tcl_code(self):
         return ' '.join([
-            f'FixedLocation {len(self.sectags):d}',
-            *[f'{tag:d}' for tag in self.sectags],
+            f'FixedLocation {len(self.sections):d}',
+            *[f'{tag:d}' for tag in self.sections],
             *[f'{loc:g}' for loc in self.locations],
         ])
