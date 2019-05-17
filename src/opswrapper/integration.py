@@ -19,7 +19,7 @@ class Lobatto(base.OpenSeesObject, Integration):
     ----------
     section : int
         Tag of the section.
-    npoints: int
+    npoints : int
         Number of integration points to use.
     """
     section: int
@@ -41,7 +41,7 @@ class Legendre(base.OpenSeesObject, Integration):
     ----------
     section : int
         Tag of the section.
-    npoints: int
+    npoints : int
         Number of integration points to use.
     """
     section: int
@@ -64,7 +64,7 @@ class Radau(base.OpenSeesObject, Integration):
     ----------
     section : int
         Tag of the section.
-    npoints: int
+    npoints : int
         Number of integration points to use.
     """
     section: int
@@ -85,7 +85,7 @@ class NewtonCotes(base.OpenSeesObject, Integration):
     ----------
     section : int
         Tag of the section.
-    npoints: int
+    npoints : int
         Number of integration points to use.
     """
     section: int
