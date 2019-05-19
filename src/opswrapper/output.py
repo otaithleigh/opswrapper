@@ -45,6 +45,13 @@ class ElementRecorder(base.OpenSeesObject):
     dofs: np.ndarray = None
     response: str = None
 
+    def __post_init__(self):
+        if self.fileformat not in ['file', 'xml', 'binary']:
+            raise ValueError(
+                "ElementRecorder: given file format is not recognized "
+                f"(expected one of 'file', 'xml', 'binary'; got {self.fileformat!r}"
+            )
+
     def tcl_code(self) -> str:
         if self.file is not None:
             file = utils.path_for_tcl(self.file)
@@ -130,7 +137,7 @@ class NodeRecorder(base.OpenSeesObject):
     def __post_init__(self):
         if self.fileformat not in ['file', 'xml', 'binary']:
             raise ValueError(
-                "NodeRecorder: given file format is not recognized ",
+                "NodeRecorder: given file format is not recognized "
                 f"(expected one of 'file', 'xml', 'binary'; got {self.fileformat!r}"
             )
 
