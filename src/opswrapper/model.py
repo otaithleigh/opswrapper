@@ -27,7 +27,7 @@ class Model(base.OpenSeesObject):
     ndf: int
 
     def tcl_code(self) -> str:
-        code = f"model basic -ndm {self.ndm} -ndf {self.ndf}"
+        code = f'model basic -ndm {self.ndm} -ndf {self.ndf}'
         return code
 
 
@@ -57,10 +57,9 @@ class Node(base.OpenSeesObject):
         self.mass = mass
 
     def tcl_code(self) -> str:
-        code = [f"node {self.tag}", *[f" {c:g}" for c in self.coords]]
+        code = [f'node {self.tag:d}', *[f'{c:g}' for c in self.coords]]
         if self.mass is not None:
-            code.append(f" -mass")
-            for m in self.mass:
-                code.append(f" {m:g}")
+            code.append(f'-mass')
+            code.extend([f'{m:g}' for m in self.mass])
 
-        return "".join(code)
+        return ' '.join(code)
