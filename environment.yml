@@ -6,6 +6,7 @@ dependencies:
   - xarray
   # Testing
   - ipython
+  - line_profiler
   - yapf
   - pytest
   # Needed for examples
