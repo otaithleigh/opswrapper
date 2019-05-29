@@ -98,7 +98,7 @@ class NodeRecorder(base.OpenSeesObject):
         If True, places domain time in the first entry of each line. (default=False)
     nodes : array-like
         Node tags to record.
-    node_range : array-like, optional
+    node_range : 2-tuple or array-like, optional
         Pair of node tags that define the range to record.
     dofs : array-like, optional
         DOFs to record.
@@ -131,6 +131,7 @@ class NodeRecorder(base.OpenSeesObject):
     time_series: int = None
     time: bool = False
     nodes: np.ndarray = None
+    node_range: np.ndarray = None
     dofs: np.ndarray = None
     response: str = None
 
