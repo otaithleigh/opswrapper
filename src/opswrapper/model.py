@@ -2,6 +2,8 @@
 
 import dataclasses
 
+import numpy as np
+
 from . import base
 
 __all__ = [
@@ -49,7 +51,9 @@ class Node(base.OpenSeesObject):
     def __init__(self, tag, *coords, mass=None):
         super().__init__()
         self.tag = tag
-        self.coords = coords
+        self.coords = np.array(coords).flatten()
+        if mass is not None:
+            mass = np.array(mass).flatten()
         self.mass = mass
 
     def tcl_code(self) -> str:
