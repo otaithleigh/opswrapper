@@ -1,4 +1,7 @@
 __pycache__
 **.egg-info
 .pytest_cache
-.vscode
+
+# Stuff for VS Code
+.vscode     # local settings
+opswrapper  # symlink to make python module happy
