@@ -1,4 +1,4 @@
-from opswrapper.materials import Elastic, ElasticPP
+from opswrapper.material import Elastic, ElasticPP
 
 
 def test_elastic():
