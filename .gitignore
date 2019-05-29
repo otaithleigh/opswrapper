@@ -3,5 +3,5 @@ __pycache__
 .pytest_cache
 
 # Stuff for VS Code
-.vscode     # local settings
-opswrapper  # symlink to make python module happy
+.vscode
+opswrapper
