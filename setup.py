@@ -2,10 +2,17 @@ from setuptools import setup
 
 setup(
     name="opswrapper",
-    version="0.0.2",
+    version="0.0.3",
 
     packages=["opswrapper"],
     package_dir={'': "src"},
+
+    python_requires=">=3.7",
+    install_requires=[
+        "numpy",
+        "toml",
+        "xarray",
+    ],
 
     author="Peter Talley",
     author_email="ptalley2@vols.utk.edu",
