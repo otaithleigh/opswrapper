@@ -216,6 +216,8 @@ class Truss(base.OpenSeesObject):
         If True, use a consistent mass matrix instead of lumped mass. (default: False)
     do_rayleigh : bool, optional
         If True, include Rayleigh damping for this element. (default: False)
+    corot : bool, optional
+        If True, construct a corotTruss instead of a truss. (default: False)
     """
     tag : int
     inode : int
@@ -225,9 +227,11 @@ class Truss(base.OpenSeesObject):
     rho : float = None
     cmass : bool = False
     do_rayleigh : bool = False
+    corot: bool = False
 
     def tcl_code(self):
-        code = [f'element truss {self.tag:d} {self.inode:d} {self.jnode:d} {self.A:g} {self.mat:d}']
+        element = 'corotTruss' if self.corot else 'truss'
+        code = [f'element {element} {self.tag:d} {self.inode:d} {self.jnode:d} {self.A:g} {self.mat:d}']
         if self.rho is not None:
             code.append(f'-rho {self.rho:g}')
         if self.cmass:
@@ -257,6 +261,8 @@ class TrussSection(base.OpenSeesObject):
         If True, use a consistent mass matrix instead of lumped mass. (default: False)
     do_rayleigh : bool, optional
         If True, include Rayleigh damping for this element. (default: False)
+    corot : bool, optional
+        If True, construct a corotTruss instead of a truss. (default: False)
     """
     tag : int
     inode : int
@@ -265,9 +271,11 @@ class TrussSection(base.OpenSeesObject):
     rho : float = None
     cmass : bool = False
     do_rayleigh : bool = False
+    corot: bool = False
 
     def tcl_code(self):
-        code = [f'element trussSection {self.tag:d} {self.inode:d} {self.jnode:d} {self.section:d}']
+        element = 'corotTrussSection' if self.corot else 'trussSection'
+        code = [f'element {element} {self.tag:d} {self.inode:d} {self.jnode:d} {self.section:d}']
         if self.rho is not None:
             code.append(f'-rho {self.rho:g}')
         if self.cmass:
