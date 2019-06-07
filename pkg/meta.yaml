@@ -1,0 +1,40 @@
+{% set version = "0.0.1" %}
+
+package:
+  name: opswrapper
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/otaithleigh/opswrapper.git
+  git_tag: v{{ version }}
+
+requirements:
+  build:
+    - python
+  run:
+    - python>=3.7.0
+    - numpy
+    - toml
+    - xarray
+
+test:
+  imports:
+    - opswrapper
+    - opswrapper.analysis
+    - opswrapper.config
+    - opswrapper.element
+    - opswrapper.integration
+    - opswrapper.material
+    - opswrapper.output
+    - opswrapper.section
+  requires:
+    - pytest
+  source_files:
+    - tests
+  commands:
+    - pytest
+
+about:
+  home: https://github.com/otaithleigh/opswrapper
+  license: MIT
+  summary: A wrapper for OpenSees Tcl analyses.
