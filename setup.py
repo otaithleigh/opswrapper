@@ -7,9 +7,6 @@ setup(
     packages=["opswrapper"],
     package_dir={'': "src"},
 
-    python_requires=">=3.7",
-    install_requires=["numpy"],
-
     author="Peter Talley",
     author_email="ptalley2@vols.utk.edu",
     description="Python helpers for writing OpenSees scripts.",
