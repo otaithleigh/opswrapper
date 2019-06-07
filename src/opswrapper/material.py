@@ -128,7 +128,7 @@ class Steel01(base.OpenSeesObject):
                              f'(expected 4 params, got {nparams})')
 
     def tcl_code(self):
-        code = f'uniaxialMaterial Steel01 {self.tag:d} {self.Fy:g} {self.E0:g} {self.b:g}'
+        code = f'uniaxialMaterial Steel01 {self.tag:d} {self.Fy:g} {self.E:g} {self.b:g}'
         if self._num_iso_params_defined() == 4:
             code += f' {self.a1:g} {self.a2:g} {self.a3:g} {self.a4:g}'
 
