@@ -1,4 +1,4 @@
-{% set version = "0.1.0" %}
+{% set version = "0.1.1" %}
 
 package:
   name: opswrapper
@@ -7,6 +7,9 @@ package:
 source:
   git_url: https://github.com/otaithleigh/opswrapper.git
   git_tag: v{{ version }}
+
+build:
+  noarch: python
 
 requirements:
   host:
