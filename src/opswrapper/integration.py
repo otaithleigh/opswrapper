@@ -97,6 +97,15 @@ class NewtonCotes(base.OpenSeesObject, Integration):
 
 @dataclasses.dataclass()
 class FixedLocation(base.OpenSeesObject, Integration):
+    """Integration at user-specified points.
+
+    Parameters
+    ----------
+    sections : tuple
+        Tuple of section tags.
+    locations : tuple
+        Tuple of locations, specified by factors on the element length.
+    """
     sections: tuple
     locations: tuple
 
