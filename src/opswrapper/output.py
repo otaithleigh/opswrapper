@@ -52,20 +52,22 @@ class ElementRecorder(base.OpenSeesObject):
                 f"(expected one of 'file', 'xml', 'binary'; got {self.fileformat!r}"
             )
 
-    def tcl_code(self) -> str:
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         if self.file is not None:
             file = utils.path_for_tcl(self.file)
             command = f"recorder Element -{self.fileformat} {{{file!s}}}"
         else:
             command = f"recorder Element -{self.fileformat}" " {{{file!s}}}"
 
-        command += " -ele " + " ".join([f"{tag:d}" for tag in np.array(self.elements).flat])
+        command += " -ele " + " ".join([f"{tag:{i}}" for tag in np.array(self.elements).flat])
 
         if self.precision is not None:
-            command += f" -precision {self.precision:d}"
+            command += f" -precision {self.precision:{i}}"
 
         if self.dofs is not None:
-            command += " -dof " + " ".join([f"{dof:d}" for dof in np.array(self.dofs).flat])
+            command += " -dof " + " ".join([f"{dof:{i}}" for dof in np.array(self.dofs).flat])
 
         command += f" {self.response}"
 
@@ -142,7 +144,9 @@ class NodeRecorder(base.OpenSeesObject):
                 f"(expected one of 'file', 'xml', 'binary'; got {self.fileformat!r}"
             )
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         if self.file is not None:
             file = utils.path_for_tcl(self.file)
             command = f"recorder Node -{self.fileformat} {{{file!s}}}"
@@ -150,22 +154,22 @@ class NodeRecorder(base.OpenSeesObject):
             command = f"recorder Node -{self.fileformat}" " {{{file!s}}}"
 
         if self.precision is not None:
-            command += f" -precision {self.precision:d}"
+            command += f" -precision {self.precision:{i}}"
 
         if self.time_series is not None:
-            command += f' -timeSeries {self.time_series:d}'
+            command += f' -timeSeries {self.time_series:{i}}'
 
         if self.time:
             command += " -time"
 
         if self.nodes is not None:
-            command += " -node " + " ".join([f"{tag:d}" for tag in np.array(self.nodes).flat])
+            command += " -node " + " ".join([f"{tag:{i}}" for tag in np.array(self.nodes).flat])
 
         if self.node_range is not None:
-            command += f" -nodeRange {self.node_range[0]:d} {self.node_range[1]:d}"
+            command += f" -nodeRange {self.node_range[0]:{i}} {self.node_range[1]:{i}}"
 
         if self.dofs is not None:
-            command += " -dof " + " ".join([f"{dof:d}" for dof in np.array(self.dofs).flat])
+            command += " -dof " + " ".join([f"{dof:{i}}" for dof in np.array(self.dofs).flat])
 
         command += f" {self.response}"
         return command

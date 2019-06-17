@@ -26,8 +26,10 @@ class Model(base.OpenSeesObject):
     ndm: int
     ndf: int
 
-    def tcl_code(self) -> str:
-        code = f'model basic -ndm {self.ndm} -ndf {self.ndf}'
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        code = f'model basic -ndm {self.ndm:{i}} -ndf {self.ndf:{i}}'
         return code
 
 
@@ -56,10 +58,12 @@ class Node(base.OpenSeesObject):
             mass = np.array(mass).flatten()
         self.mass = mass
 
-    def tcl_code(self) -> str:
-        code = [f'node {self.tag:d}', *[f'{c:g}' for c in self.coords]]
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        code = [f'node {self.tag:{i}}', *[f'{c:{f}}' for c in self.coords]]
         if self.mass is not None:
             code.append(f'-mass')
-            code.extend([f'{m:g}' for m in self.mass])
+            code.extend([f'{m:{f}}' for m in self.mass])
 
         return ' '.join(code)

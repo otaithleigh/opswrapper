@@ -33,10 +33,12 @@ class Elastic2D(base.OpenSeesObject):
     G: float = None
     alphaY: float = None
 
-    def tcl_code(self):
-        code = f'section Elastic {self.tag:d} {self.E:g} {self.A:g} {self.Iz:g}'
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        code = f'section Elastic {self.tag:{i}} {self.E:{f}} {self.A:{f}} {self.Iz:{f}}'
         if self.G is not None and self.alphaY is not None:
-            code += f' {self.G:g} {self.alphaY:g}'
+            code += f' {self.G:{f}} {self.alphaY:{f}}'
         return code
 
 
@@ -79,13 +81,15 @@ class Elastic3D(base.OpenSeesObject):
     alphaY: float = None
     alphaZ: float = None
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         code = (
-            f'section Elastic {self.tag:d} {self.E:g} {self.A:g}',
-            f' {self.Iz:g} {self.Iy:g} {self.G:g} {self.J:g}'
+            f'section Elastic {self.tag:{i}} {self.E:{f}} {self.A:{f}}'
+            f' {self.Iz:{f}} {self.Iy:{f}} {self.G:{f}} {self.J:{f}}'
         )
         if self.alphaY is not None and self.alphaZ is not None:
-            code += f' {self.alphaY:g} {self.alphaZ:g}'
+            code += f' {self.alphaY:{f}} {self.alphaZ:{f}}'
         return code
 
 
@@ -104,10 +108,28 @@ class Fiber(base.OpenSeesObject):
         Linear-elastic torsional stiffness for the section. (default: None)
     commands : list, optional
         List of commands that make up the section. (default: [])
+
+    Example
+    -------
+    >>> ops.section.Fiber(1).fiber(0, 1, 1.0, 2).fiber(0, -1, 1.0, 2)
+    Fiber(tag=1, GJ=None, commands=[Fiber._Fiber(y=0, z=1, A=1.0, mat=2), Fiber._Fiber(y=0, z=-1, A=1.0, mat=2)])
     """
     tag: int
     GJ: float = None
     commands: list = dataclasses.field(default_factory=list)
+
+    @dataclasses.dataclass
+    class _Fiber():
+        y: float
+        z: float
+        A: float
+        mat: int
+        _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
+
+        def tcl_code(self, **format_spec) -> str:
+            fmt = self._parent.get_format_spec(format_spec)
+            i, f = fmt.int, fmt.float
+            return f'fiber {self.y:{f}} {self.z:{f}} {self.A:{f}} {self.mat:{i}}'
 
     def fiber(self, y, z, A, mat):
         """Add a single fiber.
@@ -125,8 +147,32 @@ class Fiber(base.OpenSeesObject):
         mat : int
             Tag of the uniaxial material to use.
         """
-        self.commands.append(f'fiber {y:g} {z:g} {A:g} {mat:d}')
+        self.commands.append(self._Fiber(y, z, A, mat, self))
         return self
+
+    @dataclasses.dataclass
+    class _PatchQuad():
+        mat: int
+        nfIJ: int
+        nfJK: int
+        yI: float
+        zI: float
+        yJ: float
+        zJ: float
+        yK: float
+        zK: float
+        yL: float
+        zL: float
+        _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
+
+        def tcl_code(self, **format_spec) -> str:
+            fmt = self._parent.get_format_spec(format_spec)
+            i, f = fmt.int, fmt.float
+            return (
+                f'patch quad {self.mat:{i}} {self.nfIJ:{i}} {self.nfJK:{i}}'
+                f' {self.yI:{f}} {self.zI:{f}} {self.yJ:{f}} {self.zJ:{f}}'
+                f' {self.yK:{f}} {self.zK:{f}} {self.yL:{f}} {self.zL:{f}}'
+            )
 
     def patch_quad(self, mat, nfIJ, nfJK, *coords):
         """Add a quadrilateral shaped patch.
@@ -161,11 +207,27 @@ class Fiber(base.OpenSeesObject):
         else:
             raise ValueError("patch_quad: coords must either be 4 2-tuples or 8 coordinates")
 
-        self.commands.append(
-            f'patch quad {mat:d} {nfIJ:d} {nfJK:d} '
-            f'{yI:g} {zI:g} {yJ:g} {zJ:g} {yK:g} {zK:g} {yL:g} {zL:g}'
-        )
+        self.commands.append(self._PatchQuad(mat, nfIJ, nfJK, yI, zI, yJ, zJ, yK, zK, yL, zL, self))
         return self
+
+    @dataclasses.dataclass
+    class _PatchRect():
+        mat: int
+        nfY: int
+        nfZ: int
+        yI: float
+        zI: float
+        yJ: float
+        zJ: float
+        _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
+
+        def tcl_code(self, **format_spec) -> str:
+            fmt = self._parent.get_format_spec(format_spec)
+            i, f = fmt.int, fmt.float
+            return (
+                f'patch rect {self.mat:{i}} {self.nfY:{i}} {self.nfZ:{i}}'
+                f' {self.yI:{f}} {self.zI:{f}} {self.yJ:{f}} {self.zJ:{f}}'
+            )
 
     def patch_rect(self, mat, nfY, nfZ, *coords):
         """Add a rectangular patch of fibers.
@@ -196,14 +258,17 @@ class Fiber(base.OpenSeesObject):
             yI, zI, yJ, zJ = coords
         else:
             raise ValueError("patch_rect: coords must either be 2 2-tuples or 4 coordinates")
-        
-        self.commands.append(f'patch rect {mat:d} {nfY:d} {nfZ:d} {yI:g} {zI:g} {yJ:g} {zJ:g}')
 
-    def tcl_code(self):
-        code = [f'section Fiber {self.tag:d}']
+        self.commands.append(self._PatchRect(mat, nfY, nfZ, yI, zI, yJ, zJ, self))
+        return self
+
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        code = [f'section Fiber {self.tag:{i}}']
         if self.GJ is not None:
-            code[0] += f' -GJ {self.GJ:g}'
+            code[0] += f' -GJ {self.GJ:{f}}'
         code[0] += ' {'
-        code.extend([f'    {cmd!s}' for cmd in self.commands])
+        code.extend([f'    {cmd.tcl_code(**format_spec)}' for cmd in self.commands])
         code.append('}')
         return '\n'.join(code)
