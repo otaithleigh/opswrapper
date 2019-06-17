@@ -219,19 +219,21 @@ class Truss(base.OpenSeesObject):
     corot : bool, optional
         If True, construct a corotTruss instead of a truss. (default: False)
     """
-    tag : int
-    inode : int
-    jnode : int
-    A : float
-    mat : int
-    rho : float = None
-    cmass : bool = False
-    do_rayleigh : bool = False
+    tag: int
+    inode: int
+    jnode: int
+    A: float
+    mat: int
+    rho: float = None
+    cmass: bool = False
+    do_rayleigh: bool = False
     corot: bool = False
 
     def tcl_code(self):
         element = 'corotTruss' if self.corot else 'truss'
-        code = [f'element {element} {self.tag:d} {self.inode:d} {self.jnode:d} {self.A:g} {self.mat:d}']
+        code = [
+            f'element {element} {self.tag:d} {self.inode:d} {self.jnode:d} {self.A:g} {self.mat:d}'
+        ]
         if self.rho is not None:
             code.append(f'-rho {self.rho:g}')
         if self.cmass:
@@ -264,13 +266,13 @@ class TrussSection(base.OpenSeesObject):
     corot : bool, optional
         If True, construct a corotTruss instead of a truss. (default: False)
     """
-    tag : int
-    inode : int
-    jnode : int
-    section : int
-    rho : float = None
-    cmass : bool = False
-    do_rayleigh : bool = False
+    tag: int
+    inode: int
+    jnode: int
+    section: int
+    rho: float = None
+    cmass: bool = False
+    do_rayleigh: bool = False
     corot: bool = False
 
     def tcl_code(self):
