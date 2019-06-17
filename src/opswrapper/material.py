@@ -218,3 +218,109 @@ class Steel02(base.OpenSeesObject):
             code += f' {self.a1:{f}} {self.a2:{f}} {self.a3:{f}} {self.a4:{f}}'
 
         return code
+
+
+@dataclasses.dataclass
+class Bilin(base.OpenSeesObject):
+    """Deterioration model with bilinear hysteretic response.
+
+    Parameters
+    ----------
+    tag : int
+        Integer tag identifying the material.
+    K0 : float
+        Initial elastic stiffness.
+    as_plus : float
+        Strain hardening ratio for positive loading direction.
+    as_neg : float
+        Strain hardening ratio for negative loading direction.
+    My_plus : float
+        Effective yield strength for positive loading direction.
+    My_neg : float
+        Effective yield strength for negative loading direction. (negative value)
+    lambda_s : float
+        Cyclic deterioration parameter for strength deterioration: Et = lambda_s*My.
+        Set to 0 to disable this mode of deterioration.
+    lambda_c : float
+        Cyclic deterioration parameter for post-capping strength deterioration:
+        Et = lambda_c*My. Set to 0 to disable this mode of deterioration.
+    lambda_a : float
+        Cyclic deterioration parameter for acceleration reloading stiffness
+        deterioration -- not a deterioration mode for a component with bilinear
+        hysteretic response.
+    lambda_k : float
+        Cyclic deterioration parameter for unloading stiffness deterioration:
+        Et = lambda_k*My. Set to 0 to disable this mode of deterioration.
+    c_s : float
+        Rate of strength deterioration.
+    c_c : float
+        Rate of post-capping strength deterioration.
+    c_a : float
+        Rate of accelerated reloading deterioration.
+    c_k : float
+        Rate of unloading stiffness deterioration.
+    theta_p_plus : float
+        Pre-capping rotation for positive loading direction.
+    theta_p_neg : float
+        Pre-capping rotation for negative loading direction. (positive value)
+    theta_pc_plus : float
+        Post-capping rotation for positive loading direction.
+    theta_pc_neg : float
+        Post-capping rotation for negative loading direction. (positive value)
+    res_plus : float
+        Residual strength ratio for positive loading direction.
+    res_neg : float
+        Residual strength ratio for negative loading direction. (positive value)
+    theta_u_plus : float
+        Ultimate rotation capacity for positive loading direction.
+    theta_u_neg : float
+        Ultimate rotation capacity for negative loading direction. (positive value)
+    D_plus : float
+        Rate of cyclic deterioration in the positive loading direction. This
+        parameter is used to create asymmetric hysteretic behavior in the case
+        of a composite beam. For symmetric hysteretic response use 1.0.
+    D_neg : float
+        Rate of cyclic deterioration in the negative loading direction. This
+        parameter is used to create asymmetric hysteretic behavior in the case
+        of a composite beam. For symmetric hysteretic response use 1.0.
+    nfactor : float, optional
+        Elastic stiffness amplification factor, mainly for use with concentrated
+        plastic hinge elements. (default: 0.0)
+    """
+    tag: int
+    K0: float
+    as_plus: float
+    as_neg: float
+    My_plus: float
+    My_neg: float
+    lambda_s: float
+    lambda_c: float
+    lambda_a: float
+    lambda_k: float
+    c_s: float
+    c_c: float
+    c_a: float
+    c_k: float
+    theta_p_plus: float
+    theta_p_neg: float
+    theta_pc_plus: float
+    theta_pc_neg: float
+    res_plus: float
+    res_neg: float
+    theta_u_plus: float
+    theta_u_neg: float
+    D_plus: float = 1.0
+    D_neg: float = 1.0
+    nfactor: float = None
+
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        values = [
+            getattr(self, field.name) for field in dataclasses.fields(self)
+            if field.name not in ('tag', 'nfactor')
+        ]
+        code = [f'uniaxialMaterial Bilin {self.tag:{fmt.int}}']
+        code.extend([f'{value:{fmt.float}}' for value in values])
+        if self.nfactor is not None:
+            code.append(f'{self.nfactor:{fmt.float}}')
+        return ' '.join(code)
