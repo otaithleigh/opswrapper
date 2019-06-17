@@ -29,13 +29,15 @@ class Elastic(base.OpenSeesObject):
     eta: float = 0.0
     Eneg: float = None
 
-    def tcl_code(self) -> str:
-        code = f"uniaxialMaterial Elastic {self.tag:d} {self.E:g}"
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        code = f"uniaxialMaterial Elastic {self.tag:{i}} {self.E:{f}}"
 
         if (self.Eneg is not None):
-            code += f" {self.eta:g} {self.Eneg:g}"
+            code += f" {self.eta:{f}} {self.Eneg:{f}}"
         elif (self.eta != 0.0):
-            code += f" {self.eta:g}"
+            code += f" {self.eta:{f}}"
 
         return code
 
@@ -68,14 +70,16 @@ class ElasticPP(base.OpenSeesObject):
     eps_yN: float = None
     eps0: float = 0.0
 
-    def tcl_code(self) -> str:
-        code = f"uniaxialMaterial ElasticPP {self.tag:d} {self.E:g} {self.eps_y:g}"
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        code = f"uniaxialMaterial ElasticPP {self.tag:{i}} {self.E:{f}} {self.eps_y:{f}}"
 
         eps_yN = self.eps_yN if self.eps_yN is not None else self.eps_y
         if self.eps0 != 0.0:
-            code += f" {eps_yN:g} {self.eps0:g}"
+            code += f" {eps_yN:{f}} {self.eps0:{f}}"
         elif self.eps_yN is not None:
-            code += f" {eps_yN:g}"
+            code += f" {eps_yN:{f}}"
 
         return code
 
@@ -127,10 +131,12 @@ class Steel01(base.OpenSeesObject):
             raise ValueError('Steel01: isometric hardening definition incomplete ',
                              f'(expected 4 params, got {nparams})')
 
-    def tcl_code(self):
-        code = f'uniaxialMaterial Steel01 {self.tag:d} {self.Fy:g} {self.E:g} {self.b:g}'
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        code = f'uniaxialMaterial Steel01 {self.tag:{i}} {self.Fy:{f}} {self.E:{f}} {self.b:{f}}'
         if self._num_iso_params_defined() == 4:
-            code += f' {self.a1:g} {self.a2:g} {self.a3:g} {self.a4:g}'
+            code += f' {self.a1:{f}} {self.a2:{f}} {self.a3:{f}} {self.a4:{f}}'
 
         return code
 
@@ -194,19 +200,21 @@ class Steel02(base.OpenSeesObject):
     def _num_iso_params_defined(self):
         return sum([a is not None for a in (self.a1, self.a2, self.a3, self.a4)])
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         code = (
-            f'uniaxialMaterial Steel02 {self.tag:d} {self.Fy:g} {self.E:g} '
-            f'{self.b:g} {self.R0:g} {self.cR1:g} {self.cR2:g}'
+            f'uniaxialMaterial Steel02 {self.tag:{i}} {self.Fy:{f}} {self.E:{f}} '
+            f'{self.b:{f}} {self.R0:{f}} {self.cR1:{f}} {self.cR2:{f}}'
         )
 
         n_iso_params = self._num_iso_params_defined()
         if self.sigma_i is not None:
             if n_iso_params == 0:
-                code += f' 0.0 1.0 0.0 1.0 {self.sigma_i:g}'
+                code += f' 0.0 1.0 0.0 1.0 {self.sigma_i:{f}}'
             elif n_iso_params == 4:
-                code += f' {self.a1:g} {self.a2:g} {self.a3:g} {self.a4:g} {self.sigma_i:g}'
+                code += f' {self.a1:{f}} {self.a2:{f}} {self.a3:{f}} {self.a4:{f}} {self.sigma_i:{f}}'
         elif n_iso_params == 4:
-            code += f' {self.a1:g} {self.a2:g} {self.a3:g} {self.a4:g}'
+            code += f' {self.a1:{f}} {self.a2:{f}} {self.a3:{f}} {self.a4:{f}}'
 
         return code

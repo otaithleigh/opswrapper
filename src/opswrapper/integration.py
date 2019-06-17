@@ -25,8 +25,10 @@ class Lobatto(base.OpenSeesObject, Integration):
     section: int
     npoints: int
 
-    def tcl_code(self):
-        return f'Lobatto {self.section:d} {self.npoints:d}'
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        return f'Lobatto {self.section:{i}} {self.npoints:{i}}'
 
 
 @dataclasses.dataclass
@@ -47,8 +49,10 @@ class Legendre(base.OpenSeesObject, Integration):
     section: int
     npoints: int
 
-    def tcl_code(self):
-        return f'Legendre {self.section:d} {self.npoints:d}'
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        return f'Legendre {self.section:{i}} {self.npoints:{i}}'
 
 
 @dataclasses.dataclass
@@ -70,8 +74,10 @@ class Radau(base.OpenSeesObject, Integration):
     section: int
     npoints: int
 
-    def tcl_code(self):
-        return f'Radau {self.section:d} {self.npoints:d}'
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        return f'Radau {self.section:{i}} {self.npoints:{i}}'
 
 
 @dataclasses.dataclass
@@ -91,8 +97,10 @@ class NewtonCotes(base.OpenSeesObject, Integration):
     section: int
     npoints: int
 
-    def tcl_code(self):
-        return f'NewtonCotes {self.section:d} {self.npoints:d}'
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+        return f'NewtonCotes {self.section:{i}} {self.npoints:{i}}'
 
 
 @dataclasses.dataclass()
@@ -113,9 +121,11 @@ class FixedLocation(base.OpenSeesObject, Integration):
         if len(self.sections) != len(self.locations):
             raise ValueError("FixedLocation: len(sections) must equal len(locations)")
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         return ' '.join([
-            f'FixedLocation {len(self.sections):d}',
-            *[f'{tag:d}' for tag in self.sections],
-            *[f'{loc:g}' for loc in self.locations],
+            f'FixedLocation {len(self.sections):{i}}',
+            *[f'{tag:{i}}' for tag in self.sections],
+            *[f'{loc:{f}}' for loc in self.locations],
         ])

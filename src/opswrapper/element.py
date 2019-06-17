@@ -42,13 +42,15 @@ class ElasticBeamColumn2D(base.OpenSeesObject):
     mass: float = None
     cmass: bool = False
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         code = [
-            f'element elasticBeamColumn {self.tag:d} {self.inode:d} {self.jnode:d} '
-            f'{self.A:g} {self.E:g} {self.Iz:g} {self.transf:d}'
+            f'element elasticBeamColumn {self.tag:{i}} {self.inode:{i}} {self.jnode:{i}} '
+            f'{self.A:{f}} {self.E:{f}} {self.Iz:{f}} {self.transf:{i}}'
         ]
         if self.mass is not None:
-            code.append(f'-mass {self.mass:g}')
+            code.append(f'-mass {self.mass:{f}}')
         if self.cmass:
             code.append('-cMass')
         return ' '.join(code)
@@ -69,13 +71,16 @@ class ElasticBeamColumn3D(base.OpenSeesObject):
     mass: float = None
     cmass: bool = False
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         code = [
-            f'element elasticBeamColumn {self.tag:d} {self.inode:d} {self.jnode:d} '
-            f'{self.A:g} {self.E:g} {self.G:g} {self.J:g} {self.Iy:g} {self.Iz:g} {self.transf:d}'
+            f'element elasticBeamColumn {self.tag:{i}} {self.inode:{i}} {self.jnode:{i}}'
+            f' {self.A:{f}} {self.E:{f}} {self.G:{f}} {self.J:{f}}'
+            f' {self.Iy:{f}} {self.Iz:{f}} {self.transf:{i}}'
         ]
         if self.mass is not None:
-            code.append(f'-mass {self.mass:g}')
+            code.append(f'-mass {self.mass:{f}}')
         if self.cmass:
             code.append('-cMass')
         return ' '.join(code)
@@ -116,9 +121,12 @@ class ForceBeamColumn(base.OpenSeesObject):
     maxiters: int = 10
     itertol: float = 1e-12
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         code = [
-            f"element forceBeamColumn {self.tag:d} {self.inode:d} {self.jnode:d} {self.transf:d}"
+            f"element forceBeamColumn {self.tag:{i}} {self.inode:{i}}",
+            f"{self.jnode:{i}} {self.transf:{i}}"
         ]
         code.append(str(self.integration))
         if self.mass is not None:
@@ -165,7 +173,9 @@ class DispBeamColumn(base.OpenSeesObject):
     cmass: bool = False
     integration: str = 'Legendre'
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         try:
             nsections = len(self.section)
             if nsections != self.npoints and nsections != 1:
@@ -176,16 +186,17 @@ class DispBeamColumn(base.OpenSeesObject):
             sections = [self.section]
 
         code = [
-            f'element dispBeamColumn {self.tag:d} {self.inode:d} {self.jnode:d} {self.npoints:d}',
+            f'element dispBeamColumn {self.tag:{i}}',
+            f'{self.inode:{i}} {self.jnode:{i}} {self.npoints:{i}}',
         ]
         if nsections == 1:
-            code.append(f'{self.section:d} {self.transf:d}')
+            code.append(f'{self.section:{i}} {self.transf:{i}}')
         else:
             code.append(f'-sections')
-            code.extend([f'{s:d}' for s in sections])
-            code.append(f'{self.transf:d}')
+            code.extend([f'{s:{i}}' for s in sections])
+            code.append(f'{self.transf:{i}}')
         if self.mass is not None:
-            code.append(f'-mass {self.mass:g}')
+            code.append(f'-mass {self.mass:{f}}')
         if self.cmass:
             code.append('-cMass')
         if self.integration != 'Legendre':
@@ -229,17 +240,20 @@ class Truss(base.OpenSeesObject):
     do_rayleigh: bool = False
     corot: bool = False
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         element = 'corotTruss' if self.corot else 'truss'
         code = [
-            f'element {element} {self.tag:d} {self.inode:d} {self.jnode:d} {self.A:g} {self.mat:d}'
+            f'element {element} {self.tag:{i}} {self.inode:{i}}',
+            f'{self.jnode:{i}} {self.A:{f}} {self.mat:{i}}'
         ]
         if self.rho is not None:
-            code.append(f'-rho {self.rho:g}')
+            code.append(f'-rho {self.rho:{f}}')
         if self.cmass:
-            code.append(f'-cMass {self.cmass:d}')
+            code.append(f'-cMass {self.cmass:{i}}')
         if self.do_rayleigh:
-            code.append(f'-doRayleigh {self.do_rayleigh:d}')
+            code.append(f'-doRayleigh {self.do_rayleigh:{i}}')
         return ' '.join(code)
 
 
@@ -275,13 +289,17 @@ class TrussSection(base.OpenSeesObject):
     do_rayleigh: bool = False
     corot: bool = False
 
-    def tcl_code(self):
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
         element = 'corotTrussSection' if self.corot else 'trussSection'
-        code = [f'element {element} {self.tag:d} {self.inode:d} {self.jnode:d} {self.section:d}']
+        code = [
+            f'element {element} {self.tag:{i}} {self.inode:{i}} {self.jnode:{i}} {self.section:{i}}'
+        ]
         if self.rho is not None:
-            code.append(f'-rho {self.rho:g}')
+            code.append(f'-rho {self.rho:{f}}')
         if self.cmass:
-            code.append(f'-cMass {self.cmass:d}')
+            code.append(f'-cMass {self.cmass:{i}}')
         if self.do_rayleigh:
-            code.append(f'-doRayleigh {self.do_rayleigh:d}')
+            code.append(f'-doRayleigh {self.do_rayleigh:{i}}')
         return ' '.join(code)
