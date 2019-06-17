@@ -4,4 +4,4 @@ __pycache__
 
 # Stuff for VS Code
 .vscode
-opswrapper
+/opswrapper
