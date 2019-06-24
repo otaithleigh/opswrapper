@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="opswrapper",
-    version="0.2.0",
+    version="0.2.1",
 
     packages=["opswrapper"],
     package_dir={'': "src"},
