@@ -5,5 +5,6 @@ from . import base
 from . import element
 from . import integration
 from . import material
+from . import output
 from . import section
 from .model import *
