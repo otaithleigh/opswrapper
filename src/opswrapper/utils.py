@@ -108,7 +108,7 @@ def fill_out_numbers(peaks, rate):
     for i in range(numpeaks - 1):
         diff = peaks[i + 1, :] - peaks[i, :]
         numsteps = int(np.maximum(2, 1 + np.ceil(np.max(np.abs(diff/rate)))))
-        numbers_to_add = super_linspace(peaks[i, :], peaks[i + 1, :], numsteps)
+        numbers_to_add = np.linspace(peaks[i, :], peaks[i + 1, :], numsteps)
         numbers.append(numbers_to_add[1:, :])
 
     numbers = np.vstack(numbers)
@@ -116,46 +116,3 @@ def fill_out_numbers(peaks, rate):
         numbers = numbers.flatten()
 
     return numbers
-
-
-def super_linspace(a, b, n):
-    """Create a 2-d array whose values are linearly spaced between two vectors.
-
-    Parameters
-    ----------
-    a : np.ndarray
-        First vector.
-    b : np.ndarray
-        Last vector.
-    n : int
-        Number of rows to create.
-
-    Returns
-    -------
-    y : np.ndarray
-        2-d array whose first row is `a`, last row is `b`, and whose columns are
-        linspace-d vectors between the corresponding values of `a` and `b`.    
-
-    Example
-    -------
-    >>> a = np.ndarray([1, 2, 3, 4, 5])
-    >>> b = np.ndarray([2, 3, 4, 5, 6])
-    >>> super_linspace(a, b, 5)
-    array([[1.  , 2.  , 3.  , 4.  , 5.  ],
-           [1.25, 2.25, 3.25, 4.25, 5.25],
-           [1.5 , 2.5 , 3.5 , 4.5 , 5.5 ],
-           [1.75, 2.75, 3.75, 4.75, 5.75],
-           [2.  , 3.  , 4.  , 5.  , 6.  ]])
-
-    Ported from the MATLAB function written by Mark Denavit.    
-    """
-    if len(a.shape) != 1 or len(b.shape) != 1:
-        raise ValueError("super_linspace: a and b must be vectors")
-    if a.size != b.size:
-        raise ValueError("super_linspace: a and b must be the same length")
-
-    y = np.empty((n, a.size))
-    for i in range(a.size):
-        y[:, i] = np.linspace(a[i], b[i], n)
-
-    return y
