@@ -1,3 +1,6 @@
+"""Integration methods for force-based beam-columns."""
+
+
 import dataclasses
 
 from . import base
