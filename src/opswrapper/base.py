@@ -1,6 +1,12 @@
 import abc
 import dataclasses
 
+__all__ = [
+    'MultiFormatSpec',
+    'OpenSeesObject',
+    'set_global_format_spec',
+]
+
 
 @dataclasses.dataclass
 class MultiFormatSpec():
