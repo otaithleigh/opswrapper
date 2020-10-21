@@ -111,15 +111,17 @@ class OpenSeesAnalysis():
 
         cmd = [str(self.opensees_path), str(inputfile)]
         stdout = []
+        if echo:
+            def handle_stdout(line):
+                print(line, end='')
+                stdout.append(line)
+        else:
+            def handle_stdout(line):
+                stdout.append(line)
 
         with sub.Popen(cmd, bufsize=1, stdout=sub.PIPE, stderr=sub.STDOUT, text=True) as p:
-            if echo:
-                for line in p.stdout:
-                    print(line, end='')
-                    stdout.append(line)
-            else:
-                for line in p.stdout:
-                    stdout.append(line)
+            for line in p.stdout:
+                handle_stdout(line)
 
         stdout = ''.join(stdout)
 
