@@ -1,5 +1,6 @@
 import abc
 import dataclasses
+import typing
 
 __all__ = [
     'MultiFormatSpec',
@@ -195,3 +196,6 @@ class OpenSeesObject(abc.ABC):
             Format specifiers to use instead of the defaults.
         """
         print(self.tcl_code(**format_spec), file=fid)
+
+
+OpenSeesDef = typing.Union[str, OpenSeesObject]

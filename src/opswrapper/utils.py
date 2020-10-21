@@ -1,14 +1,17 @@
 import dataclasses
 import pathlib
+from typing import List
 
 import numpy as np
+
+from .base import OpenSeesDef
 
 
 def path_for_tcl(path) -> str:
     return str(path).replace('\\', '/')
 
 
-def print_model(model, file=None):
+def print_model(model: List[OpenSeesDef], file=None):
     """Print a model definition to a file.
 
     Parameters
