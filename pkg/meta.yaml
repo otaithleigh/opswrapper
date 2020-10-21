@@ -1,12 +1,11 @@
-{% set version = "0.2.1" %}
+{% set data = load_setup_py_data() %}
 
 package:
   name: opswrapper
-  version: {{ version }}
+  version: {{ data.get('version') }}
 
 source:
-  git_url: https://github.com/otaithleigh/opswrapper.git
-  git_tag: v{{ version }}
+  path: ".."
 
 build:
   noarch: python
@@ -38,6 +37,6 @@ test:
     - pytest
 
 about:
-  home: https://github.com/otaithleigh/opswrapper
-  license: MIT
-  summary: A wrapper for OpenSees Tcl analyses.
+  home: {{ data.get('url') }}
+  license: {{ data.get('license') }}
+  summary: {{ data.get('description') }}
