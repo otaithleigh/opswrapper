@@ -16,6 +16,50 @@ from .model import Model, Node
 from .output import ElementRecorder
 
 
+def scratch_file_factory(analysis_type: str, scratch_path=None, analysis_id=0):
+    """Create a scratch file path generator.
+
+    Parameters
+    ----------
+    analysis_type : str
+        Type of the analysis, e.g. 'SectionAnalysis'.
+    scratch_path : path_like
+        Path to the scratch directory. If None, uses the system temp directory.
+        (default: None)
+    analysis_id : optional
+        Unique ID for the analysis. Useful for parallel execution, for example.
+        (default: 0)
+
+    Returns
+    -------
+    scratch_file
+        A function that takes two arguments, 'name' and 'suffix', returning a
+        Path object.
+
+    Example
+    -------
+    >>> scratch_file = scratch_file_factory('TestoPresto')
+    >>> scratch_file('disp', '.dat')
+    PosixPath('/tmp/TestoPresto_disp_0.dat')
+    """
+    if scratch_path is None:
+        scratch_path = tempfile.gettempdir()
+    scratch_path = pathlib.Path(scratch_path).resolve()
+
+    def scratch_file(name: str, suffix: str = '') -> pathlib.Path:
+        """
+        Parameters
+        ----------
+        name : str
+            Name of the scratch file, e.g. 'displacement'.
+        suffix : str, optional
+            Suffix to use for the scratch file. (default: '')
+        """
+        return scratch_path/f'{analysis_type}_{name}_{analysis_id}{suffix}'
+
+    return scratch_file
+
+
 @dataclasses.dataclass
 class AnalysisResults():
     """Results from an OpenSees analysis.
@@ -84,9 +128,25 @@ class OpenSeesAnalysis():
             value = config.path_of.scratch
         self._scratch_path = pathlib.Path(value)
 
-    def scratch_file(self, filename: str) -> pathlib.Path:
-        """Return the path to `filename` in the scratch directory."""
-        return self.scratch_path/filename
+    def create_scratch_filer(self, analysis_id=None):
+        """Create a new scratch file function with a particular analysis id.
+
+        Parameters
+        ----------
+        analysis_id : optional
+            Unique analysis ID. If not provided, a random UUID is generated to
+            serve as the analysis ID.
+
+        Example
+        -------
+        >>> analysis = UniaxialMaterialAnalysis(...)
+        >>> scratch_file = analysis.create_scratch_filer('foo')
+        >>> scratch_file('disp', '.dat')
+        PosixPath('/home/ptalley2/Scratch/UniaxialMaterialAnalysis_disp_foo.dat')
+        """
+        if analysis_id is None:
+            analysis_id = uuid.uuid4()
+        return scratch_file_factory(self.__class__.__name__, self.scratch_path, analysis_id)
 
     def run_opensees(self, inputfile: str, echo: bool = None) -> AnalysisResults:
         """Run an OpenSees script.
