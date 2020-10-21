@@ -1,10 +1,29 @@
 import dataclasses
 import pathlib
+import types
 from typing import List
 
 import numpy as np
 
 from .base import OpenSeesDef
+
+
+class Namespace(types.SimpleNamespace):
+    """Extension of the SimpleNamespace class to allow iterating over name-value
+    pairs (a la dict.items).
+    
+    Example
+    -------
+    >>> files = Namespace()
+    >>> files.input = 'input.tcl'
+    >>> files.output = 'output.dat'
+    >>> for name, path in files:
+    ...     print(name, ':', path)
+    input : input.tcl
+    output : output.dat
+    """
+    def __iter__(self):
+        return iter(self.__dict__.items())
 
 
 def path_for_tcl(path) -> str:
