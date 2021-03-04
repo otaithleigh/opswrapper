@@ -1,0 +1,50 @@
+version: '3'
+
+output: prefixed
+
+vars:
+  PACKAGE: package
+  CONDA:
+    # Use mamba if available
+    sh: if ! command -v mamba &> /dev/null; then echo conda; else echo mamba; fi
+  CONDABUILD:
+    # Use mambabuild if boa is installed
+    sh: if [ -z "$(conda list | grep boa)" ]; then echo build; else echo mambabuild; fi
+  DEVDEPS: anaconda-client twine 
+
+tasks:
+  install-dev-deps:
+    desc: Install development dependencies.
+    cmds:
+      - echo "{{.CONDA}} install {{.DEVDEPS}}"
+
+  build:
+    desc: Build all distribution packages.
+    deps: [build-pypi, build-conda]
+
+  build-pypi:
+    desc: Build the PyPi package.
+    cmds:
+      - python setup.py sdist bdist_wheel
+
+  build-conda:
+    desc: Build the Conda package.
+    cmds:
+      - conda {{.CONDABUILD}} {{.CHANNELS}} --output-folder dist pkg
+    vars:
+      CHANNELS: "-c defaults -c conda-forge"
+
+  upload:
+    desc: Upload packages to PyPi and anaconda.org.
+    cmds:
+      - anaconda upload "dist/noarch/{{.PACKAGE}}-{{.VERSION}}-py_0.tar.bz2"
+      - twine upload "dist/{{.PACKAGE}}-{{.VERSION}}*"
+    vars:
+      VERSION:
+        sh: cat "src/{{.PACKAGE}}/__version__"
+
+  clean:
+    desc: Remove all build artifacts.
+    cmds:
+      - rm -rf dist/* dist/.*
+      - rm -rf build/* build/.*
