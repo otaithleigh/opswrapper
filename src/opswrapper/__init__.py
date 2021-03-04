@@ -11,6 +11,7 @@ from . import integration
 from . import material
 from . import output
 from . import section
+from . import test
 from . import uniaxialmaterialanalysis
 from . import utils
 from .base import *
