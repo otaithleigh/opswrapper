@@ -4,7 +4,9 @@ import warnings
 import numpy as np
 import xarray as xr
 
+from . import constraints
 from . import element
+from . import test
 from . import utils
 from .analysis import OpenSeesAnalysis
 from .output import ElementRecorder
@@ -113,8 +115,8 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             new_recorder(file=files.output_disp, response='deformations'),
             new_recorder(file=files.output_stiff, response='stiff'),
             'system UmfPack',
-            'constraints Penalty 1.0e12 1.0e12',
-            'test NormDispIncr 1.0e-8 10 0',
+            constraints.Penalty(alpha_s=1e12, alpha_m=1e12),
+            test.NormDispIncr(tolerance=1e-8, max_iters=10, print_flag=0),
             'algorithm Newton',
             'numberer RCM',
             'integrator LoadControl 1.0',
