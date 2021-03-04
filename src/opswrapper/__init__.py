@@ -4,6 +4,7 @@ import importlib.resources
 from . import analysis
 from . import base
 from . import config
+from . import constraints
 from . import element
 from . import formatting
 from . import integration
