@@ -6,7 +6,8 @@ import xarray as xr
 
 from . import element
 from . import utils
-from .analysis import OpenSeesAnalysis, ElementRecorder
+from .analysis import OpenSeesAnalysis
+from .output import ElementRecorder
 from .model import Model, Node
 
 
