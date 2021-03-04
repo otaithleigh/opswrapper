@@ -3,7 +3,7 @@ version: '3'
 output: prefixed
 
 vars:
-  PACKAGE: package
+  PACKAGE: opswrapper
   CONDA:
     # Use mamba if available
     sh: if ! command -v mamba &> /dev/null; then echo conda; else echo mamba; fi
