@@ -25,8 +25,9 @@ class ElementRecorder(base.OpenSeesObject):
     precision : int, optional
         Precision (number of significant figures) of the recorder. If None, uses
         the default OpenSees precision (6). (default: None)
-    elements : array-like
-        Element tags to record.
+    elements : array-like or 'all'
+        Element tags to record. If 'all', the `getEleTags` command is used to
+        produce a list of all elements.
     dofs : array-like, optional
         DOFs to record.
     response : str
@@ -61,7 +62,10 @@ class ElementRecorder(base.OpenSeesObject):
         else:
             command = f"recorder Element -{self.fileformat}" " {{{file!s}}}"
 
-        command += " -ele " + " ".join([f"{tag:{i}}" for tag in np.array(self.elements).flat])
+        if self.elements == 'all':
+            command += " -ele {*}[getEleTags]"
+        else:
+            command += " -ele " + " ".join([f"{tag:{i}}" for tag in np.array(self.elements).flat])
 
         if self.precision is not None:
             command += f" -precision {self.precision:{i}}"
@@ -98,8 +102,9 @@ class NodeRecorder(base.OpenSeesObject):
         time step are added to the load factor from the series.
     time : bool, optional
         If True, places domain time in the first entry of each line. (default=False)
-    nodes : array-like
-        Node tags to record.
+    nodes : array-like or 'all', optional
+        Node tags to record. If 'all', the `getNodeTags` command is used to
+        produce a list of all nodes.
     node_range : 2-tuple or array-like, optional
         Pair of node tags that define the range to record.
     dofs : array-like, optional
@@ -162,7 +167,9 @@ class NodeRecorder(base.OpenSeesObject):
         if self.time:
             command += " -time"
 
-        if self.nodes is not None:
+        if self.nodes == 'all':
+            command += " -node {*}[getNodeTags]"
+        elif self.nodes is not None:
             command += " -node " + " ".join([f"{tag:{i}}" for tag in np.array(self.nodes).flat])
 
         if self.node_range is not None:
