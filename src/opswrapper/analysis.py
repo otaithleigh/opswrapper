@@ -10,19 +10,19 @@ from typing import NamedTuple
 from . import config
 
 
-def scratch_file_factory(analysis_type: str, scratch_path=None, analysis_id=0):
+def scratch_file_factory(analysis_type: str, analysis_id=None, scratch_path=None):
     """Create a scratch file path generator.
 
     Parameters
     ----------
     analysis_type : str
         Type of the analysis, e.g. 'SectionAnalysis'.
+    analysis_id : optional
+        Unique ID for the analysis. Useful for parallel execution. If None, a
+        random UUID is generated. (default: None)
     scratch_path : path_like
         Path to the scratch directory. If None, uses the system temp directory.
         (default: None)
-    analysis_id : optional
-        Unique ID for the analysis. Useful for parallel execution, for example.
-        (default: 0)
 
     Returns
     -------
@@ -40,6 +40,9 @@ def scratch_file_factory(analysis_type: str, scratch_path=None, analysis_id=0):
         scratch_path = tempfile.gettempdir()
     scratch_path = pathlib.Path(scratch_path).resolve()
 
+    if analysis_id is None:
+        analysis_id = uuid.uuid4()
+
     def scratch_file(name: str, suffix: str = '') -> pathlib.Path:
         """
         Parameters
@@ -49,7 +52,7 @@ def scratch_file_factory(analysis_type: str, scratch_path=None, analysis_id=0):
         suffix : str, optional
             Suffix to use for the scratch file. (default: '')
         """
-        return scratch_path/f'{analysis_type}_{name}_{analysis_id}{suffix}'
+        return scratch_path/f'{analysis_type}_{analysis_id}_{name}{suffix}'
 
     return scratch_file
 
@@ -135,11 +138,9 @@ class OpenSeesAnalysis():
         >>> analysis = UniaxialMaterialAnalysis(...)
         >>> scratch_file = analysis.create_scratch_filer('foo')
         >>> scratch_file('disp', '.dat')
-        PosixPath('/home/ptalley2/Scratch/UniaxialMaterialAnalysis_disp_foo.dat')
+        PosixPath('/home/ptalley2/Scratch/UniaxialMaterialAnalysis_foo_disp.dat')
         """
-        if analysis_id is None:
-            analysis_id = uuid.uuid4()
-        return scratch_file_factory(self.__class__.__name__, self.scratch_path, analysis_id)
+        return scratch_file_factory(self.__class__.__name__, analysis_id, self.scratch_path)
 
     def run_opensees(self, inputfile: str, echo: bool = None) -> AnalysisResults:
         """Run an OpenSees script.
