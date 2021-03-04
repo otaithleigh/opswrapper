@@ -35,7 +35,7 @@ def scratch_file_factory(analysis_type: str, scratch_path=None, analysis_id=0):
 
     Returns
     -------
-    scratch_file
+    scratch_file : (name: str, suffix: str = '') -> Path
         A function that takes two arguments, 'name' and 'suffix', returning a
         Path object.
 
