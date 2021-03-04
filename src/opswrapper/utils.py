@@ -56,6 +56,21 @@ def print_model(model: List[OpenSeesDef], file=None):
             print(modeltext, file=f)
 
 
+def tcllist(l: list) -> str:
+    """Translate a Python list to the equivalent Tcl command.
+
+    All elements in the list are quoted using brackets and will not support
+    variable substitution. Do that on the Python side.
+
+    Example:
+    >>> tcllist([1.0, 2, "sam's the best!"])
+    "[list {1.0} {2} {sam's the best!}]"
+    """
+    list_items = ['{' + str(i) + '}' for i in l]
+    list_str = ' '.join(list_items)
+    return f'[list {list_str}]'
+
+
 def list_dataclass_fields(name, object, pad='', end='\n', exclude=None) -> str:
     """Represent the fields of a dataclass object.
 
