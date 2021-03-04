@@ -1,7 +1,7 @@
 import abc
 import typing
 
-from .formatting import MultiFormatSpec, DEFAULT_FORMAT_SPEC
+from .formatting import MultiFormatSpec, _GLOBAL_FORMAT_SPEC
 
 __all__ = [
     'OpenSeesObject',
@@ -44,7 +44,7 @@ class OpenSeesObject(abc.ABC):
     Each of these methods return the previously-set modifiers if you wish to restore
     them later.
     """
-    _format_spec: MultiFormatSpec = DEFAULT_FORMAT_SPEC
+    _format_spec: MultiFormatSpec = _GLOBAL_FORMAT_SPEC
 
     def get_format_spec(self, **formats):
         """Return a copy of the format specifiers for this object.
@@ -123,8 +123,8 @@ class OpenSeesObject(abc.ABC):
     def __format__(self, float_spec=None):
         return self.tcl_code(float=float_spec)
 
-    def use_default_format(self):
-        self._format_spec = DEFAULT_FORMAT_SPEC
+    def use_global_format(self):
+        self._format_spec = _GLOBAL_FORMAT_SPEC
 
     def dump(self, fid, **format_spec):
         """Write the Tcl code for this object to the given file descriptor.

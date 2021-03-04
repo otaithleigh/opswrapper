@@ -32,8 +32,7 @@ class MultiFormatSpec():
         return self
 
 
-DEFAULT_FORMAT_SPEC = MultiFormatSpec()
-_global_format_spec = DEFAULT_FORMAT_SPEC.copy()
+_GLOBAL_FORMAT_SPEC = MultiFormatSpec()
 
 
 def set_global_format_spec(**format_spec):
@@ -59,6 +58,6 @@ def set_global_format_spec(**format_spec):
     >>> print(s)
     section Elastic 1 2.90e+04 10.0 144.
     """
-    old_spec = _global_format_spec.copy()
-    _global_format_spec.update(format_spec)
+    old_spec = _GLOBAL_FORMAT_SPEC.copy()
+    _GLOBAL_FORMAT_SPEC.update(format_spec)
     return old_spec
