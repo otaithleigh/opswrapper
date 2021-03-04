@@ -7,6 +7,7 @@ import subprocess as sub
 import tempfile
 import uuid
 import warnings
+from typing import NamedTuple
 
 import numpy as np
 import xarray as xr
@@ -62,15 +63,14 @@ def scratch_file_factory(analysis_type: str, scratch_path=None, analysis_id=0):
     return scratch_file
 
 
-@dataclasses.dataclass
-class AnalysisResults():
+class AnalysisResults(NamedTuple):
     """Results from an OpenSees analysis.
 
     Parameters
     ----------
-    returncode
+    returncode : int
         The return code from OpenSees.
-    stdout
+    stdout : str
         Captured console output from OpenSees.
     """
     returncode: int
