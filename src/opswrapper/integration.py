@@ -6,12 +6,13 @@ import dataclasses
 from . import base
 
 
-class Integration:
+@dataclasses.dataclass
+class Integration(base.OpenSeesObject):
     pass
 
 
 @dataclasses.dataclass
-class Lobatto(base.OpenSeesObject, Integration):
+class Lobatto(Integration):
     """Gauss-Lobatto integration.
 
     Gauss-Lobatto integration places an integration point at each end of the
@@ -35,7 +36,7 @@ class Lobatto(base.OpenSeesObject, Integration):
 
 
 @dataclasses.dataclass
-class Legendre(base.OpenSeesObject, Integration):
+class Legendre(Integration):
     """Gauss-Legendre integration.
 
     Gauss-Legendre integration is more accurate than Gauss-Lobatto, but is less
@@ -59,7 +60,7 @@ class Legendre(base.OpenSeesObject, Integration):
 
 
 @dataclasses.dataclass
-class Radau(base.OpenSeesObject, Integration):
+class Radau(Integration):
     """Gauss-Radau integration.
 
     Gauss-Radau integration is not common in force-based elements because it
@@ -84,7 +85,7 @@ class Radau(base.OpenSeesObject, Integration):
 
 
 @dataclasses.dataclass
-class NewtonCotes(base.OpenSeesObject, Integration):
+class NewtonCotes(Integration):
     """Newton-Cotes integration.
 
     Newton-Cotes places integration points uniformly along the element,
@@ -107,7 +108,7 @@ class NewtonCotes(base.OpenSeesObject, Integration):
 
 
 @dataclasses.dataclass()
-class FixedLocation(base.OpenSeesObject, Integration):
+class FixedLocation(Integration):
     """Integration at user-specified points.
 
     Parameters
