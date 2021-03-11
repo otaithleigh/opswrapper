@@ -128,7 +128,11 @@ class ForceBeamColumn(base.OpenSeesObject):
             f"element forceBeamColumn {self.tag:{i}} {self.inode:{i}}",
             f"{self.jnode:{i}} {self.transf:{i}}"
         ]
-        code.append(str(self.integration))
+        if isinstance(self.integration, integration.Integration):
+            integr = self.integration.tcl_code(**format_spec)
+        else:
+            integr = str(self.integration)
+        code.append(integr)
         if self.mass is not None:
             code.append(f'-mass {self.mass}')
         if self.iterative:
