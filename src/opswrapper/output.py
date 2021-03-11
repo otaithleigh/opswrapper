@@ -56,14 +56,20 @@ class ElementRecorder(base.OpenSeesObject):
     def tcl_code(self, **format_spec) -> str:
         fmt = self.get_format_spec(**format_spec)
         i, f = fmt.int, fmt.float
+
         if self.file is not None:
             file = utils.path_for_tcl(self.file)
             command = f"recorder Element -{self.fileformat} {{{file!s}}}"
+            tcl_list_expansion = '{*}'
         else:
             command = f"recorder Element -{self.fileformat}" " {{{file!s}}}"
+            # If the returned string is being returned with '{file}' in it to be formatted later,
+            # need to escape the brackets in the list expansion operator. Otherwise, a completely
+            # baffling KeyError will be raised when calling '.format'.
+            tcl_list_expansion = '{{*}}'
 
         if self.elements == 'all':
-            command += " -ele {*}[getEleTags]"
+            command += f" -ele {tcl_list_expansion}[getEleTags]"
         else:
             command += " -ele " + " ".join([f"{tag:{i}}" for tag in np.array(self.elements).flat])
 
@@ -152,11 +158,17 @@ class NodeRecorder(base.OpenSeesObject):
     def tcl_code(self, **format_spec) -> str:
         fmt = self.get_format_spec(**format_spec)
         i, f = fmt.int, fmt.float
+
         if self.file is not None:
             file = utils.path_for_tcl(self.file)
             command = f"recorder Node -{self.fileformat} {{{file!s}}}"
+            tcl_list_expansion = '{*}'
         else:
             command = f"recorder Node -{self.fileformat}" " {{{file!s}}}"
+            # If the returned string is being returned with '{file}' in it to be formatted later,
+            # need to escape the brackets in the list expansion operator. Otherwise, a completely
+            # baffling KeyError will be raised when calling '.format'.
+            tcl_list_expansion = '{{*}}'
 
         if self.precision is not None:
             command += f" -precision {self.precision:{i}}"
@@ -168,7 +180,7 @@ class NodeRecorder(base.OpenSeesObject):
             command += " -time"
 
         if self.nodes == 'all':
-            command += " -node {*}[getNodeTags]"
+            command += f" -node {tcl_list_expansion}[getNodeTags]"
         elif self.nodes is not None:
             command += " -node " + " ".join([f"{tag:{i}}" for tag in np.array(self.nodes).flat])
 
