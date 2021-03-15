@@ -3,14 +3,14 @@
 import dataclasses
 import pathlib
 import subprocess as sub
-import tempfile
 import uuid
+import warnings
 from typing import NamedTuple
 
 from . import config
 
 
-def scratch_file_factory(analysis_type: str, analysis_id=None, scratch_path=None):
+class ScratchFile():
     """Create a scratch file path generator.
 
     Parameters
@@ -21,7 +21,7 @@ def scratch_file_factory(analysis_type: str, analysis_id=None, scratch_path=None
         Unique ID for the analysis. Useful for parallel execution. If None, a
         random UUID is generated. (default: None)
     scratch_path : path_like
-        Path to the scratch directory. If None, uses the system temp directory.
+        Path to the scratch directory. If None, uses `config.path_of.scratch`.
         (default: None)
 
     Returns
@@ -32,18 +32,20 @@ def scratch_file_factory(analysis_type: str, analysis_id=None, scratch_path=None
 
     Example
     -------
-    >>> scratch_file = scratch_file_factory('TestoPresto')
+    >>> scratch_file = scratch_file_factory('TestoPresto', 0)
     >>> scratch_file('disp', '.dat')
-    PosixPath('/tmp/TestoPresto_disp_0.dat')
+    PosixPath('/tmp/TestoPresto_0_disp.dat')
     """
-    if scratch_path is None:
-        scratch_path = tempfile.gettempdir()
-    scratch_path = pathlib.Path(scratch_path).resolve()
+    __slots__ = ('analysis_type', 'analysis_id', 'scratch_path')
 
-    if analysis_id is None:
-        analysis_id = uuid.uuid4()
+    def __init__(self, analysis_type, analysis_id=None, scratch_path=None):
+        self.analysis_type = str(analysis_type)
+        self.analysis_id = str(uuid.uuid4() if analysis_id is None else analysis_id)
+        self.scratch_path = pathlib.Path(
+            config.path_of.scratch if scratch_path is None else scratch_path
+        ).resolve()
 
-    def scratch_file(name: str, suffix: str = '') -> pathlib.Path:
+    def __call__(self, name: str, suffix: str = '') -> pathlib.Path:
         """
         Parameters
         ----------
@@ -51,10 +53,19 @@ def scratch_file_factory(analysis_type: str, analysis_id=None, scratch_path=None
             Name of the scratch file, e.g. 'displacement'.
         suffix : str, optional
             Suffix to use for the scratch file. (default: '')
-        """
-        return scratch_path/f'{analysis_type}_{analysis_id}_{name}{suffix}'
 
-    return scratch_file
+        Returns
+        -------
+        path : pathlib.Path
+            Path to the scratch file.
+        """
+        return self.scratch_path/f'{self.analysis_type}_{self.analysis_id}_{name}{suffix}'
+
+
+def scratch_file_factory(*args, **kwargs):
+    warnings.warn('opswrapper.analysis.scratch_file_factory is deprecated.'
+                  'Use opswrapper.analysis.ScratchFile instead.')
+    return ScratchFile(*args, **kwargs)
 
 
 class AnalysisResults(NamedTuple):
@@ -124,7 +135,7 @@ class OpenSeesAnalysis():
             value = config.path_of.scratch
         self._scratch_path = pathlib.Path(value)
 
-    def create_scratch_filer(self, analysis_id=None):
+    def create_scratch_filer(self, analysis_id=None, name: str = None):
         """Create a new scratch file function with a particular analysis id.
 
         Parameters
@@ -132,15 +143,25 @@ class OpenSeesAnalysis():
         analysis_id : optional
             Unique analysis ID. If not provided, a random UUID is generated to
             serve as the analysis ID.
+        name : str, optional
+            "Name" for the scratch filer. Defaults to the analysis class name.
 
         Example
         -------
         >>> analysis = UniaxialMaterialAnalysis(...)
         >>> scratch_file = analysis.create_scratch_filer('foo')
         >>> scratch_file('disp', '.dat')
-        PosixPath('/home/ptalley2/Scratch/UniaxialMaterialAnalysis_foo_disp.dat')
+        PosixPath('/path/to/scratchdir/UniaxialMaterialAnalysis_foo_disp.dat')
+
+        Non-default name:
+
+        >>> scratch_file = analysis.create_scratch_filer(name='Steel04Test', analysis_id='bar')
+        >>> scratch_file('disp', '.dat')
+        PosixPath('/path/to/scratchdir/Steel04Test_bar_disp.dat')
         """
-        return scratch_file_factory(self.__class__.__name__, analysis_id, self.scratch_path)
+        if name is None:
+            name = self.__class__.__name__
+        return ScratchFile(name, analysis_id, self.scratch_path)
 
     def run_opensees(self, inputfile: str, echo: bool = None) -> AnalysisResults:
         """Run an OpenSees script.
