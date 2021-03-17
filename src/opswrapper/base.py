@@ -1,4 +1,6 @@
 import abc
+import dataclasses
+import numbers
 import typing
 
 from .formatting import MultiFormatSpec, SpecLike, _GLOBAL_FORMAT_SPEC
@@ -45,6 +47,23 @@ class OpenSeesObject(abc.ABC):
     them later.
     """
     _format_spec: MultiFormatSpec = _GLOBAL_FORMAT_SPEC
+
+    def __post_init__(self):
+        # Gently attempt to coerce numeric types.
+        for field in dataclasses.fields(self):
+            # Only try to coerce *to* numbers
+            if not issubclass(field.type, numbers.Number):
+                continue
+            # Only try to coerce *from* numbers
+            value = getattr(self, field.name)
+            if not isinstance(value, numbers.Number):
+                continue
+            # And if it doesn't work, that's ok!
+            try:
+                coerced_value = field.type(value)
+            except:
+                continue
+            setattr(self, field.name, coerced_value)
 
     def get_object_formats(self, objects: list, formats: SpecLike = None):
         """Get type-specific formatters for a list of objects, using this
