@@ -87,6 +87,55 @@ class ElasticPP(base.OpenSeesObject):
         return code
 
 
+@dataclasses.dataclass
+class Hardening(base.OpenSeesObject):
+    """Uniaxial material with combined linear kinematic and isotropic hardening.
+
+    Wraps the OpenSees Tcl command Hardening:
+
+        uniaxialMaterial Hardening $matTag $E $sigmaY $H_iso $H_kin <$eta>
+
+    Parameters
+    ----------
+    tag : int
+        Integer tag identifying the material.
+    E : float
+        Tangent stiffness/modulus of elasticity.
+    sigma_y : float
+        Yield stress/force
+    h_iso : float
+        Isotropic hardening modulus.
+    h_kin : float
+        Kinematic hardening modulus.
+    eta : float, optional
+        Visco-plastic coefficient. (default = 0.0)
+    """
+    tag: int
+    E: float
+    sigma_y: float
+    h_iso: float
+    h_kin: float
+    eta: float = 0.0
+
+    def tcl_code(self, **format_spec) -> str:
+        fmt = self.get_format_spec(**format_spec)
+        i, f = fmt.int, fmt.float
+
+        code = [
+            'uniaxialMaterial',
+            'Hardening',
+            f'{self.tag:{i}}',
+            f'{self.E:{f}}',
+            f'{self.sigma_y:{f}}',
+            f'{self.h_iso:{f}}',
+            f'{self.h_kin:{f}}',
+        ]
+        if self.eta != 0.0:
+            code.append(f'{self.eta:{f}}')
+
+        return ' '.join(code)
+
+
 #===================================================================================================
 # Steels
 #===================================================================================================
