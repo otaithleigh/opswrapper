@@ -58,8 +58,8 @@ class Lagrange(OpenSeesObject):
     alpha_m: float
 
     def tcl_code(self, formats=None) -> str:
-        f = self.get_format_spec(formats).float
-        return f'constraints Lagrange {self.alpha_s:{f}} {self.alpha_m:{f}}'
+        args = ['constraints', 'Lagrange', self.alpha_s, self.alpha_m]
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -84,5 +84,5 @@ class Penalty(OpenSeesObject):
     alpha_m: float
 
     def tcl_code(self, formats=None) -> str:
-        f = self.get_format_spec(formats).float
-        return f'constraints Penalty {self.alpha_s:{f}} {self.alpha_m:{f}}'
+        args = ['constraints', 'Penalty', self.alpha_s, self.alpha_m]
+        return self.format_objects(args, formats)
