@@ -33,14 +33,8 @@ class Test(OpenSeesObject):
 
     def tcl_code(self, formats=None) -> str:
         method = self.__class__.__name__
-        args = [self.tolerance, self.max_iters, self.print_flag, self.norm_type]
-        fmts = self.get_object_formats(args, formats)
-
-        code = [f'test {method}']
-        for arg, fmt in zip(args, fmts):
-            code.append(f'{arg:{fmt}}')
-
-        return ' '.join(code)
+        args = ['test', method, self.tolerance, self.max_iters, self.print_flag, self.norm_type]
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
