@@ -84,6 +84,26 @@ class OpenSeesObject(abc.ABC):
         format_spec = self.get_format_spec(formats)
         return [format_spec.get_format(obj) for obj in objects]
 
+    def format_objects(self, objects: list, formats: SpecLike = None, join: str = ' '):
+        """Format a list of objects according to their type.
+
+        Parameters
+        ----------
+        objects : list
+            The objects to format.
+        formats : SpecLike, optional
+            Override format specifiers.
+        join : str, optional
+            String to join the formatted objects with. If None, skip joining.
+            (default: ' ')
+        """
+        fmts = self.get_object_formats(objects, formats)
+        formatted = [f'{obj:{fmt}}' for obj, fmt in zip(objects, fmts)]
+        if join is None:
+            return formatted
+        else:
+            return join.join(formatted)
+
     def get_format_spec(self, formats: SpecLike = None):
         """Return a copy of the format specifiers for this object.
 
