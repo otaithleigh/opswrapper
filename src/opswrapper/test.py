@@ -32,14 +32,15 @@ class Test(OpenSeesObject):
     norm_type: int = 2
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-
         method = self.__class__.__name__
-        return (
-            f'test {method} {self.tolerance:{f}} {self.max_iters:{i}} '
-            f'{self.print_flag:{i}} {self.norm_type:{i}}'
-        )
+        args = [self.tolerance, self.max_iters, self.print_flag, self.norm_type]
+        fmts = self.get_object_formats(args, formats)
+
+        code = [f'test {method}']
+        for arg, fmt in zip(args, fmts):
+            code.append(f'{arg:{fmt}}')
+
+        return ' '.join(code)
 
 
 @dataclasses.dataclass
