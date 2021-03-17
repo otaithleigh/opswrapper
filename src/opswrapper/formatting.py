@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import dataclasses
+from typing import Dict, Type, Union
 
 __all__ = [
     'MultiFormatSpec',
@@ -6,42 +9,104 @@ __all__ = [
 ]
 
 
+SpecDict = Dict[Type, str]
+
+
 @dataclasses.dataclass
 class MultiFormatSpec():
-    """Specifiers for formatting of different numeric types."""
-    int: str = 'd'
-    float: str = 'g'
+    """Specifiers for formatting of different types."""
+    _spec: SpecDict = dataclasses.field(default_factory=dict)
+
+    # Properties for temporary backwards compatibility
+    @property
+    def int(self):
+        return self.get_format(1)
+
+    @property
+    def float(self):
+        return self.get_format(1.0)
+
+    def __repr__(self) -> str:
+        clsname = self.__class__.__name__
+        specs = ', '.join([f'{cls.__name__}={fmt!r}' for cls, fmt in self._spec.items()])
+        return f'{clsname}({specs})'
 
     def copy(self):
         """Return a copy of the object."""
-        return self.__class__(self.int, self.float)
+        the_copy = self.__class__()
+        the_copy.update(self)
+        return the_copy
 
-    def update(self, other):
+    def update(self, other: Union[SpecDict, MultiFormatSpec]):
         """Update the object. Accepts a dict or MultiFormatSpec.
 
         Unlike the dict method, returns self.
         """
         if isinstance(other, self.__class__):
-            get = lambda obj, v: getattr(obj, v, None)
+            self._spec.update(other._spec)
         else:
-            get = lambda obj, v: obj.get(v, None)
-        for field in dataclasses.fields(self):
-            new_value = get(other, field.name)
-            if new_value is not None:
-                setattr(self, field.name, new_value)
+            self._spec.update(other)
         return self
+
+    def get_format(self, obj):
+        """Find a format specifier for the given object.
+
+        - If the object's type is listed specifically, return that.
+        - Failing that, try to find a registered type that is a superclass of
+          the object. If multiple superclasses are registered, the earliest
+          registered one is returned.
+        - If no superclass is registered, return ''.
+
+        Parameters
+        ----------
+        obj : object
+            The object to get a format for.
+
+        Returns
+        -------
+        fmt : str
+            The format string to use for `obj`.
+        """
+        try:
+            fmt = self._spec[obj.__class__]
+        except KeyError:
+            for type, fmt in self._spec.items():
+                if isinstance(obj, type):
+                    break
+            else:
+                fmt = ''
+        return fmt
+
+    def register_format(self, cls: Type, fmt: str):
+        """Register a format string for a given type.
+
+        Parameters
+        ----------
+        cls : Type
+            The type to register.
+        fmt : str
+            The format string to register.
+        """
+        if not isinstance(cls, type):
+            raise TypeError(f'cls must be a type, not a {cls.__class__!r}')
+
+        self._spec[cls] = fmt
+
 
 
 _GLOBAL_FORMAT_SPEC = MultiFormatSpec()
+_GLOBAL_FORMAT_SPEC.register_format(int, 'd')
+_GLOBAL_FORMAT_SPEC.register_format(float, 'f')
+_GLOBAL_FORMAT_SPEC.register_format(str, '')
 
 
-def set_global_format_spec(**format_spec):
+def set_global_format_spec(formats: SpecDict):
     """Set the global default format specifiers.
 
     Parameters
     ----------
-    **format_spec
-        Keyword-based format identifiers.
+    formats: dict[type, str]
+        Class-based format identifiers.
 
     Returns
     -------
@@ -53,11 +118,11 @@ def set_global_format_spec(**format_spec):
     >>> s = section.Elastic2D(1, 29000, 10, 144)
     >>> print(s)
     section Elastic 1 29000 10 144
-    >>> set_global_format_spec(float='#.3g')
+    >>> set_global_format_spec({float: '#.3g'})
     MultiFormatSpec(int='d', float='g')
     >>> print(s)
     section Elastic 1 2.90e+04 10.0 144.
     """
     old_spec = _GLOBAL_FORMAT_SPEC.copy()
-    _GLOBAL_FORMAT_SPEC.update(format_spec)
+    _GLOBAL_FORMAT_SPEC.update(formats)
     return old_spec
