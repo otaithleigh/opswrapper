@@ -9,7 +9,7 @@ class Plain(OpenSeesObject):
 
     Only supports constraints applied using the 'fix' and 'equalDOF' commands.
     """
-    def tcl_code(self, **format_spec) -> str:
+    def tcl_code(self, formats=None) -> str:
         return 'constraints Plain'
 
 
@@ -32,7 +32,7 @@ class Transformation(OpenSeesObject):
     2. If multiple nodes are constrained, make sure that the retained node is
        not constrained in any other constraint.
     """
-    def tcl_code(self, **format_spec) -> str:
+    def tcl_code(self, formats=None) -> str:
         return 'constraints Transformation'
 
 
@@ -57,8 +57,8 @@ class Lagrange(OpenSeesObject):
     alpha_s: float
     alpha_m: float
 
-    def tcl_code(self, **format_spec) -> str:
-        f = self.get_format_spec(**format_spec).float
+    def tcl_code(self, formats=None) -> str:
+        f = self.get_format_spec(formats).float
         return f'constraints Lagrange {self.alpha_s:{f}} {self.alpha_m:{f}}'
 
 
@@ -83,6 +83,6 @@ class Penalty(OpenSeesObject):
     alpha_s: float
     alpha_m: float
 
-    def tcl_code(self, **format_spec) -> str:
-        f = self.get_format_spec(**format_spec).float
+    def tcl_code(self, formats=None) -> str:
+        f = self.get_format_spec(formats).float
         return f'constraints Penalty {self.alpha_s:{f}} {self.alpha_m:{f}}'

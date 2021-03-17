@@ -33,8 +33,8 @@ class Elastic2D(base.OpenSeesObject):
     G: float = None
     alphaY: float = None
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         code = f'section Elastic {self.tag:{i}} {self.E:{f}} {self.A:{f}} {self.Iz:{f}}'
         if self.G is not None and self.alphaY is not None:
@@ -81,8 +81,8 @@ class Elastic3D(base.OpenSeesObject):
     alphaY: float = None
     alphaZ: float = None
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         code = (
             f'section Elastic {self.tag:{i}} {self.E:{f}} {self.A:{f}}'
@@ -126,8 +126,8 @@ class Fiber(base.OpenSeesObject):
         mat: int
         _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
 
-        def tcl_code(self, **format_spec) -> str:
-            fmt = self._parent.get_format_spec(format_spec)
+        def tcl_code(self, formats=None) -> str:
+            fmt = self._parent.get_format_spec(formats)
             i, f = fmt.int, fmt.float
             return f'fiber {self.y:{f}} {self.z:{f}} {self.A:{f}} {self.mat:{i}}'
 
@@ -165,8 +165,8 @@ class Fiber(base.OpenSeesObject):
         zL: float
         _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
 
-        def tcl_code(self, **format_spec) -> str:
-            fmt = self._parent.get_format_spec(format_spec)
+        def tcl_code(self, formats=None) -> str:
+            fmt = self._parent.get_format_spec(formats)
             i, f = fmt.int, fmt.float
             return (
                 f'patch quad {self.mat:{i}} {self.nfIJ:{i}} {self.nfJK:{i}}'
@@ -221,8 +221,8 @@ class Fiber(base.OpenSeesObject):
         zJ: float
         _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
 
-        def tcl_code(self, **format_spec) -> str:
-            fmt = self._parent.get_format_spec(format_spec)
+        def tcl_code(self, formats=None) -> str:
+            fmt = self._parent.get_format_spec(formats)
             i, f = fmt.int, fmt.float
             return (
                 f'patch rect {self.mat:{i}} {self.nfY:{i}} {self.nfZ:{i}}'
@@ -262,13 +262,13 @@ class Fiber(base.OpenSeesObject):
         self.commands.append(self._PatchRect(mat, nfY, nfZ, yI, zI, yJ, zJ, self))
         return self
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         code = [f'section Fiber {self.tag:{i}}']
         if self.GJ is not None:
             code[0] += f' -GJ {self.GJ:{f}}'
         code[0] += ' {'
-        code.extend([f'    {cmd.tcl_code(**format_spec)}' for cmd in self.commands])
+        code.extend([f'    {cmd.tcl_code(formats)}' for cmd in self.commands])
         code.append('}')
         return '\n'.join(code)

@@ -42,8 +42,8 @@ class ElasticBeamColumn2D(base.OpenSeesObject):
     mass: float = None
     cmass: bool = False
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         code = [
             f'element elasticBeamColumn {self.tag:{i}} {self.inode:{i}} {self.jnode:{i}} '
@@ -71,8 +71,8 @@ class ElasticBeamColumn3D(base.OpenSeesObject):
     mass: float = None
     cmass: bool = False
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         code = [
             f'element elasticBeamColumn {self.tag:{i}} {self.inode:{i}} {self.jnode:{i}}'
@@ -121,15 +121,15 @@ class ForceBeamColumn(base.OpenSeesObject):
     maxiters: int = 10
     itertol: float = 1e-12
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         code = [
             f"element forceBeamColumn {self.tag:{i}} {self.inode:{i}}",
             f"{self.jnode:{i}} {self.transf:{i}}"
         ]
         if isinstance(self.integration, integration.Integration):
-            integr = self.integration.tcl_code(**format_spec)
+            integr = self.integration.tcl_code(formats)
         else:
             integr = str(self.integration)
         code.append(integr)
@@ -177,8 +177,8 @@ class DispBeamColumn(base.OpenSeesObject):
     cmass: bool = False
     integration: str = 'Legendre'
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         try:
             nsections = len(self.section)
@@ -244,8 +244,8 @@ class Truss(base.OpenSeesObject):
     do_rayleigh: bool = False
     corot: bool = False
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         element = 'corotTruss' if self.corot else 'truss'
         code = [
@@ -293,8 +293,8 @@ class TrussSection(base.OpenSeesObject):
     do_rayleigh: bool = False
     corot: bool = False
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         element = 'corotTrussSection' if self.corot else 'trussSection'
         code = [

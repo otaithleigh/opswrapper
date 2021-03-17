@@ -31,8 +31,8 @@ class Test(OpenSeesObject):
     print_flag: int = 0
     norm_type: int = 2
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
 
         method = self.__class__.__name__

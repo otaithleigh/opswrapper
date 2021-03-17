@@ -8,7 +8,7 @@ def test_Elastic2D():
 
 
 def test_Elastic2D_special_format():
-    generated = section.Elastic2D(1, 29000, 10, 144).tcl_code(float='#.3g')
+    generated = section.Elastic2D(1, 29000, 10, 144).tcl_code({float: '#.3g'})
     expected = 'section Elastic 1 2.90e+04 10.0 144.'
     assert generated == expected
 

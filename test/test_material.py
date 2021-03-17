@@ -6,7 +6,7 @@ def test_elastic():
 
 
 def test_elastic_special_format():
-    assert material.Elastic(1, 29000).tcl_code(float='.2e') == 'uniaxialMaterial Elastic 1 2.90e+04'
+    assert material.Elastic(1, 29000).tcl_code({float: '.2e'}) == 'uniaxialMaterial Elastic 1 2.90e+04'
 
 
 def test_elastic_Eneg_but_no_eta():
@@ -40,7 +40,7 @@ def test_Steel01():
 
 
 def test_Steel01_special_format():
-    generated_code = material.Steel01(1, 50, 29000, 0.003).tcl_code(float='.2e')
+    generated_code = material.Steel01(1, 50, 29000, 0.003).tcl_code({float: '.2e'})
     expected_code = 'uniaxialMaterial Steel01 1 5.00e+01 2.90e+04 3.00e-03'
     assert generated_code == expected_code
 
@@ -58,7 +58,7 @@ def test_Steel02():
 
 
 def test_Steel02_special_format():
-    generated_code = material.Steel02(1, 50, 29000, 0.003).tcl_code(int='4d')
+    generated_code = material.Steel02(1, 50, 29000, 0.003).tcl_code({int: '4d'})
     expected_code = 'uniaxialMaterial Steel02    1 50 29000 0.003 20 0.925 0.15'
     assert generated_code == expected_code
 

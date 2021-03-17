@@ -53,8 +53,8 @@ class ElementRecorder(base.OpenSeesObject):
                 f"(expected one of 'file', 'xml', 'binary'; got {self.fileformat!r}"
             )
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
 
         if self.file is not None:
@@ -155,8 +155,8 @@ class NodeRecorder(base.OpenSeesObject):
                 f"(expected one of 'file', 'xml', 'binary'; got {self.fileformat!r}"
             )
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
 
         if self.file is not None:

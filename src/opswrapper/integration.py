@@ -29,8 +29,8 @@ class Lobatto(Integration):
     section: int
     npoints: int
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         return f'Lobatto {self.section:{i}} {self.npoints:{i}}'
 
@@ -53,8 +53,8 @@ class Legendre(Integration):
     section: int
     npoints: int
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         return f'Legendre {self.section:{i}} {self.npoints:{i}}'
 
@@ -78,8 +78,8 @@ class Radau(Integration):
     section: int
     npoints: int
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         return f'Radau {self.section:{i}} {self.npoints:{i}}'
 
@@ -101,8 +101,8 @@ class NewtonCotes(Integration):
     section: int
     npoints: int
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         return f'NewtonCotes {self.section:{i}} {self.npoints:{i}}'
 
@@ -125,8 +125,8 @@ class FixedLocation(Integration):
         if len(self.sections) != len(self.locations):
             raise ValueError("FixedLocation: len(sections) must equal len(locations)")
 
-    def tcl_code(self, **format_spec) -> str:
-        fmt = self.get_format_spec(**format_spec)
+    def tcl_code(self, formats=None) -> str:
+        fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         return ' '.join([
             f'FixedLocation {len(self.sections):{i}}',
