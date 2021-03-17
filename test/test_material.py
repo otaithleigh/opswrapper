@@ -77,5 +77,5 @@ def test_Steel02_iso_hardening():
 
 def test_Steel02_initial_stress():
     generated_code = material.Steel02(1, 50, 29000, 0.003, sigma_i=15).tcl_code()
-    expected_code = 'uniaxialMaterial Steel02 1 50 29000 0.003 20 0.925 0.15 0.0 1.0 0.0 1.0 15'
+    expected_code = 'uniaxialMaterial Steel02 1 50 29000 0.003 20 0.925 0.15 0 1 0 1 15'
     assert generated_code == expected_code
