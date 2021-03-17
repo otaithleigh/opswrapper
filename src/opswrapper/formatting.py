@@ -9,9 +9,6 @@ __all__ = [
 ]
 
 
-SpecDict = Dict[Type, str]
-
-
 @dataclasses.dataclass
 class MultiFormatSpec():
     """Specifiers for formatting of different types."""
@@ -37,7 +34,7 @@ class MultiFormatSpec():
         the_copy.update(self)
         return the_copy
 
-    def update(self, other: Union[SpecDict, MultiFormatSpec]):
+    def update(self, other: SpecLike):
         """Update the object. Accepts a dict or MultiFormatSpec.
 
         Unlike the dict method, returns self.
@@ -93,6 +90,8 @@ class MultiFormatSpec():
         self._spec[cls] = fmt
 
 
+SpecDict = Dict[Type, str]
+SpecLike = Union[SpecDict, MultiFormatSpec]
 
 _GLOBAL_FORMAT_SPEC = MultiFormatSpec()
 _GLOBAL_FORMAT_SPEC.register_format(int, 'd')
