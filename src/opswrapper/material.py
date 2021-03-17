@@ -33,16 +33,14 @@ class Elastic(base.OpenSeesObject):
     Eneg: float = None
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = f"uniaxialMaterial Elastic {self.tag:{i}} {self.E:{f}}"
+        args = ['uniaxialMaterial', 'Elastic', self.tag, self.E]
+        if self.Eneg is not None:
+            args.append(self.eta)
+            args.append(self.Eneg)
+        elif self.eta != 0.0:
+            args.append(self.eta)
 
-        if (self.Eneg is not None):
-            code += f" {self.eta:{f}} {self.Eneg:{f}}"
-        elif (self.eta != 0.0):
-            code += f" {self.eta:{f}}"
-
-        return code
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -74,17 +72,15 @@ class ElasticPP(base.OpenSeesObject):
     eps0: float = 0.0
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = f"uniaxialMaterial ElasticPP {self.tag:{i}} {self.E:{f}} {self.eps_y:{f}}"
-
+        args = ['uniaxialMaterial', 'ElasticPP', self.tag, self.E, self.eps_y]
         eps_yN = self.eps_yN if self.eps_yN is not None else self.eps_y
         if self.eps0 != 0.0:
-            code += f" {eps_yN:{f}} {self.eps0:{f}}"
+            args.append(eps_yN)
+            args.append(self.eps0)
         elif self.eps_yN is not None:
-            code += f" {eps_yN:{f}}"
+            args.append(eps_yN)
 
-        return code
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -118,22 +114,19 @@ class Hardening(base.OpenSeesObject):
     eta: float = 0.0
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-
-        code = [
+        args = [
             'uniaxialMaterial',
             'Hardening',
-            f'{self.tag:{i}}',
-            f'{self.E:{f}}',
-            f'{self.sigma_y:{f}}',
-            f'{self.h_iso:{f}}',
-            f'{self.h_kin:{f}}',
+            self.tag,
+            self.E,
+            self.sigma_y,
+            self.h_iso,
+            self.h_kin,
         ]
         if self.eta != 0.0:
-            code.append(f'{self.eta:{f}}')
+            args.append(self.eta)
 
-        return ' '.join(code)
+        return self.format_objects(args, formats)
 
 
 #===================================================================================================
@@ -181,19 +174,18 @@ class Steel01(base.OpenSeesObject):
         return sum([a is not None for a in (self.a1, self.a2, self.a3, self.a4)])
 
     def __post_init__(self):
+        super().__post_init__()
         nparams = self._num_iso_params_defined()
         if nparams not in [0, 4]:
             raise ValueError('Steel01: isometric hardening definition incomplete ',
                              f'(expected 4 params, got {nparams})')
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = f'uniaxialMaterial Steel01 {self.tag:{i}} {self.Fy:{f}} {self.E:{f}} {self.b:{f}}'
+        args = ['uniaxialMaterial', 'Steel01', self.tag, self.Fy, self.E, self.b]
         if self._num_iso_params_defined() == 4:
-            code += f' {self.a1:{f}} {self.a2:{f}} {self.a3:{f}} {self.a4:{f}}'
+            args.extend([self.a1, self.a2, self.a3, self.a4])
 
-        return code
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -256,23 +248,28 @@ class Steel02(base.OpenSeesObject):
         return sum([a is not None for a in (self.a1, self.a2, self.a3, self.a4)])
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = (
-            f'uniaxialMaterial Steel02 {self.tag:{i}} {self.Fy:{f}} {self.E:{f}} '
-            f'{self.b:{f}} {self.R0:{f}} {self.cR1:{f}} {self.cR2:{f}}'
-        )
+        args = [
+            'uniaxialMaterial',
+            'Steel02',
+            self.tag,
+            self.Fy,
+            self.E,
+            self.b,
+            self.R0,
+            self.cR1,
+            self.cR2,
+        ]
 
         n_iso_params = self._num_iso_params_defined()
         if self.sigma_i is not None:
             if n_iso_params == 0:
-                code += f' 0.0 1.0 0.0 1.0 {self.sigma_i:{f}}'
+                args.extend([0.0, 1.0, 0.0, 1.0, self.sigma_i])
             elif n_iso_params == 4:
-                code += f' {self.a1:{f}} {self.a2:{f}} {self.a3:{f}} {self.a4:{f}} {self.sigma_i:{f}}'
+                args.extend([self.a1, self.a2, self.a3, self.a4, self.sigma_i])
         elif n_iso_params == 4:
-            code += f' {self.a1:{f}} {self.a2:{f}} {self.a3:{f}} {self.a4:{f}}'
+            args.extend([self.a1, self.a2, self.a3, self.a4])
 
-        return code
+        return self.format_objects(args, formats)
 
 
 #===================================================================================================
@@ -372,13 +369,12 @@ class Bilin(base.OpenSeesObject):
     nfactor: float = None
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        values = [
+        args = ['uniaxialMaterial', 'Bilin']
+        args += [
             getattr(self, field.name) for field in dataclasses.fields(self)
-            if field.name not in ('tag', 'nfactor')
+            if field.name not in ('nfactor', )
         ]
-        code = [f'uniaxialMaterial Bilin {self.tag:{fmt.int}}']
-        code.extend([f'{value:{fmt.float}}' for value in values])
         if self.nfactor is not None:
-            code.append(f'{self.nfactor:{fmt.float}}')
-        return ' '.join(code)
+            args.append(self.nfactor)
+
+        return self.format_objects(args, formats)
