@@ -1,7 +1,7 @@
 import abc
 import typing
 
-from .formatting import MultiFormatSpec, _GLOBAL_FORMAT_SPEC
+from .formatting import MultiFormatSpec, SpecDict, _GLOBAL_FORMAT_SPEC
 
 __all__ = [
     'OpenSeesObject',
@@ -46,12 +46,31 @@ class OpenSeesObject(abc.ABC):
     """
     _format_spec: MultiFormatSpec = _GLOBAL_FORMAT_SPEC
 
-    def get_format_spec(self, **formats):
+    def get_object_formats(self, objects: list, formats: SpecDict = None):
+        """Get type-specific formatters for a list of objects, using this
+        object's current format spec.
+
+        Parameters
+        ----------
+        objects : list
+            The objects to get formatters for.
+        formats : dict[type, str]
+            Override format specifiers.
+
+        Returns
+        -------
+        specs : list[str]
+            List of specifiers, in the same order as `objects`.
+        """
+        format_spec = self.get_format_spec(formats)
+        return [format_spec.get_format(obj) for obj in objects]
+
+    def get_format_spec(self, formats: SpecDict = None):
         """Return a copy of the format specifiers for this object.
 
         Parameters
         ----------
-        **formats
+        formats
             Format specifiers to use instead of the stored ones.
 
         Returns
@@ -65,12 +84,12 @@ class OpenSeesObject(abc.ABC):
             format_spec = self._format_spec.copy().update(formats)
         return format_spec
 
-    def set_format_spec(self, **formats):
+    def set_format_spec(self, formats: SpecDict):
         """Set the default format specifiers for this object.
 
         Parameters
         ----------
-        **formats
+        formats
             Keyword-based format identifiers.
 
         Returns
@@ -83,7 +102,7 @@ class OpenSeesObject(abc.ABC):
         return old_spec
 
     @classmethod
-    def set_class_format_spec(cls, **formats):
+    def set_class_format_spec(cls, formats: SpecDict):
         """Set the default format specifiers for this class.
 
         Parameters
@@ -101,13 +120,13 @@ class OpenSeesObject(abc.ABC):
         return old_spec
 
     @abc.abstractmethod
-    def tcl_code(self, **format_spec) -> str:
+    def tcl_code(self, formats: SpecDict = None) -> str:
         """Return the corresponding Tcl code to create this object.
 
         Parameters
         ----------
-        **format_spec
-            Format specifiers by class. See `MultiFormatSpec` for supported classes.
+        formats : dict[type, str], optional
+            Override format specifiers by class.
 
         Example
         -------
@@ -121,22 +140,22 @@ class OpenSeesObject(abc.ABC):
         return self.tcl_code()
 
     def __format__(self, float_spec=None):
-        return self.tcl_code(float=float_spec)
+        return self.tcl_code({float: float_spec})
 
     def use_global_format(self):
         self._format_spec = _GLOBAL_FORMAT_SPEC
 
-    def dump(self, fid, **format_spec):
+    def dump(self, fid: typing.TextIO, formats: SpecDict = None):
         """Write the Tcl code for this object to the given file descriptor.
 
         Parameters
         ----------
         fid
             File-like object to write to.
-        **format_spec
+        formats
             Format specifiers to use instead of the defaults.
         """
-        print(self.tcl_code(**format_spec), file=fid)
+        print(self.tcl_code(formats), file=fid)
 
 
 OpenSeesDef = typing.Union[str, OpenSeesObject]
