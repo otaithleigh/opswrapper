@@ -95,7 +95,7 @@ SpecLike = Union[SpecDict, MultiFormatSpec]
 
 _GLOBAL_FORMAT_SPEC = MultiFormatSpec()
 _GLOBAL_FORMAT_SPEC.register_format(int, 'd')
-_GLOBAL_FORMAT_SPEC.register_format(float, 'f')
+_GLOBAL_FORMAT_SPEC.register_format(float, 'g')
 _GLOBAL_FORMAT_SPEC.register_format(str, '')
 
 
