@@ -5,6 +5,9 @@ import dataclasses
 from . import base
 
 
+#===================================================================================================
+# Elastic-ish materials
+#===================================================================================================
 @dataclasses.dataclass
 class Elastic(base.OpenSeesObject):
     """Elastic uniaxial material.
@@ -84,6 +87,9 @@ class ElasticPP(base.OpenSeesObject):
         return code
 
 
+#===================================================================================================
+# Steels
+#===================================================================================================
 @dataclasses.dataclass
 class Steel01(base.OpenSeesObject):
     """Bilinear steel model with optional isotropic hardening.
@@ -220,6 +226,9 @@ class Steel02(base.OpenSeesObject):
         return code
 
 
+#===================================================================================================
+# Deterioration models
+#===================================================================================================
 @dataclasses.dataclass
 class Bilin(base.OpenSeesObject):
     """Deterioration model with bilinear hysteretic response.
