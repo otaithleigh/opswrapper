@@ -53,7 +53,7 @@ str:
 
 .. code:: python
 
-    >>> str(Elastic(1, 29000))
+    >>> str(Elastic(1, 29000.))
     'uniaxialMaterial 1 29000'
 
 A float format specifier may be specified when used with the built-in format
@@ -61,16 +61,16 @@ commands:
 
 .. code:: python
 
-    >>> format(Elastic(1, 29000), 'e')
+    >>> format(Elastic(1, 29000.), 'e')
     'uniaxialMaterial 1 2.900000e+4'
-    >>> f'{Elastic(1, 29000):.2e}'
+    >>> f'{Elastic(1, 29000.):.2e}'
     'uniaxialMaterial 1 2.90e+04'
 
-Specifiers for other numeric types may be passed using the `tcl_code` method:
+Specifiers for other types may be passed using the `tcl_code` method:
 
 .. code:: python
 
-    >>> Elastic(1, 29000).tcl_code(int='4d')
+    >>> Elastic(1, 29000.).tcl_code({int: '4d'})
     'uniaxialMaterial Elastic    1 29000'
 
 Defaults can be set on a global basis using `base.set_global_format_spec`, on a
@@ -79,10 +79,10 @@ using `self.set_format_spec`:
 
 .. code:: python
 
-    >>> set_global_format_spec(float='#.3g')
-    >>> section.Elastic2D.set_class_format_spec(float='#.3g')
+    >>> set_global_format_spec({float: '#.3g'})
+    >>> section.Elastic2D.set_class_format_spec({float: '#.3g'})
     >>> s = section.Elastic2D(...)
-    >>> s.set_format_spec(float='#.3g')
+    >>> s.set_format_spec({float: '#.3g'})
 
 Each of these methods return the previously-set modifiers if you wish to restore
 them later.

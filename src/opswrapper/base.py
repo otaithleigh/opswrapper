@@ -22,24 +22,24 @@ class OpenSeesObject(abc.ABC):
     A float format specifier may be specified when used with the built-in format
     commands::
 
-        >>> format(Elastic(1, 29000), 'e')
+        >>> format(Elastic(1, 29000.), 'e')
         'uniaxialMaterial 1 2.900000e+4'
-        >>> f'{Elastic(1, 29000):.2e}'
+        >>> f'{Elastic(1, 29000.):.2e}'
         'uniaxialMaterial 1 2.90e+04'
 
     Specifiers for other numeric types may be passed using the `tcl_code` method::
 
-        >>> Elastic(1, 29000).tcl_code(int='4d')
+        >>> Elastic(1, 29000.).tcl_code({int: '4d'})
         'uniaxialMaterial Elastic    1 29000'
 
     Defaults can be set on a global basis using `base.set_global_format_spec`, on a
     per-class basis using `cls.set_class_format_spec`, or on a per-object basis
     using `self.set_format_spec`::
 
-        >>> set_global_format_spec(float='#.3g')
-        >>> section.Elastic2D.set_class_format_spec(float='#.3g')
+        >>> set_global_format_spec({float: '#.3g'})
+        >>> section.Elastic2D.set_class_format_spec({float: '#.3g'})
         >>> s = section.Elastic2D(...)
-        >>> s.set_format_spec(float='#.3g')
+        >>> s.set_format_spec({float: '#.3g'})
 
     Each of these methods return the previously-set modifiers if you wish to restore
     them later.
@@ -131,7 +131,7 @@ class OpenSeesObject(abc.ABC):
         Example
         -------
         >>> import opswrapper as ops
-        >>> ops.material.Elastic(1, 29000.0).tcl_code(float='e')
+        >>> ops.material.Elastic(1, 29000.0).tcl_code({float: 'e'})
         'uniaxialMaterial Elastic 1 2.900000e+04'
         """
         pass
