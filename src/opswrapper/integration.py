@@ -115,8 +115,7 @@ class FixedLocation(Integration):
     ----------
     sections : tuple
         Tuple of section tags.
-    locations : tuple
-        Tuple of locations, specified by factors on the element length.
+        Tuple of locations, specified as factors of the element length.
     """
     sections: tuple
     locations: tuple
