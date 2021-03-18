@@ -2,6 +2,7 @@
 
 
 import dataclasses
+from typing import Tuple
 
 from . import base
 
@@ -113,12 +114,13 @@ class FixedLocation(Integration):
 
     Parameters
     ----------
-    sections : tuple
+    sections : tuple[int]
         Tuple of section tags.
+    locations : tuple[float]
         Tuple of locations, specified as factors of the element length.
     """
-    sections: tuple
-    locations: tuple
+    sections: Tuple[int]
+    locations: Tuple[float]
 
     def __post_init__(self):
         if len(self.sections) != len(self.locations):
