@@ -49,7 +49,7 @@ Formatting
 ==========
 
 Objects can be formatted via multiple ways. The simplest is to convert them to
-str:
+``str``:
 
 .. code:: python
 
@@ -66,16 +66,16 @@ commands:
     >>> f'{Elastic(1, 29000.):.2e}'
     'uniaxialMaterial 1 2.90e+04'
 
-Specifiers for other types may be passed using the `tcl_code` method:
+Specifiers for other types may be passed using the ``tcl_code`` method:
 
 .. code:: python
 
     >>> Elastic(1, 29000.).tcl_code({int: '4d'})
     'uniaxialMaterial Elastic    1 29000'
 
-Defaults can be set on a global basis using `base.set_global_format_spec`, on a
-per-class basis using `cls.set_class_format_spec`, or on a per-object basis
-using `self.set_format_spec`:
+Defaults can be set on a global basis using ``base.set_global_format_spec``, on a
+per-class basis using ``cls.set_class_format_spec``, or on a per-object basis
+using ``self.set_format_spec``:
 
 .. code:: python
 
