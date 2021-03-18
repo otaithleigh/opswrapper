@@ -1,9 +1,9 @@
 import abc
 import dataclasses
-import numbers
 import typing
 
 from .formatting import MultiFormatSpec, SpecLike, _GLOBAL_FORMAT_SPEC
+from .utils import coerce_numeric
 
 __all__ = [
     'OpenSeesObject',
@@ -51,18 +51,8 @@ class OpenSeesObject(abc.ABC):
     def __post_init__(self):
         # Gently attempt to coerce numeric types.
         for field in dataclasses.fields(self):
-            # Only try to coerce *to* numbers
-            if not issubclass(field.type, numbers.Number):
-                continue
-            # Only try to coerce *from* numbers
             value = getattr(self, field.name)
-            if not isinstance(value, numbers.Number):
-                continue
-            # And if it doesn't work, that's ok!
-            try:
-                coerced_value = field.type(value)
-            except:
-                continue
+            coerced_value = coerce_numeric(value, field.type)
             setattr(self, field.name, coerced_value)
 
     def get_object_formats(self, objects: list, formats: SpecLike = None):

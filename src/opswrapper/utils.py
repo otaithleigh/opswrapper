@@ -1,11 +1,29 @@
 import dataclasses
+import numbers
 import pathlib
 import types
 from typing import List
 
 import numpy as np
 
-from .base import OpenSeesDef
+
+def coerce_numeric(obj, to_type):
+    """Gently attempt to coerce between numeric types."""
+    # Only try to coerce *to* numbers
+    if not issubclass(to_type, numbers.Number):
+        return obj
+
+    # Only try to coerce *from* numbers
+    if not isinstance(obj, numbers.Number):
+        return obj
+
+    # If coercion doesn't work, just return the original object.
+    try:
+        coerced = to_type(obj)
+    except:
+        return obj
+
+    return coerced
 
 
 class Namespace(types.SimpleNamespace):
@@ -48,7 +66,7 @@ def path_for_tcl(path) -> str:
     return str(path).replace('\\', '/')
 
 
-def print_model(model: List[OpenSeesDef], file=None):
+def print_model(model: List[str], file=None):
     """Print a model definition to a file.
 
     Parameters
