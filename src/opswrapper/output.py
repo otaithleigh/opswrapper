@@ -54,39 +54,39 @@ class ElementRecorder(base.OpenSeesObject):
             )
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-
+        args = ['recorder Element', f'-{self.fileformat}']
         if self.file is not None:
             file = utils.path_for_tcl(self.file)
-            command = f"recorder Element -{self.fileformat} {{{file!s}}}"
+            args.append(f'{{{file!s}}}')
             tcl_list_expansion = '{*}'
         else:
-            command = f"recorder Element -{self.fileformat}" " {{{file!s}}}"
+            args.append('{{{file!s}}}')
             # If the returned string is being returned with '{file}' in it to be formatted later,
             # need to escape the brackets in the list expansion operator. Otherwise, a completely
             # baffling KeyError will be raised when calling '.format'.
             tcl_list_expansion = '{{*}}'
 
         if self.elements == 'all':
-            command += f" -ele {tcl_list_expansion}[getEleTags]"
+            args.append(f'-ele {tcl_list_expansion}[getEleTags]')
         else:
-            command += " -ele " + " ".join([f"{tag:{i}}" for tag in np.array(self.elements).flat])
+            args.append('-ele')
+            args.extend(utils.coerce_numeric(tag, int) for tag in np.asarray(self.elements).flat)
 
         if self.precision is not None:
-            command += f" -precision {self.precision:{i}}"
+            args.append('-precision')
+            args.append(self.precision)
 
         if self.dofs is not None:
-            command += " -dof " + " ".join([f"{dof:{i}}" for dof in np.array(self.dofs).flat])
+            args.append('-dof')
+            args.extend(utils.coerce_numeric(dof, int) for dof in np.asarray(self.dofs).flat)
 
-        command += f" {self.response}"
-
-        return command
+        args.append(self.response)
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
 class NodeRecorder(base.OpenSeesObject):
-    """Node recorder.
+    R"""Node recorder.
 
     Parameters
     ----------
@@ -156,39 +156,42 @@ class NodeRecorder(base.OpenSeesObject):
             )
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-
+        args = ['recorder Node', f'-{self.fileformat}']
         if self.file is not None:
             file = utils.path_for_tcl(self.file)
-            command = f"recorder Node -{self.fileformat} {{{file!s}}}"
+            args.append(f'{{{file!s}}}')
             tcl_list_expansion = '{*}'
         else:
-            command = f"recorder Node -{self.fileformat}" " {{{file!s}}}"
+            args.append('{{{file!s}}}')
             # If the returned string is being returned with '{file}' in it to be formatted later,
             # need to escape the brackets in the list expansion operator. Otherwise, a completely
             # baffling KeyError will be raised when calling '.format'.
             tcl_list_expansion = '{{*}}'
 
         if self.precision is not None:
-            command += f" -precision {self.precision:{i}}"
+            args.append('-precision')
+            args.append(self.precision)
 
         if self.time_series is not None:
-            command += f' -timeSeries {self.time_series:{i}}'
+            args.append('-timeSeries')
+            args.append(self.time_series)
 
         if self.time:
-            command += " -time"
+            args.append('-time')
 
         if self.nodes == 'all':
-            command += f" -node {tcl_list_expansion}[getNodeTags]"
+            args.append(f'-node {tcl_list_expansion}[getNodeTags]')
         elif self.nodes is not None:
-            command += " -node " + " ".join([f"{tag:{i}}" for tag in np.array(self.nodes).flat])
+            args.append('-node')
+            args.extend(utils.coerce_numeric(tag, int) for tag in np.asarray(self.nodes).flat)
 
         if self.node_range is not None:
-            command += f" -nodeRange {self.node_range[0]:{i}} {self.node_range[1]:{i}}"
+            args.append('-nodeRange')
+            args.extend(self.node_range)
 
         if self.dofs is not None:
-            command += " -dof " + " ".join([f"{dof:{i}}" for dof in np.array(self.dofs).flat])
+            args.append('-dof')
+            args.extend(utils.coerce_numeric(dof, int) for dof in np.asarray(self.dofs).flat)
 
-        command += f" {self.response}"
-        return command
+        args.append(self.response)
+        return self.format_objects(args, formats)

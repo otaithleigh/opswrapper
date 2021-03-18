@@ -43,17 +43,15 @@ class ElasticBeamColumn2D(base.OpenSeesObject):
     cmass: bool = False
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = [
-            f'element elasticBeamColumn {self.tag:{i}} {self.inode:{i}} {self.jnode:{i}} '
-            f'{self.A:{f}} {self.E:{f}} {self.Iz:{f}} {self.transf:{i}}'
+        args = [
+            'element', 'elasticBeamColumn', self.tag, self.inode, self.jnode, self.A, self.E,
+            self.Iz, self.transf
         ]
         if self.mass is not None:
-            code.append(f'-mass {self.mass:{f}}')
+            args.extend(['-mass', self.mass])
         if self.cmass:
-            code.append('-cMass')
-        return ' '.join(code)
+            args.append('-cMass')
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -72,18 +70,15 @@ class ElasticBeamColumn3D(base.OpenSeesObject):
     cmass: bool = False
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = [
-            f'element elasticBeamColumn {self.tag:{i}} {self.inode:{i}} {self.jnode:{i}}'
-            f' {self.A:{f}} {self.E:{f}} {self.G:{f}} {self.J:{f}}'
-            f' {self.Iy:{f}} {self.Iz:{f}} {self.transf:{i}}'
+        args = [
+            'element', 'elasticBeamColumn', self.tag, self.inode, self.jnode, self.A, self.E,
+            self.G, self.J, self.Iy, self.Iz, self.transf
         ]
         if self.mass is not None:
-            code.append(f'-mass {self.mass:{f}}')
+            args.extend(['-mass', self.mass])
         if self.cmass:
-            code.append('-cMass')
-        return ' '.join(code)
+            args.append('-cMass')
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -122,22 +117,17 @@ class ForceBeamColumn(base.OpenSeesObject):
     itertol: float = 1e-12
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = [
-            f"element forceBeamColumn {self.tag:{i}} {self.inode:{i}}",
-            f"{self.jnode:{i}} {self.transf:{i}}"
-        ]
+        args = ['element', 'forceBeamColumn', self.tag, self.inode, self.jnode, self.transf]
         if isinstance(self.integration, integration.Integration):
             integr = self.integration.tcl_code(formats)
         else:
             integr = str(self.integration)
-        code.append(integr)
+        args.append(integr)
         if self.mass is not None:
-            code.append(f'-mass {self.mass}')
+            args.extend(['-mass', self.mass])
         if self.iterative:
-            code.append(f'-iter {self.maxiters} {self.itertol}')
-        return ' '.join(code)
+            args.extend(['-iter', self.maxiters, self.itertol])
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -178,8 +168,6 @@ class DispBeamColumn(base.OpenSeesObject):
     integration: str = 'Legendre'
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
         try:
             nsections = len(self.section)
             if nsections != self.npoints and nsections != 1:
@@ -189,24 +177,22 @@ class DispBeamColumn(base.OpenSeesObject):
             nsections = 1
             sections = [self.section]
 
-        code = [
-            f'element dispBeamColumn {self.tag:{i}}',
-            f'{self.inode:{i}} {self.jnode:{i}} {self.npoints:{i}}',
-        ]
+        args = ['element', 'dispBeamColumn', self.tag, self.inode, self.jnode, self.npoints]
         if nsections == 1:
-            code.append(f'{self.section:{i}} {self.transf:{i}}')
+            args.append(self.section)
+            args.append(self.transf)
         else:
-            code.append(f'-sections')
-            code.extend([f'{s:{i}}' for s in sections])
-            code.append(f'{self.transf:{i}}')
+            args.append('-sections')
+            args.extend(sections)
+            args.append(self.transf)
         if self.mass is not None:
-            code.append(f'-mass {self.mass:{f}}')
+            args.extend(['-mass', self.mass])
         if self.cmass:
-            code.append('-cMass')
+            args.append('-cMass')
         if self.integration != 'Legendre':
-            code.append(f'-integration {self.integration!s}')
+            args.extend('-integration', self.integration)
 
-        return ' '.join(code)
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -245,20 +231,15 @@ class Truss(base.OpenSeesObject):
     corot: bool = False
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
         element = 'corotTruss' if self.corot else 'truss'
-        code = [
-            f'element {element} {self.tag:{i}} {self.inode:{i}}',
-            f'{self.jnode:{i}} {self.A:{f}} {self.mat:{i}}'
-        ]
+        args = ['element', element, self.tag, self.inode, self.jnode, self.A, self.mat]
         if self.rho is not None:
-            code.append(f'-rho {self.rho:{f}}')
+            args.extend(['-rho', self.rho])
         if self.cmass:
-            code.append(f'-cMass {self.cmass:{i}}')
+            args.extend(['-cMass', self.cmass])
         if self.do_rayleigh:
-            code.append(f'-doRayleigh {self.do_rayleigh:{i}}')
-        return ' '.join(code)
+            args.extend(['-doRayleigh', self.do_rayleigh])
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -294,16 +275,12 @@ class TrussSection(base.OpenSeesObject):
     corot: bool = False
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
         element = 'corotTrussSection' if self.corot else 'trussSection'
-        code = [
-            f'element {element} {self.tag:{i}} {self.inode:{i}} {self.jnode:{i}} {self.section:{i}}'
-        ]
+        args = ['element', element, self.tag, self.inode, self.jnode, self.section]
         if self.rho is not None:
-            code.append(f'-rho {self.rho:{f}}')
+            args.extend(['-rho', self.rho])
         if self.cmass:
-            code.append(f'-cMass {self.cmass:{i}}')
+            args.extend(['-cMass', self.cmass])
         if self.do_rayleigh:
-            code.append(f'-doRayleigh {self.do_rayleigh:{i}}')
-        return ' '.join(code)
+            args.extend(['-doRayleigh', self.do_rayleigh])
+        return self.format_objects(args, formats)

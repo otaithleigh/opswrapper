@@ -5,6 +5,7 @@ import dataclasses
 import numpy as np
 
 from . import base
+from .utils import coerce_numeric
 
 __all__ = [
     "Model",
@@ -27,10 +28,8 @@ class Model(base.OpenSeesObject):
     ndf: int
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = f'model basic -ndm {self.ndm:{i}} -ndf {self.ndf:{i}}'
-        return code
+        args = ['model', 'basic', '-ndm', self.ndm, '-ndf', self.ndf]
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass(init=False)
@@ -59,11 +58,9 @@ class Node(base.OpenSeesObject):
         self.mass = mass
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = [f'node {self.tag:{i}}', *[f'{c:{f}}' for c in self.coords]]
+        args = ['node', self.tag]
+        args.extend([coerce_numeric(c, float) for c in self.coords])
         if self.mass is not None:
-            code.append(f'-mass')
-            code.extend([f'{m:{f}}' for m in self.mass])
-
-        return ' '.join(code)
+            args.append('-mass')
+            args.extend([coerce_numeric(m, float) for m in self.mass])
+        return self.format_objects(args, formats)

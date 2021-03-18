@@ -5,6 +5,7 @@ import dataclasses
 from typing import Tuple
 
 from . import base
+from .utils import coerce_numeric
 
 
 @dataclasses.dataclass
@@ -31,9 +32,8 @@ class Lobatto(Integration):
     npoints: int
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        return f'Lobatto {self.section:{i}} {self.npoints:{i}}'
+        args = ['Lobatto', self.section, self.npoints]
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -55,9 +55,8 @@ class Legendre(Integration):
     npoints: int
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        return f'Legendre {self.section:{i}} {self.npoints:{i}}'
+        args = ['Legendre', self.section, self.npoints]
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -80,9 +79,8 @@ class Radau(Integration):
     npoints: int
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        return f'Radau {self.section:{i}} {self.npoints:{i}}'
+        args = ['Radau', self.section, self.npoints]
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -103,9 +101,8 @@ class NewtonCotes(Integration):
     npoints: int
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        return f'NewtonCotes {self.section:{i}} {self.npoints:{i}}'
+        args = ['NewtonCotes', self.section, self.npoints]
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass()
@@ -127,10 +124,7 @@ class FixedLocation(Integration):
             raise ValueError("FixedLocation: len(sections) must equal len(locations)")
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        return ' '.join([
-            f'FixedLocation {len(self.sections):{i}}',
-            *[f'{tag:{i}}' for tag in self.sections],
-            *[f'{loc:{f}}' for loc in self.locations],
-        ])
+        args = ['FixedLocation', len(self.sections)]
+        args.extend([coerce_numeric(tag, int) for tag in self.sections])
+        args.extend([coerce_numeric(loc, float) for loc in self.locations])
+        return self.format_objects(args, formats)
