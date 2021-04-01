@@ -1,3 +1,5 @@
+import numpy as np
+
 from opswrapper.output import NodeRecorder, ElementRecorder
 
 
@@ -10,6 +12,21 @@ def test_node_recorder():
     )
     generated = recorder.tcl_code()
     expected = 'recorder Node -file {/path/to/file} -node 1 -dof 1 2 disp'
+    assert generated == expected
+
+
+def test_node_recorder_pass_array():
+    recorder = NodeRecorder(
+        file=R'C:\Scratch\displacement.dat',
+        nodes=np.array([1, 2, 3, 4, 5]),
+        dofs=np.array([1, 2, 3, 4, 5, 6]),
+        response='disp',
+    )
+    generated = recorder.tcl_code()
+    expected = (
+        'recorder Node -file {C:/Scratch/displacement.dat} '
+        '-node 1 2 3 4 5 -dof 1 2 3 4 5 6 disp'
+    )
     assert generated == expected
 
 
@@ -77,6 +94,21 @@ def test_element_recorder():
     )
     generated = recorder.tcl_code()
     expected = 'recorder Element -file {/path/to/file} -ele 1 -dof 1 2 localForce'
+    assert generated == expected
+
+
+def test_element_recorder_pass_array():
+    recorder = ElementRecorder(
+        file=R'C:\Scratch\forces.dat',
+        elements=np.array([1, 2, 3, 4, 5]),
+        dofs=np.array([1, 2, 3, 4, 5, 6]),
+        response='force',
+    )
+    generated = recorder.tcl_code()
+    expected = (
+        'recorder Element -file {C:/Scratch/forces.dat} '
+        '-ele 1 2 3 4 5 -dof 1 2 3 4 5 6 force'
+    )
     assert generated == expected
 
 

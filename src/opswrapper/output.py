@@ -66,7 +66,7 @@ class ElementRecorder(base.OpenSeesObject):
             # baffling KeyError will be raised when calling '.format'.
             tcl_list_expansion = '{{*}}'
 
-        if self.elements == 'all':
+        if str(self.elements) == 'all':
             args.append(f'-ele {tcl_list_expansion}[getEleTags]')
         else:
             args.append('-ele')
@@ -179,7 +179,7 @@ class NodeRecorder(base.OpenSeesObject):
         if self.time:
             args.append('-time')
 
-        if self.nodes == 'all':
+        if str(self.nodes) == 'all':
             args.append(f'-node {tcl_list_expansion}[getNodeTags]')
         elif self.nodes is not None:
             args.append('-node')
