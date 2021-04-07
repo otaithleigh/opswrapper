@@ -86,6 +86,8 @@ class OpenSeesAnalysis():
 
     Parameters
     ----------
+    name : str, optional
+        Descriptive name for the analysis object. Defaults to the class name.
     echo_output : bool, optional
         If True, echo OpenSees output to stdout. (default: False)
     delete_files : bool, optional
@@ -99,11 +101,16 @@ class OpenSeesAnalysis():
     """
     def __init__(
         self,
+        name: str = None,
         echo_output: bool = False,
         delete_files: bool = True,
         opensees_path: pathlib.Path = None,
         scratch_path: pathlib.Path = None,
     ):
+        if name is None:
+            name = self.__class__.__name__
+
+        self.name = name
         self.echo_output = echo_output
         self.delete_files = delete_files
         self.opensees_path = opensees_path
@@ -133,7 +140,7 @@ class OpenSeesAnalysis():
             value = config.path_of.scratch
         self._scratch_path = pathlib.Path(value)
 
-    def create_scratch_filer(self, analysis_id=None, name: str = None):
+    def create_scratch_filer(self, analysis_id=None):
         """Create a new scratch file function with a particular analysis id.
 
         Parameters
@@ -141,8 +148,6 @@ class OpenSeesAnalysis():
         analysis_id : optional
             Unique analysis ID. If not provided, a random UUID is generated to
             serve as the analysis ID.
-        name : str, optional
-            "Name" for the scratch filer. Defaults to the analysis class name.
 
         Example
         -------
@@ -153,13 +158,12 @@ class OpenSeesAnalysis():
 
         Non-default name:
 
-        >>> scratch_file = analysis.create_scratch_filer(name='Steel04Test', analysis_id='bar')
+        >>> analysis = UniaxialMaterialAnalysis(name='Steel04Test', ...)
+        >>> scratch_file = analysis.create_scratch_filer('bar')
         >>> scratch_file('disp', '.dat')
         PosixPath('/path/to/scratchdir/Steel04Test_bar_disp.dat')
         """
-        if name is None:
-            name = self.__class__.__name__
-        return ScratchFile(name, analysis_id, self.scratch_path)
+        return ScratchFile(self.name, analysis_id, self.scratch_path)
 
     def run_opensees(self, inputfile: str, echo: bool = None) -> AnalysisResults:
         """Run an OpenSees script.
