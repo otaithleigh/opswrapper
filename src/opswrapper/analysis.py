@@ -1,6 +1,5 @@
 """Helpers for running OpenSees."""
 
-import dataclasses
 import pathlib
 import subprocess as sub
 import uuid
@@ -82,7 +81,6 @@ class AnalysisResults(NamedTuple):
     stdout: str
 
 
-@dataclasses.dataclass(init=False)
 class OpenSeesAnalysis():
     """Wrapper for an OpenSees analysis.
 
@@ -99,13 +97,13 @@ class OpenSeesAnalysis():
         Path to the directory for storing temporary files. If None, uses the
         value from the global configuration. (default: None)
     """
-
-    echo_output: bool
-    delete_files: bool
-    opensees_path: pathlib.Path
-    scratch_path: pathlib.Path
-
-    def __init__(self, echo_output=False, delete_files=True, opensees_path=None, scratch_path=None):
+    def __init__(
+        self,
+        echo_output: bool = False,
+        delete_files: bool = True,
+        opensees_path: pathlib.Path = None,
+        scratch_path: pathlib.Path = None,
+    ):
         self.echo_output = echo_output
         self.delete_files = delete_files
         self.opensees_path = opensees_path
