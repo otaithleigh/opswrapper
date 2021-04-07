@@ -116,6 +116,10 @@ class OpenSeesAnalysis():
         self.opensees_path = opensees_path
         self.scratch_path = scratch_path
 
+    def __repr__(self):
+        clsname = self.__class__.__module__ + '.' + self.__class__.__name__
+        return f'<{clsname} {self.name!r} at {id(self):#x}>'
+
     @property
     def opensees_path(self):
         """Path to the OpenSees binary to use.
