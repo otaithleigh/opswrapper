@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 
 
-def coerce_numeric(obj, to_type):
+def coerce_numeric(obj, to_type: type):
     """Gently attempt to coerce between numeric types."""
     # Only try to coerce *to* numbers
     if not issubclass(to_type, numbers.Number):
