@@ -49,11 +49,19 @@ class OpenSeesObject(abc.ABC):
     _format_spec: MultiFormatSpec = _GLOBAL_FORMAT_SPEC
 
     def __post_init__(self):
-        # Gently attempt to coerce numeric types.
+        # Gently attempt to coerce numeric types. Not guarding against TypeError
+        # from dataclasses.fields since __post_init__ only gets called on
+        # dataclasses.
         for field in dataclasses.fields(self):
             value = getattr(self, field.name)
-            coerced_value = coerce_numeric(value, field.type)
-            setattr(self, field.name, coerced_value)
+            # A field's "type" isn't always strictly a type -- sometimes it's an
+            # annotation that doesn't resolve to a concrete type. For example,
+            # Union[str, int] causes coerce_numeric to panic when checking for
+            # numeric subclasses. I'm not sure if it makes more sense to check
+            # that here or inside coerce_numeric.
+            if isinstance(field.type, type):
+                value = coerce_numeric(value, field.type)
+            setattr(self, field.name, value)
 
     def get_object_formats(self, objects: list, formats: SpecLike = None):
         """Get type-specific formatters for a list of objects, using this
