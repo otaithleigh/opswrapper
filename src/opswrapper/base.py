@@ -95,8 +95,15 @@ class OpenSeesObject(abc.ABC):
             String to join the formatted objects with. If None, skip joining.
             (default: ' ')
         """
-        fmts = self.get_object_formats(objects, formats)
-        formatted = [f'{obj:{fmt}}' for obj, fmt in zip(objects, fmts)]
+        format_spec = self.get_format_spec(formats)
+        formatted = []
+        for obj in objects:
+            if isinstance(obj, OpenSeesObject):
+                formatted.append(obj.tcl_code(formats))
+            else:
+                fmt = format_spec.get_format(obj)
+                formatted.append(format(obj, fmt))
+
         if join is None:
             return formatted
         else:
