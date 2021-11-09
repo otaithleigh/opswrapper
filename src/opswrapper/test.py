@@ -53,6 +53,16 @@ class NormUnbalance(Test):
     When using the Penalty method additional large forces to enforce the penalty
     functions exist on the right hand side, making convergence using this test
     usually impossible (even though solution might have converged).
+
+    Theory
+    ------
+    If the system of equations formed by the integrator is::
+
+        K ΔUi = R(Ui)
+
+    This integrator is testing::
+
+        ||R(Ui)|| < tol
     """
 
 
@@ -71,6 +81,16 @@ class NormDispIncr(Test):
     -----
     When using the Lagrange method to enforce the constraints, the Lagrange
     multipliers appear in the solution vector.
+
+    Theory
+    ------
+    If the system of equations formed by the integrator is::
+
+        K ΔUi = R(Ui)
+
+    This integrator is testing::
+
+        ||ΔUi|| < tol
     """
 
 
@@ -93,6 +113,145 @@ class EnergyIncr(Test):
        this test usually impossible (even though solution might have converged).
     2. When Lagrange multipliers are used, the solution vector contains the
        Lagrange multipliers.
+
+    Theory
+    ------
+    If the system of equations formed by the integrator is::
+
+        K ΔUi = R(Ui)
+
+    This integrator is testing::
+
+        ΔUi * R(Ui) < tol
+    """
+
+
+@dataclasses.dataclass
+class RelativeNormUnbalance(Test):
+    """Convergence test which uses the relative norm of the right-hand side of
+    the matrix equation to determine if convergence has been reached.
+
+    What the right-hand side of the matrix equation is depends on the chosen
+    integrator and constraint handler. Usually, though not always, it is equal
+    to the unbalanced forces in the system.
+
+    %(parameters)s
+
+    Notes
+    -----
+    1. When using the Penalty method additional large forces to enforce the
+       penalty functions exist on the right hand side, making convergence using
+       this test usually impossible (even though solution might have converged).
+    2. ||R(U0)|| is the initial unbalance seen by the system when
+       ``solveCurrentStep()`` is invoked on the algorithm.
+    3. Sometimes there may be problems converging if ||R(U0)|| is very small to
+       begin with.
+
+    Theory
+    ------
+    If the system of equations formed by the integrator is::
+
+        K ΔUi = R(Ui)
+
+    This integrator is testing::
+
+        ||R(Ui)|| / ||R(U0)|| < tol
+    """
+
+
+@dataclasses.dataclass
+class RelativeNormDispIncr(Test):
+    """Convergence test which uses the relative norm of the left-hand side
+    solution vector of the matrix equation to determine if convergence has been
+    reached.
+
+    What the solution vector of the matrix equation is depends on the chosen
+    integrator and constraint handler. Usually, though not always, it is equal
+    to the displacement increments that are to be applied to the model.
+
+    %(parameters)s
+
+    Notes
+    -----
+    1. When using the Lagrange method to enforce the constraints, the Lagrange
+       multipliers appear in the solution vector, making convergence using this
+       test usually impossible (even though solution might have converged).
+    2. ||ΔU0|| is the initial solution when ``solveCurrentStep()`` is invoked on
+       the algorithm.
+    3. Sometimes there may be problems converging if ||ΔU0|| is very small to
+       begin with.
+
+    Theory
+    ------
+    If the system of equations formed by the integrator is::
+
+        K ΔUi = R(Ui)
+
+    This integrator is testing::
+
+        ||ΔUi|| / ||ΔU0|| < tol
+    """
+
+
+@dataclasses.dataclass
+class TotalRelativeNormDispIncr(Test):
+    """Convergence test which uses the ratio of the current norm to the total
+    norm (the sum of all the norms since last convergence) of the solution
+    vector of the matrix equation to determine if convergence has been reached.
+
+    What the solution vector of the matrix equation is depends on the chosen
+    integrator and constraint handler. Usually, though not always, it is equal
+    to the displacement increments that are to be applied to the model.
+
+    %(parameters)s
+
+    Notes
+    -----
+    1. When using the Lagrange method to enforce the constraints, the Lagrange
+       multipliers appear in the solution vector, making convergence using this
+       test usually impossible (even though solution might have converged).
+
+    Theory
+    ------
+    If the system of equations formed by the integrator is::
+
+        K ΔUi = R(Ui)
+
+    This integrator is testing::
+
+        ||ΔUi|| / ||ΔU0 + ΔU1 + ΔU2 + ... + ΔUi|| < tol
+    """
+
+
+@dataclasses.dataclass
+class RelativeEnergyIncr(Test):
+    """Convergence test which uses the dot product of the solution vector and
+    norm of the right hand side of the matrix equation to determine if
+    convergence has been reached.
+
+    The physical meaning of this quantity depends on the chosen integrator and
+    constraint handler. Usually, though not always, it is equal to the energy
+    unbalance in the system.
+
+    %(parameters)s
+
+    Notes
+    -----
+    1. When using the Penalty method additional large forces to enforce the
+       penalty functions exist on the right hand side, making convergence using
+       this test usually impossible (even though solution might have converged).
+    2. When Lagrange multipliers are used, the solution vector contains the
+       Lagrange multipliers.
+
+    Theory
+    ------
+    If the system of equations formed by the integrator is::
+
+        K ΔUi = R(Ui)
+
+    This integrator is testing::
+
+        [ΔUi * R(Ui)] / [ΔU0 * R(U0)] < tol
     """
 
 
