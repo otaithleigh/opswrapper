@@ -1,4 +1,5 @@
 import dataclasses
+import typing as t
 
 from .base import OpenSeesObject
 
@@ -32,9 +33,12 @@ class Test(OpenSeesObject):
     norm_type: int = 2
 
     def tcl_code(self, formats=None) -> str:
+        return ' '.join(['test', *self.tcl_args(formats=formats)])
+
+    def tcl_args(self, formats=None) -> t.List[str]:
         method = self.__class__.__name__
-        args = ['test', method, self.tolerance, self.max_iters, self.print_flag, self.norm_type]
-        return self.format_objects(args, formats)
+        args = [method, self.tolerance, self.max_iters, self.print_flag, self.norm_type]
+        return self.format_objects(args, formats, join=None)
 
 
 @dataclasses.dataclass
