@@ -2,7 +2,7 @@ import dataclasses
 import numbers
 import pathlib
 import types
-from typing import List
+from typing import Generic, List, Mapping, TypeVar
 
 import numpy as np
 
@@ -189,3 +189,41 @@ def fill_out_numbers(peaks, rate):
         numbers = numbers.flatten()
 
     return numbers
+
+
+KT = TypeVar('KT')
+VT = TypeVar('VT')
+
+
+@dataclasses.dataclass
+class ValueTypeDispatch(Generic[KT, VT]):
+    """Dispatch helper that raises TypeError.
+
+    Parameters
+    ----------
+    name : str
+        Name of the value type. Used in the error message.
+    dispatch : mapping
+        Mapping of dispatch keys to values.
+
+    Example
+    -------
+    >>> tangent_dispatch = ValueTypeDispatch('tangent',
+    ...                                      {'current': None,
+    ...                                       'initial': '-initial'})
+    >>> tangent_dispatch['initial']
+    '-initial'
+    >>> tangent_dispatch['not_a_tangent']
+    <Traceback>
+    TypeError: Invalid tangent 'not_a_tangent'; must be one of ['current', 'initial']
+    """
+    name: str
+    dispatch: Mapping[KT, VT]
+
+    def __getitem__(self, key: KT) -> VT:
+        try:
+            value = self.dispatch[key]
+        except KeyError as exc:
+            valid = list(self.dispatch)
+            raise TypeError(f'Invalid {self.name} {key!r}; must be one of {valid!r}') from exc
+        return value
