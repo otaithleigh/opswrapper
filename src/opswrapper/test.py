@@ -1,5 +1,6 @@
 import dataclasses
 import typing as t
+from enum import IntEnum
 
 from .base import OpenSeesObject
 
@@ -25,11 +26,31 @@ _standard_test_parameters = """Parameters
         Type of norm. 0 = max-norm, 1 = 1-norm, 2 = 2-norm, etc. (default: 2)"""
 
 
+class PrintFlag(IntEnum):
+    """Print flag for convergence tests.
+    
+    Options
+    -------
+    - 0: print nothing
+    - 1: print information on norms each time `test()` is invoked
+    - 2: print information on norms and number of iterations at end of
+         successful test
+    - 4: print norms at each step and also the ΔU and R(U) vectors.
+    - 5: if test fails to converge after `max_iters`, print an error message
+         BUT RETURN A SUCCESSFUL TEST.
+    """
+    NOTHING = 0
+    NORMS = 1
+    NORMS_AND_ITERS = 2
+    NORMS_AND_VECS = 4
+    IGNORE_ERROR = 5
+
+
 @dataclasses.dataclass
 class Test(OpenSeesObject):
     tolerance: float
     max_iters: int
-    print_flag: int = 0
+    print_flag: int = PrintFlag.NOTHING
     norm_type: int = 2
 
     def tcl_code(self, formats=None) -> str:
@@ -37,7 +58,8 @@ class Test(OpenSeesObject):
 
     def tcl_args(self, formats=None) -> t.List[str]:
         method = self.__class__.__name__
-        args = [method, self.tolerance, self.max_iters, self.print_flag, self.norm_type]
+        print_flag = PrintFlag(self.print_flag)
+        args = [method, self.tolerance, self.max_iters, print_flag, self.norm_type]
         return self.format_objects(args, formats, join=None)
 
 
