@@ -1,20 +1,26 @@
 import dataclasses
+import typing as t
 
 from .base import OpenSeesObject
 
 
+class Constraints(OpenSeesObject):
+    def tcl_code(self, formats=None) -> str:
+        return ' '.join(['constraints', *self.tcl_args(formats=formats)])
+
+
 @dataclasses.dataclass
-class Plain(OpenSeesObject):
+class Plain(Constraints):
     """Plain constraint handler.
 
     Only supports constraints applied using the 'fix' and 'equalDOF' commands.
     """
-    def tcl_code(self, formats=None) -> str:
-        return 'constraints Plain'
+    def tcl_args(self, formats=None) -> t.List[str]:
+        return ['Plain']
 
 
 @dataclasses.dataclass
-class Transformation(OpenSeesObject):
+class Transformation(Constraints):
     """Constraints enforcement by the transformation method.
 
     Notes
@@ -32,12 +38,12 @@ class Transformation(OpenSeesObject):
     2. If multiple nodes are constrained, make sure that the retained node is
        not constrained in any other constraint.
     """
-    def tcl_code(self, formats=None) -> str:
-        return 'constraints Transformation'
+    def tcl_args(self, formats=None) -> t.List[str]:
+        return ['Transformation']
 
 
 @dataclasses.dataclass
-class Lagrange(OpenSeesObject):
+class Lagrange(Constraints):
     """Constraints enforcement using Lagrange multipliers.
 
     Parameters
@@ -57,13 +63,13 @@ class Lagrange(OpenSeesObject):
     alpha_s: float
     alpha_m: float
 
-    def tcl_code(self, formats=None) -> str:
-        args = ['constraints', 'Lagrange', self.alpha_s, self.alpha_m]
-        return self.format_objects(args, formats)
+    def tcl_args(self, formats=None) -> t.List[str]:
+        args = ['Lagrange', self.alpha_s, self.alpha_m]
+        return self.format_objects(args, formats, join=None)
 
 
 @dataclasses.dataclass
-class Penalty(OpenSeesObject):
+class Penalty(Constraints):
     """Constraints enforcement using the penalty method.
 
     Parameters
@@ -83,6 +89,6 @@ class Penalty(OpenSeesObject):
     alpha_s: float
     alpha_m: float
 
-    def tcl_code(self, formats=None) -> str:
-        args = ['constraints', 'Penalty', self.alpha_s, self.alpha_m]
-        return self.format_objects(args, formats)
+    def tcl_args(self, formats=None) -> t.List[str]:
+        args = ['Penalty', self.alpha_s, self.alpha_m]
+        return self.format_objects(args, formats, join=None)
