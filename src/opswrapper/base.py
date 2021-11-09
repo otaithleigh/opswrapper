@@ -180,6 +180,23 @@ class OpenSeesObject(abc.ABC):
         """
         pass
 
+    def tcl_args(self, formats: SpecLike = None) -> typing.List[str]:
+        """Return the formatted arguments to the Tcl command to create this
+        object.
+
+        Parameters
+        ----------
+        formats : SpecLike, optional
+            Override format specifiers by class.
+
+        Example
+        -------
+        >>> import opswrapper as ops
+        >>> ops.material.Elastic(1, 29000.0).tcl_args({float: 'e'})
+        ['Elastic', '1' , '2.900000e+04']
+        """
+        raise NotImplementedError()
+
     def __str__(self):
         return self.tcl_code()
 
