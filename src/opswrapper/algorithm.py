@@ -134,7 +134,7 @@ class NewtonLineSearch(Algorithm):
       direction, but the step size ||ΔU|| is not, and
     - it is cheaper to compute the residual for several points along ΔU rather
       than form and factor a new system Jacobian.
-    
+
     In NewtonLineSearch, the regular Newton-Raphson method is used to compute
     ΔU, but the update is modified::
 
