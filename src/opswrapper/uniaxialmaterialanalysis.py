@@ -60,7 +60,14 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
 
         return matdef
 
-    def run_analysis(self, peak_points, rate_type=None, rate_value=None, analysis_id=None):
+    def run_analysis(
+        self,
+        peak_points,
+        rate_type: str = None,
+        rate_value: float = None,
+        echo: bool = None,
+        analysis_id: str = None
+    ):
         """
         Parameters
         ----------
@@ -73,6 +80,8 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             peak. None does no interpolation.
         rate_value : float, optional
             Rate for rate types 'StrainRate' and 'Steps'.
+        echo : bool, optional
+            Whether to echo OpenSees output to console. (default: `self.echo_output`)
         analysis_id : optional
             Unique identifier for the analysis.
 
@@ -131,7 +140,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         utils.print_model(model, file=files.input)
 
         # Run the analysis
-        process = self.run_opensees(files.input)
+        process = self.run_opensees(files.input, echo=echo)
         if process.returncode == 1:
             status = 'Analysis successful'
         elif process.returncode == 2:
