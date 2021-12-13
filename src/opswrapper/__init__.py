@@ -1,6 +1,7 @@
 """Wrappers for Tcl OpenSees analyses."""
 import importlib.resources
 
+from . import algorithm
 from . import analysis
 from . import base
 from . import config
