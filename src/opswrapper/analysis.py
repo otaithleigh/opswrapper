@@ -58,7 +58,15 @@ class ScratchFile():
         path : pathlib.Path
             Path to the scratch file.
         """
-        return self.scratch_path/f'{self.analysis_type}_{self.analysis_id}_{name}{suffix}'
+        components = []
+        if self.analysis_type:
+            components.append(self.analysis_type)
+        if self.analysis_id:
+            components.append(self.analysis_id)
+        components.append(f'{name}{suffix}')
+        filename = '_'.join(components)
+
+        return self.scratch_path/filename
 
 
 def scratch_file_factory(*args, **kwargs):
