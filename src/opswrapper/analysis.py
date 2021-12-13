@@ -1,5 +1,6 @@
 """Helpers for running OpenSees."""
 
+import dataclasses
 import pathlib
 import subprocess as sub
 import uuid
@@ -9,6 +10,15 @@ from typing import NamedTuple
 from . import config
 
 
+def _get_str_uuid4():
+    return str(uuid.uuid4())
+
+
+def _get_default_scratch_path():
+    return config.path_of.scratch
+
+
+@dataclasses.dataclass
 class ScratchFile():
     """Create a scratch file path generator.
 
@@ -35,14 +45,14 @@ class ScratchFile():
     >>> scratch_file('disp', '.dat')
     PosixPath('/tmp/TestoPresto_0_disp.dat')
     """
-    __slots__ = ('analysis_type', 'analysis_id', 'scratch_path')
+    analysis_type: str
+    analysis_id: str = dataclasses.field(default_factory=_get_str_uuid4)
+    scratch_path: pathlib.Path = dataclasses.field(default_factory=_get_default_scratch_path)
 
-    def __init__(self, analysis_type, analysis_id=None, scratch_path=None):
-        self.analysis_type = str(analysis_type)
-        self.analysis_id = str(uuid.uuid4() if analysis_id is None else analysis_id)
-        self.scratch_path = pathlib.Path(
-            config.path_of.scratch if scratch_path is None else scratch_path
-        ).resolve()
+    def __post_init__(self):
+        self.analysis_type = str(self.analysis_type)
+        self.analysis_id = str(self.analysis_id)
+        self.scratch_path = pathlib.Path(self.scratch_path).resolve()
 
     def __call__(self, name: str, suffix: str = '') -> pathlib.Path:
         """
