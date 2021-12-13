@@ -9,6 +9,7 @@ from . import constraints
 from . import element
 from . import formatting
 from . import integration
+from . import integrator
 from . import material
 from . import output
 from . import section
