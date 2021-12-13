@@ -115,7 +115,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             new_recorder(file=files.output_disp, response='deformations'),
             new_recorder(file=files.output_stiff, response='stiff'),
             'system UmfPack',
-            constraints.Penalty(alpha_s=1e12, alpha_m=1e12),
+            constraints.Transformation(),
             test.NormDispIncr(tolerance=1e-8, max_iters=10, print_flag=0),
             'algorithm Newton',
             'numberer RCM',
