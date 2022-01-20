@@ -65,7 +65,7 @@ class Linear(
     factor_once : bool, optional
         If True, only set up and factor the matrix once. (default: False)
     """
-    tangent: t.Literal['current', 'initial', 'secant'] = 'current'
+    tangent: str = 'current'
     factor_once: bool = False
 
     def tcl_args(self, formats=None) -> t.List[str]:
@@ -93,7 +93,7 @@ class Newton(
     tangent : {'current', 'initial', 'initialThenCurrent', 'secant', 'hall'}
         Which stiffness to use for iterating. (default: 'current')
     """
-    tangent: t.Literal['current', 'initial', 'initialThenCurrent', 'secant', 'hall'] = 'current'
+    tangent: str = 'current'
 
 
 @dataclasses.dataclass
@@ -114,7 +114,7 @@ class ModifiedNewton(
     tangent : {'current', 'initial', 'secant', 'hall'}
         Which stiffness to use for iterating. (default: 'current')
     """
-    tangent: t.Literal['current', 'initial', 'secant', 'hall'] = 'current'
+    tangent: str = 'current'
 
 
 #===================================================================================================
@@ -157,8 +157,7 @@ class NewtonLineSearch(Algorithm):
 
         s(η) = ΔU R(U_n + η ΔU)
     """
-    type_search: t.Literal['Bisection', 'Secant', 'RegulaFalsi',
-                           'InitialInterpolated'] = 'InitialInterpolated'
+    type_search: str = 'InitialInterpolated'
     tol: float = 0.8
     max_iters: int = 10
     min_eta: float = 0.1
@@ -215,8 +214,8 @@ class _AcceleratedNewton(
         Maximum number of iterations until the tangent is reformed and the
         acceleration restarts. (default: 3)
     """
-    iterate: t.Literal['current', 'initial', 'noTangent'] = 'current'
-    increment: t.Literal['current', 'initial', 'noTangent'] = 'current'
+    iterate: str = 'current'
+    increment: str = 'current'
     max_dim: int = 3
 
     def tcl_args(self, formats=None) -> t.List[str]:
@@ -292,7 +291,7 @@ class _Broyden(
         'secant': '-secant',
     },
 ):
-    tangent: t.Literal['current', 'initial', 'secant'] = 'current'
+    tangent: str = 'current'
     count: int = 10
 
     def tcl_args(self, formats=None) -> t.List[str]:
