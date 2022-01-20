@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, Type, Union
+from typing import Dict, Union
 
 __all__ = [
     'MultiFormatSpec',
@@ -45,7 +45,7 @@ class MultiFormatSpec():
             self._spec.update(other)
         return self
 
-    def get_format(self, obj):
+    def get_format(self, obj: object):
         """Find a format specifier for the given object.
 
         - If the object's type is listed specifically, return that.
@@ -74,7 +74,7 @@ class MultiFormatSpec():
                 fmt = ''
         return fmt
 
-    def register_format(self, cls: Type, fmt: str):
+    def register_format(self, cls: type, fmt: str):
         """Register a format string for a given type.
 
         Parameters
@@ -90,7 +90,7 @@ class MultiFormatSpec():
         self._spec[cls] = fmt
 
 
-SpecDict = Dict[Type, str]
+SpecDict = Dict[type, str]
 SpecLike = Union[SpecDict, MultiFormatSpec]
 
 _GLOBAL_FORMAT_SPEC = MultiFormatSpec()
