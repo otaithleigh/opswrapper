@@ -34,6 +34,15 @@ class MultiFormatSpec():
         the_copy.update(self)
         return the_copy
 
+    def __or__(self, other: SpecLike):
+        new = self.copy()
+        new.update(other)
+        return new
+
+    def __ior__(self, other: SpecLike):
+        self.update(other)
+        return self
+
     def update(self, other: SpecLike):
         """Update the object. Accepts a dict or MultiFormatSpec.
 
