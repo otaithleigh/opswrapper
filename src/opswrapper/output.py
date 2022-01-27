@@ -15,10 +15,10 @@ class ElementRecorder(base.OpenSeesObject):
     file : str, optional
         Filename to record to. This is printed to the file within braces, so no
         variable substitution on the Tcl side is supported. If not given,
-        '{{file}}' is printed instead, allowing for substitution later using
+        '{file}' is printed instead, allowing for substitution later using
         ``.format(file='/path/to/file')``. Note that Tcl interprets backslashes
         as escape characters, so a more complete format might be ``.format(file=
-        filename.replace('\\', '/'))``. (default: None)
+        filename.replace('\\', '/'))``. (default: '{file}')
     fileformat : str, optional
         File format to use. Options: 'file' (ASCII), 'xml', 'binary'.
         (default: 'file')
@@ -39,7 +39,7 @@ class ElementRecorder(base.OpenSeesObject):
     ... response='localForce').tcl_code()
     'recorder Element -file {/path/to/file} -ele 1 -dof 1 2 localForce'
     """
-    file: str = None
+    file: str = '{file}'
     fileformat: str = 'file'
     precision: int = None
     elements: np.ndarray = None
@@ -55,16 +55,16 @@ class ElementRecorder(base.OpenSeesObject):
 
     def tcl_code(self, formats=None) -> str:
         args = ['recorder Element', f'-{self.fileformat}']
-        if self.file is not None:
-            file = utils.path_for_tcl(self.file)
-            args.append(f'{{{file!s}}}')
-            tcl_list_expansion = '{*}'
-        else:
-            args.append('{{{file!s}}}')
+        if self.file.startswith('{'):
+            args.append('{{%s}}' % self.file)
             # If the returned string is being returned with '{file}' in it to be formatted later,
             # need to escape the brackets in the list expansion operator. Otherwise, a completely
             # baffling KeyError will be raised when calling '.format'.
             tcl_list_expansion = '{{*}}'
+        else:
+            file = utils.path_for_tcl(self.file)
+            args.append('{%s}' % file)
+            tcl_list_expansion = '{*}'
 
         if str(self.elements) == 'all':
             args.append(f'-ele {tcl_list_expansion}[getEleTags]')
@@ -93,10 +93,10 @@ class NodeRecorder(base.OpenSeesObject):
     file : str, optional
         Filename to record to. This is printed to the file within braces, so no
         variable substitution on the Tcl side is supported. If not given,
-        '{{file}}' is printed instead, allowing for substitution later using
+        '{file}' is printed instead, allowing for substitution later using
         ``.format(file='/path/to/file')``. Note that Tcl interprets backslashes
         as escape characters, so a more complete format might be ``.format(file=
-        filename.replace('\\', '/'))``. (default: None)
+        filename.replace('\\', '/'))``. (default: '{file}')
     fileformat : str, optional
         File format to use. Options: 'file' (ASCII), 'xml', 'binary'.
         (default: 'file')
@@ -138,7 +138,7 @@ class NodeRecorder(base.OpenSeesObject):
     >>> NodeRecorder(file='/path/to/file', nodes=1, dofs=[1, 2], response='disp').tcl_code()
     'recorder Node -file {/path/to/file} -node 1 -dof 1 2 disp'
     """
-    file: str = None
+    file: str = '{file}'
     fileformat: str = 'file'
     precision: int = None
     time_series: int = None
@@ -157,16 +157,16 @@ class NodeRecorder(base.OpenSeesObject):
 
     def tcl_code(self, formats=None) -> str:
         args = ['recorder Node', f'-{self.fileformat}']
-        if self.file is not None:
-            file = utils.path_for_tcl(self.file)
-            args.append(f'{{{file!s}}}')
-            tcl_list_expansion = '{*}'
-        else:
-            args.append('{{{file!s}}}')
+        if self.file.startswith('{'):
+            args.append('{{%s}}' % self.file)
             # If the returned string is being returned with '{file}' in it to be formatted later,
             # need to escape the brackets in the list expansion operator. Otherwise, a completely
             # baffling KeyError will be raised when calling '.format'.
             tcl_list_expansion = '{{*}}'
+        else:
+            file = utils.path_for_tcl(self.file)
+            args.append('{%s}' % file)
+            tcl_list_expansion = '{*}'
 
         if self.precision is not None:
             args.append('-precision')
