@@ -135,3 +135,13 @@ def set_global_format_spec(formats: SpecDict):
     old_spec = _GLOBAL_FORMAT_SPEC.copy()
     _GLOBAL_FORMAT_SPEC.update(formats)
     return old_spec
+
+
+def get_global_format_spec():
+    """Return the global format specifier."""
+    return _GLOBAL_FORMAT_SPEC
+
+
+def get_format(o):
+    """Get the globally-set format specifier for an object."""
+    return _GLOBAL_FORMAT_SPEC.get_format(o)
