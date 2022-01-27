@@ -48,7 +48,7 @@ def test_node_recorder_windows_path():
 def test_node_recorder_delayed_file():
     recorder = NodeRecorder(nodes=1, dofs=1, response='accel')
     generated = recorder.tcl_code()
-    expected = 'recorder Node -file {{{file!s}}} -node 1 -dof 1 accel'
+    expected = 'recorder Node -file {{{file}}} -node 1 -dof 1 accel'
     assert generated == expected
 
 
@@ -74,7 +74,7 @@ def test_node_recorder_all_nodes():
 def test_node_recorder_all_nodes_delayed_file():
     recorder = NodeRecorder(nodes='all', dofs=1, response='accel')
     generated = recorder.tcl_code()
-    expected = 'recorder Node -file {{{file!s}}} -node {{*}}[getNodeTags] -dof 1 accel'
+    expected = 'recorder Node -file {{{file}}} -node {{*}}[getNodeTags] -dof 1 accel'
     assert generated == expected
 
 
@@ -130,7 +130,7 @@ def test_element_recorder_windows_path():
 def test_element_recorder_delayed_file():
     recorder = ElementRecorder(elements=1, dofs=1, response='force')
     generated = recorder.tcl_code()
-    expected = 'recorder Element -file {{{file!s}}} -ele 1 -dof 1 force'
+    expected = 'recorder Element -file {{{file}}} -ele 1 -dof 1 force'
     assert generated == expected
 
 
@@ -156,7 +156,7 @@ def test_element_recorder_all_elements():
 def test_element_recorder_all_elements_delayed_file():
     recorder = ElementRecorder(elements='all', dofs=1, response='force')
     generated = recorder.tcl_code()
-    expected = 'recorder Element -file {{{file!s}}} -ele {{*}}[getEleTags] -dof 1 force'
+    expected = 'recorder Element -file {{{file}}} -ele {{*}}[getEleTags] -dof 1 force'
     assert generated == expected
 
 
