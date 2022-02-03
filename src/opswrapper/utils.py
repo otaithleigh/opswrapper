@@ -1,7 +1,7 @@
 import dataclasses
 import numbers
-import pathlib
 import types
+from pathlib import Path
 from typing import Generic, List, Mapping, TypeVar
 
 import numpy as np
@@ -79,7 +79,7 @@ def print_model(model: List[str], file=None):
         (default: None)
     """
     try:
-        file = pathlib.Path(file)
+        file = Path(file)
         file_is_descriptor = False
     except TypeError:
         file_is_descriptor = True

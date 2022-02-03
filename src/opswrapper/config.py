@@ -1,12 +1,12 @@
 import dataclasses
-import pathlib
+from pathlib import Path
 
 import toml
 
 from . import utils
 
-_ROOT = pathlib.Path(__file__).parent
-_path_of_file = pathlib.Path.home()/'.path_of.toml'
+_ROOT = Path(__file__).parent
+_path_of_file = Path.home()/'.path_of.toml'
 
 
 @dataclasses.dataclass(repr=False)
@@ -22,16 +22,16 @@ class _PathOf():
     datadir
         Path of the data directory (for e.g. ground motions)
     """
-    opensees: pathlib.Path = pathlib.Path('OpenSees')
-    scratch: pathlib.Path = pathlib.Path.home()/'Scratch'
-    datadir: pathlib.Path = (_ROOT/"../../data").resolve()
+    opensees: Path = Path('OpenSees')
+    scratch: Path = Path.home()/'Scratch'
+    datadir: Path = (_ROOT/"../../data").resolve()
 
     def __repr__(self):
         return utils.list_dataclass_fields('path_of', self)
 
     def __setattr__(self, name, value):
         if name in (field.name for field in dataclasses.fields(self)):
-            value = pathlib.Path(value)
+            value = Path(value)
         return super().__setattr__(name, value)
 
     def load_config(self, file):

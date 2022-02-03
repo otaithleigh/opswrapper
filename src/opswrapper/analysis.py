@@ -1,9 +1,9 @@
 """Helpers for running OpenSees."""
 
-import pathlib
 import subprocess as sub
 import uuid
 import warnings
+from pathlib import Path
 from typing import NamedTuple, Optional
 
 from . import config
@@ -47,7 +47,7 @@ class ScratchFile():
         self,
         analysis_type: str,
         analysis_id: Optional[str] = None,
-        scratch_path: Optional[pathlib.Path] = None
+        scratch_path: Optional[Path] = None
     ):
         if analysis_id is None:
             analysis_id = _get_str_uuid4()
@@ -56,7 +56,7 @@ class ScratchFile():
 
         self.analysis_type = str(analysis_type)
         self.analysis_id = str(analysis_id)
-        self.scratch_path = pathlib.Path(scratch_path).resolve()
+        self.scratch_path = Path(scratch_path).resolve()
 
     def __repr__(self) -> str:
         analysis_type = self.analysis_type
@@ -64,7 +64,7 @@ class ScratchFile():
         scratch_path = self.scratch_path
         return f'ScratchFile({analysis_type=}, {analysis_id=}, {scratch_path=})'
 
-    def __call__(self, name: str, suffix: str = '') -> pathlib.Path:
+    def __call__(self, name: str, suffix: str = '') -> Path:
         """
         Parameters
         ----------
@@ -75,7 +75,7 @@ class ScratchFile():
 
         Returns
         -------
-        path : pathlib.Path
+        path : Path
             Path to the scratch file.
         """
         components = []
@@ -120,10 +120,10 @@ class OpenSeesAnalysis():
         If True, echo OpenSees output to stdout. (default: False)
     delete_files : bool, optional
         If True, delete temporary files after each run. (default: True)
-    opensees_path : pathlib.Path, optional
+    opensees_path : Path, optional
         Path to the OpenSees binary to use. If None, uses the value from the
         global configuration. (default: None)
-    scratch_path : pathlib.Path, optional
+    scratch_path : Path, optional
         Path to the directory for storing temporary files. If None, uses the
         value from the global configuration. (default: None)
     """
@@ -132,8 +132,8 @@ class OpenSeesAnalysis():
         name: str = None,
         echo_output: bool = False,
         delete_files: bool = True,
-        opensees_path: pathlib.Path = None,
-        scratch_path: pathlib.Path = None,
+        opensees_path: Path = None,
+        scratch_path: Path = None,
     ):
         if name is None:
             name = self.__class__.__name__
@@ -160,7 +160,7 @@ class OpenSeesAnalysis():
     def opensees_path(self, value):
         if value is None:
             value = config.path_of.opensees
-        self._opensees_path = pathlib.Path(value)
+        self._opensees_path = Path(value)
 
     @property
     def scratch_path(self):
@@ -170,7 +170,7 @@ class OpenSeesAnalysis():
     def scratch_path(self, value):
         if value is None:
             value = config.path_of.scratch
-        self._scratch_path = pathlib.Path(value)
+        self._scratch_path = Path(value)
 
     def create_scratch_filer(self, analysis_id=None):
         """Create a new scratch file function with a particular analysis id.
