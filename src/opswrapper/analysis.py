@@ -1,11 +1,10 @@
 """Helpers for running OpenSees."""
 
-import dataclasses
 import pathlib
 import subprocess as sub
 import uuid
 import warnings
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 from . import config
 
@@ -18,7 +17,6 @@ def _get_default_scratch_path():
     return config.path_of.scratch
 
 
-@dataclasses.dataclass
 class ScratchFile():
     """Create a scratch file path generator.
 
@@ -45,14 +43,26 @@ class ScratchFile():
     >>> scratch_file('disp', '.dat')
     PosixPath('/tmp/TestoPresto_0_disp.dat')
     """
-    analysis_type: str
-    analysis_id: str = dataclasses.field(default_factory=_get_str_uuid4)
-    scratch_path: pathlib.Path = dataclasses.field(default_factory=_get_default_scratch_path)
+    def __init__(
+        self,
+        analysis_type: str,
+        analysis_id: Optional[str] = None,
+        scratch_path: Optional[pathlib.Path] = None
+    ):
+        if analysis_id is None:
+            analysis_id = _get_str_uuid4()
+        if scratch_path is None:
+            scratch_path = _get_default_scratch_path()
 
-    def __post_init__(self):
-        self.analysis_type = str(self.analysis_type)
-        self.analysis_id = str(self.analysis_id)
-        self.scratch_path = pathlib.Path(self.scratch_path).resolve()
+        self.analysis_type = str(analysis_type)
+        self.analysis_id = str(analysis_id)
+        self.scratch_path = pathlib.Path(scratch_path).resolve()
+
+    def __repr__(self) -> str:
+        analysis_type = self.analysis_type
+        analysis_id = self.analysis_id
+        scratch_path = self.scratch_path
+        return f'ScratchFile({analysis_type=}, {analysis_id=}, {scratch_path=})'
 
     def __call__(self, name: str, suffix: str = '') -> pathlib.Path:
         """
