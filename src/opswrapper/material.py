@@ -1,15 +1,24 @@
 """Uniaxial material wrappers."""
 
 import dataclasses
+import typing as t
 
 from . import base
+
+
+@dataclasses.dataclass
+class UniaxialMaterial(base.OpenSeesObject):
+    tag: int
+
+    def tcl_code(self, formats=None) -> str:
+        return 'uniaxialMaterial ' + ' '.join(self.tcl_args(formats))
 
 
 #===================================================================================================
 # Elastic-ish materials
 #===================================================================================================
 @dataclasses.dataclass
-class Elastic(base.OpenSeesObject):
+class Elastic(UniaxialMaterial):
     """Elastic uniaxial material.
 
     Wraps the OpenSees Tcl command Elastic:
@@ -27,13 +36,12 @@ class Elastic(base.OpenSeesObject):
     Eneg : float, optional
         Tangent in compression (default = E)
     """
-    tag: int
     E: float
     eta: float = 0.0
     Eneg: float = None
 
-    def tcl_code(self, formats=None) -> str:
-        args = ['uniaxialMaterial', 'Elastic', self.tag, self.E]
+    def tcl_args(self, formats=None) -> t.List[str]:
+        args = ['Elastic', self.tag, self.E]
         if self.Eneg is not None:
             args.append(self.eta)
             args.append(self.Eneg)
@@ -44,7 +52,7 @@ class Elastic(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class ElasticPP(base.OpenSeesObject):
+class ElasticPP(UniaxialMaterial):
     """Elastic-perfectly-plastic uniaxial material.
 
     Wraps the OpenSees Tcl command ElasticPP:
@@ -65,14 +73,13 @@ class ElasticPP(base.OpenSeesObject):
     eps0 : float, optional
         Initial strain/deformation. (default = 0.0)
     """
-    tag: int
     E: float
     eps_y: float
     eps_yN: float = None
     eps0: float = 0.0
 
-    def tcl_code(self, formats=None) -> str:
-        args = ['uniaxialMaterial', 'ElasticPP', self.tag, self.E, self.eps_y]
+    def tcl_args(self, formats=None) -> t.List[str]:
+        args = ['ElasticPP', self.tag, self.E, self.eps_y]
         eps_yN = self.eps_yN if self.eps_yN is not None else self.eps_y
         if self.eps0 != 0.0:
             args.append(eps_yN)
@@ -84,7 +91,7 @@ class ElasticPP(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class Hardening(base.OpenSeesObject):
+class Hardening(UniaxialMaterial):
     """Uniaxial material with combined linear kinematic and isotropic hardening.
 
     Wraps the OpenSees Tcl command Hardening:
@@ -106,16 +113,14 @@ class Hardening(base.OpenSeesObject):
     eta : float, optional
         Visco-plastic coefficient. (default = 0.0)
     """
-    tag: int
     E: float
     sigma_y: float
     h_iso: float
     h_kin: float
     eta: float = 0.0
 
-    def tcl_code(self, formats=None) -> str:
+    def tcl_args(self, formats=None) -> t.List[str]:
         args = [
-            'uniaxialMaterial',
             'Hardening',
             self.tag,
             self.E,
@@ -133,7 +138,7 @@ class Hardening(base.OpenSeesObject):
 # Steels
 #===================================================================================================
 @dataclasses.dataclass
-class Steel01(base.OpenSeesObject):
+class Steel01(UniaxialMaterial):
     """Bilinear steel model with optional isotropic hardening.
 
     Wraps the OpenSees Tcl command Steel01:
@@ -161,7 +166,6 @@ class Steel01(base.OpenSeesObject):
     a4 : float, optional
         Isotropic hardening parameter; see `a3`.
     """
-    tag: int
     Fy: float
     E: float
     b: float
@@ -177,11 +181,11 @@ class Steel01(base.OpenSeesObject):
         super().__post_init__()
         nparams = self._num_iso_params_defined()
         if nparams not in [0, 4]:
-            raise ValueError('Steel01: isometric hardening definition incomplete ',
+            raise ValueError('Steel01: isometric hardening definition incomplete '
                              f'(expected 4 params, got {nparams})')
 
-    def tcl_code(self, formats=None) -> str:
-        args = ['uniaxialMaterial', 'Steel01', self.tag, self.Fy, self.E, self.b]
+    def tcl_args(self, formats=None) -> t.List[str]:
+        args = ['Steel01', self.tag, self.Fy, self.E, self.b]
         if self._num_iso_params_defined() == 4:
             args.extend([self.a1, self.a2, self.a3, self.a4])
 
@@ -189,7 +193,7 @@ class Steel01(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class Steel02(base.OpenSeesObject):
+class Steel02(UniaxialMaterial):
     """Giuffré-Menegotto-Pinto model with optional isotropic strain hardening.
 
     Wraps the OpenSees Tcl command Steel02:
@@ -231,7 +235,6 @@ class Steel02(base.OpenSeesObject):
         Initial stress. Initial strain is not zero; it is calculated from
         sigma_i/E. (default: 0.0)
     """
-    tag: int
     Fy: float
     E: float
     b: float
@@ -247,9 +250,8 @@ class Steel02(base.OpenSeesObject):
     def _num_iso_params_defined(self):
         return sum([a is not None for a in (self.a1, self.a2, self.a3, self.a4)])
 
-    def tcl_code(self, formats=None) -> str:
+    def tcl_args(self, formats=None) -> t.List[str]:
         args = [
-            'uniaxialMaterial',
             'Steel02',
             self.tag,
             self.Fy,
@@ -276,7 +278,7 @@ class Steel02(base.OpenSeesObject):
 # Deterioration models
 #===================================================================================================
 @dataclasses.dataclass
-class Bilin(base.OpenSeesObject):
+class Bilin(UniaxialMaterial):
     """Deterioration model with bilinear hysteretic response.
 
     Parameters
@@ -342,7 +344,6 @@ class Bilin(base.OpenSeesObject):
         Elastic stiffness amplification factor, mainly for use with concentrated
         plastic hinge elements. (default: 0.0)
     """
-    tag: int
     K0: float
     as_plus: float
     as_neg: float
@@ -368,8 +369,8 @@ class Bilin(base.OpenSeesObject):
     D_neg: float = 1.0
     nfactor: float = None
 
-    def tcl_code(self, formats=None) -> str:
-        args = ['uniaxialMaterial', 'Bilin']
+    def tcl_args(self, formats=None) -> t.List[str]:
+        args = ['Bilin']
         args += [
             getattr(self, field.name) for field in dataclasses.fields(self)
             if field.name not in ('nfactor', )

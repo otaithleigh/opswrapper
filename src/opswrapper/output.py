@@ -81,7 +81,7 @@ class ElementRecorder(base.OpenSeesObject):
             args.extend(utils.coerce_numeric(dof, int) for dof in np.asarray(self.dofs).flat)
 
         args.append(self.response)
-        return self.format_objects(args, formats)
+        return ' '.join(self.format_objects(args, formats))
 
 
 @dataclasses.dataclass
@@ -194,4 +194,4 @@ class NodeRecorder(base.OpenSeesObject):
             args.extend(utils.coerce_numeric(dof, int) for dof in np.asarray(self.dofs).flat)
 
         args.append(self.response)
-        return self.format_objects(args, formats)
+        return ' '.join(self.format_objects(args, formats))

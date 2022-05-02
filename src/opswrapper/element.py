@@ -1,11 +1,22 @@
 import dataclasses
+import typing as t
 
 from . import base
 from . import integration
 
 
 @dataclasses.dataclass
-class ElasticBeamColumn2D(base.OpenSeesObject):
+class Element(base.OpenSeesObject):
+    tag: int
+    inode: int
+    jnode: int
+
+    def tcl_code(self, formats=None) -> str:
+        return 'element ' + ' '.join(self.tcl_args(formats))
+
+
+@dataclasses.dataclass
+class ElasticBeamColumn2D(Element):
     """Elastic beam column element for 2D analysis.
 
     Does not include shear deformations.
@@ -32,9 +43,6 @@ class ElasticBeamColumn2D(base.OpenSeesObject):
         If True, use a consistent mass matrix instead of a lumped mass matrix.
         (default: False)
     """
-    tag: int
-    inode: int
-    jnode: int
     A: float
     E: float
     Iz: float
@@ -42,10 +50,10 @@ class ElasticBeamColumn2D(base.OpenSeesObject):
     mass: float = None
     cmass: bool = False
 
-    def tcl_code(self, formats=None) -> str:
+    def tcl_args(self, formats=None) -> t.List[str]:
         args = [
-            'element', 'elasticBeamColumn', self.tag, self.inode, self.jnode, self.A, self.E,
-            self.Iz, self.transf
+            'elasticBeamColumn', self.tag, self.inode, self.jnode, self.A, self.E, self.Iz,
+            self.transf
         ]
         if self.mass is not None:
             args.extend(['-mass', self.mass])
@@ -55,10 +63,7 @@ class ElasticBeamColumn2D(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class ElasticBeamColumn3D(base.OpenSeesObject):
-    tag: int
-    inode: int
-    jnode: int
+class ElasticBeamColumn3D(Element):
     A: float
     E: float
     G: float
@@ -69,10 +74,10 @@ class ElasticBeamColumn3D(base.OpenSeesObject):
     mass: float = None
     cmass: bool = False
 
-    def tcl_code(self, formats=None) -> str:
+    def tcl_args(self, formats=None) -> t.List[str]:
         args = [
-            'element', 'elasticBeamColumn', self.tag, self.inode, self.jnode, self.A, self.E,
-            self.G, self.J, self.Iy, self.Iz, self.transf
+            'elasticBeamColumn', self.tag, self.inode, self.jnode, self.A, self.E, self.G, self.J,
+            self.Iy, self.Iz, self.transf
         ]
         if self.mass is not None:
             args.extend(['-mass', self.mass])
@@ -82,7 +87,7 @@ class ElasticBeamColumn3D(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class ForceBeamColumn(base.OpenSeesObject):
+class ForceBeamColumn(Element):
     """Force-based beam column element.
 
     Parameters
@@ -95,7 +100,7 @@ class ForceBeamColumn(base.OpenSeesObject):
         Tag of the j node.
     transf : int
         Tag of the geometric transformation to use.
-    integration : integration.Integration
+    integration : str, integration.Integration
         Integration method to use for the element.
     mass : float, optional
         Mass-per-length of the member. (default: None)
@@ -106,23 +111,15 @@ class ForceBeamColumn(base.OpenSeesObject):
     itertol : float, optional
         Tolerance for the iterative form. (default: 1e-12)
     """
-    tag: int
-    inode: int
-    jnode: int
     transf: int
-    integration: integration.Integration
+    integration: t.Union[str, integration.Integration]
     mass: float = None
     iterative: bool = False
     maxiters: int = 10
     itertol: float = 1e-12
 
-    def tcl_code(self, formats=None) -> str:
-        args = ['element', 'forceBeamColumn', self.tag, self.inode, self.jnode, self.transf]
-        if isinstance(self.integration, integration.Integration):
-            integr = self.integration.tcl_code(formats)
-        else:
-            integr = str(self.integration)
-        args.append(integr)
+    def tcl_args(self, formats=None) -> t.List[str]:
+        args = ['forceBeamColumn', self.tag, self.inode, self.jnode, self.transf, self.integration]
         if self.mass is not None:
             args.extend(['-mass', self.mass])
         if self.iterative:
@@ -131,7 +128,7 @@ class ForceBeamColumn(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class DispBeamColumn(base.OpenSeesObject):
+class DispBeamColumn(Element):
     """Displacement-based beam column element.
 
     Parameters
@@ -157,9 +154,6 @@ class DispBeamColumn(base.OpenSeesObject):
         Integration method to use: 'Lobotto', 'Legendre', 'Radau', 'NewtonCotes',
         or 'Trapezoidal'. (default: 'Legendre')
     """
-    tag: int
-    inode: int
-    jnode: int
     npoints: int
     section: int
     transf: int
@@ -167,7 +161,7 @@ class DispBeamColumn(base.OpenSeesObject):
     cmass: bool = False
     integration: str = 'Legendre'
 
-    def tcl_code(self, formats=None) -> str:
+    def tcl_args(self, formats=None) -> t.List[str]:
         try:
             nsections = len(self.section)
             if nsections != self.npoints and nsections != 1:
@@ -177,7 +171,7 @@ class DispBeamColumn(base.OpenSeesObject):
             nsections = 1
             sections = [self.section]
 
-        args = ['element', 'dispBeamColumn', self.tag, self.inode, self.jnode, self.npoints]
+        args = ['dispBeamColumn', self.tag, self.inode, self.jnode, self.npoints]
         if nsections == 1:
             args.append(self.section)
             args.append(self.transf)
@@ -196,7 +190,7 @@ class DispBeamColumn(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class Truss(base.OpenSeesObject):
+class Truss(Element):
     """Truss element.
 
     Parameters
@@ -220,9 +214,6 @@ class Truss(base.OpenSeesObject):
     corot : bool, optional
         If True, construct a corotTruss instead of a truss. (default: False)
     """
-    tag: int
-    inode: int
-    jnode: int
     A: float
     mat: int
     rho: float = None
@@ -230,9 +221,9 @@ class Truss(base.OpenSeesObject):
     do_rayleigh: bool = False
     corot: bool = False
 
-    def tcl_code(self, formats=None) -> str:
+    def tcl_args(self, formats=None) -> t.List[str]:
         element = 'corotTruss' if self.corot else 'truss'
-        args = ['element', element, self.tag, self.inode, self.jnode, self.A, self.mat]
+        args = [element, self.tag, self.inode, self.jnode, self.A, self.mat]
         if self.rho is not None:
             args.extend(['-rho', self.rho])
         if self.cmass:
@@ -243,7 +234,7 @@ class Truss(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class TrussSection(base.OpenSeesObject):
+class TrussSection(Element):
     """Truss element specified by a section.
 
     Parameters
@@ -265,18 +256,15 @@ class TrussSection(base.OpenSeesObject):
     corot : bool, optional
         If True, construct a corotTruss instead of a truss. (default: False)
     """
-    tag: int
-    inode: int
-    jnode: int
     section: int
     rho: float = None
     cmass: bool = False
     do_rayleigh: bool = False
     corot: bool = False
 
-    def tcl_code(self, formats=None) -> str:
+    def tcl_args(self, formats=None) -> t.List[str]:
         element = 'corotTrussSection' if self.corot else 'trussSection'
-        args = ['element', element, self.tag, self.inode, self.jnode, self.section]
+        args = [element, self.tag, self.inode, self.jnode, self.section]
         if self.rho is not None:
             args.extend(['-rho', self.rho])
         if self.cmass:

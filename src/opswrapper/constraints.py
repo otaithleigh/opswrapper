@@ -65,7 +65,7 @@ class Lagrange(Constraints):
 
     def tcl_args(self, formats=None) -> t.List[str]:
         args = ['Lagrange', self.alpha_s, self.alpha_m]
-        return self.format_objects(args, formats, join=None)
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -91,4 +91,4 @@ class Penalty(Constraints):
 
     def tcl_args(self, formats=None) -> t.List[str]:
         args = ['Penalty', self.alpha_s, self.alpha_m]
-        return self.format_objects(args, formats, join=None)
+        return self.format_objects(args, formats)

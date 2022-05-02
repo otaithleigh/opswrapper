@@ -29,3 +29,9 @@ def test_Elastic3D_shear():
     generated = section.Elastic3D(1, 29000, 10, 144, 14.1, 11000, 0.402, 1.0, 1.0).tcl_code()
     expected = 'section Elastic 1 29000 10 144 14.1 11000 0.402 1 1'
     assert generated == expected
+
+
+def test_Fiber_section():
+    generated = section.Fiber(1).fiber(0, -1, 1.0, 2).fiber(0, 1, 1.0, 2).tcl_code()
+    expected = 'section Fiber 1 {\n    fiber 0 -1 1 2\n    fiber 0 1 1 2\n}'
+    assert generated == expected

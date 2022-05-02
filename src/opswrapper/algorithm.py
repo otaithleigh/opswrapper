@@ -187,7 +187,7 @@ class NewtonLineSearch(Algorithm):
             '-maxEta',
             self.max_eta,
         ]
-        return self.format_objects(args, formats, join=None)
+        return self.format_objects(args, formats)
 
 
 #===================================================================================================
@@ -225,7 +225,7 @@ class _AcceleratedNewton(
 
         args.extend(['-iterate', tangent_iter])
         args.extend(['-increment', tangent_incr])
-        args.extend(['-maxDim', self.format_objects([self.max_dim], formats)])
+        args.extend(['-maxDim', *self.format_objects([self.max_dim], formats)])
 
         return args
 
@@ -296,7 +296,7 @@ class _Broyden(
 
     def tcl_args(self, formats=None) -> t.List[str]:
         args = super().tcl_args(formats)
-        args.extend(self.format_objects(['-count', self.count], formats, join=None))
+        args.extend(self.format_objects(['-count', self.count], formats))
         return args
 
 

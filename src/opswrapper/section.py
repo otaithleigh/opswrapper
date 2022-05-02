@@ -1,10 +1,19 @@
 import dataclasses
+import typing as t
 
 from . import base
 
 
 @dataclasses.dataclass
-class Elastic2D(base.OpenSeesObject):
+class Section(base.OpenSeesObject):
+    tag: int
+
+    def tcl_code(self, formats=None) -> str:
+        return 'section ' + ' '.join(self.tcl_args(formats))
+
+
+@dataclasses.dataclass
+class Elastic2D(Section):
     """Elastic section for 2D analysis.
 
     Shear deformations may be included by specifying `G` and `alphaY`.
@@ -26,7 +35,6 @@ class Elastic2D(base.OpenSeesObject):
         Shear shape factor. Both `G` and `alphaY` must be set to create a
         section with shear deformations. (default: None)
     """
-    tag: int
     E: float
     A: float
     Iz: float
@@ -43,7 +51,7 @@ class Elastic2D(base.OpenSeesObject):
 
 
 @dataclasses.dataclass
-class Elastic3D(base.OpenSeesObject):
+class Elastic3D(Section):
     """Elastic section for 3D analysis.
 
     Shear deformations may be included by specifying `alphaY` and `alphaZ`.
@@ -71,7 +79,6 @@ class Elastic3D(base.OpenSeesObject):
         Shear shape factor along the local z-axis. Both `alphaY` and `alphaZ`
         must be set to create a section with shear deformations. (default: None)
     """
-    tag: int
     E: float
     A: float
     Iz: float
@@ -93,8 +100,64 @@ class Elastic3D(base.OpenSeesObject):
         return code
 
 
+#===================================================================================================
+# Fiber section
+#===================================================================================================
+class FiberSectionCommand(base.OpenSeesObject):
+    def tcl_code(self, formats=None) -> str:
+        return ' '.join(self.tcl_args(formats))
+
+
 @dataclasses.dataclass
-class Fiber(base.OpenSeesObject):
+class fiber(FiberSectionCommand):
+    y: float
+    z: float
+    A: float
+    mat: int
+
+    def tcl_args(self, formats=None) -> t.List[str]:
+        return self.format_objects(['    fiber', self.y, self.z, self.A, self.mat], formats)
+
+
+@dataclasses.dataclass
+class patch_quad(FiberSectionCommand):
+    mat: int
+    nfIJ: int
+    nfJK: int
+    yI: float
+    zI: float
+    yJ: float
+    zJ: float
+    yK: float
+    zK: float
+    yL: float
+    zL: float
+
+    def tcl_args(self, formats=None) -> t.List[str]:
+        return self.format_objects([
+            '    patch', 'quad', self.mat, self.nfIJ, self.nfJK, self.yI, self.zI, self.yJ, self.zJ,
+            self.yK, self.zK, self.yL, self.zL
+        ], formats)
+
+
+@dataclasses.dataclass
+class patch_rect(FiberSectionCommand):
+    mat: int
+    nfY: int
+    nfZ: int
+    yI: float
+    zI: float
+    yJ: float
+    zJ: float
+
+    def tcl_args(self, formats=None) -> t.List[str]:
+        return self.format_objects([
+            '    patch', 'rect', self.mat, self.nfY, self.nfZ, self.yI, self.zI, self.yJ, self.zJ
+        ], formats)
+
+
+@dataclasses.dataclass
+class Fiber(Section):
     """Fiber-based section.
 
     Commands that define the fibers can be passed in at construction or created
@@ -112,24 +175,10 @@ class Fiber(base.OpenSeesObject):
     Example
     -------
     >>> ops.section.Fiber(1).fiber(0, 1, 1.0, 2).fiber(0, -1, 1.0, 2)
-    Fiber(tag=1, GJ=None, commands=[Fiber._Fiber(y=0, z=1, A=1.0, mat=2), Fiber._Fiber(y=0, z=-1, A=1.0, mat=2)])
+    Fiber(tag=1, GJ=None, commands=[fiber(y=0, z=1, A=1.0, mat=2), fiber(y=0, z=-1, A=1.0, mat=2)])
     """
-    tag: int
     GJ: float = None
-    commands: list = dataclasses.field(default_factory=list)
-
-    @dataclasses.dataclass
-    class _Fiber():
-        y: float
-        z: float
-        A: float
-        mat: int
-        _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
-
-        def tcl_code(self, formats=None) -> str:
-            fmt = self._parent.get_format_spec(formats)
-            i, f = fmt.int, fmt.float
-            return f'fiber {self.y:{f}} {self.z:{f}} {self.A:{f}} {self.mat:{i}}'
+    commands: t.List[FiberSectionCommand] = dataclasses.field(default_factory=list)
 
     def fiber(self, y, z, A, mat):
         """Add a single fiber.
@@ -147,32 +196,8 @@ class Fiber(base.OpenSeesObject):
         mat : int
             Tag of the uniaxial material to use.
         """
-        self.commands.append(self._Fiber(y, z, A, mat, self))
+        self.commands.append(fiber(y, z, A, mat))
         return self
-
-    @dataclasses.dataclass
-    class _PatchQuad():
-        mat: int
-        nfIJ: int
-        nfJK: int
-        yI: float
-        zI: float
-        yJ: float
-        zJ: float
-        yK: float
-        zK: float
-        yL: float
-        zL: float
-        _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
-
-        def tcl_code(self, formats=None) -> str:
-            fmt = self._parent.get_format_spec(formats)
-            i, f = fmt.int, fmt.float
-            return (
-                f'patch quad {self.mat:{i}} {self.nfIJ:{i}} {self.nfJK:{i}}'
-                f' {self.yI:{f}} {self.zI:{f}} {self.yJ:{f}} {self.zJ:{f}}'
-                f' {self.yK:{f}} {self.zK:{f}} {self.yL:{f}} {self.zL:{f}}'
-            )
 
     def patch_quad(self, mat, nfIJ, nfJK, *coords):
         """Add a quadrilateral shaped patch.
@@ -207,27 +232,8 @@ class Fiber(base.OpenSeesObject):
         else:
             raise ValueError("patch_quad: coords must either be 4 2-tuples or 8 coordinates")
 
-        self.commands.append(self._PatchQuad(mat, nfIJ, nfJK, yI, zI, yJ, zJ, yK, zK, yL, zL, self))
+        self.commands.append(patch_quad(mat, nfIJ, nfJK, yI, zI, yJ, zJ, yK, zK, yL, zL))
         return self
-
-    @dataclasses.dataclass
-    class _PatchRect():
-        mat: int
-        nfY: int
-        nfZ: int
-        yI: float
-        zI: float
-        yJ: float
-        zJ: float
-        _parent: 'Fiber' = dataclasses.field(repr=False, hash=False)
-
-        def tcl_code(self, formats=None) -> str:
-            fmt = self._parent.get_format_spec(formats)
-            i, f = fmt.int, fmt.float
-            return (
-                f'patch rect {self.mat:{i}} {self.nfY:{i}} {self.nfZ:{i}}'
-                f' {self.yI:{f}} {self.zI:{f}} {self.yJ:{f}} {self.zJ:{f}}'
-            )
 
     def patch_rect(self, mat, nfY, nfZ, *coords):
         """Add a rectangular patch of fibers.
@@ -259,16 +265,20 @@ class Fiber(base.OpenSeesObject):
         else:
             raise ValueError("patch_rect: coords must either be 2 2-tuples or 4 coordinates")
 
-        self.commands.append(self._PatchRect(mat, nfY, nfZ, yI, zI, yJ, zJ, self))
+        self.commands.append(patch_rect(mat, nfY, nfZ, yI, zI, yJ, zJ))
         return self
 
     def tcl_code(self, formats=None) -> str:
-        fmt = self.get_format_spec(formats)
-        i, f = fmt.int, fmt.float
-        code = [f'section Fiber {self.tag:{i}}']
+        args = ['section', 'Fiber', self.tag]
         if self.GJ is not None:
-            code[0] += f' -GJ {self.GJ:{f}}'
-        code[0] += ' {'
-        code.extend([f'    {cmd.tcl_code(formats)}' for cmd in self.commands])
-        code.append('}')
-        return '\n'.join(code)
+            args.append('-GJ')
+            args.append(self.GJ)
+        args.append('{')
+        section_command = ' '.join(self.format_objects(args, formats))
+
+        code = [
+            section_command,
+            *self.commands,
+            '}',
+        ]
+        return '\n'.join(self.format_objects(code, formats))

@@ -29,7 +29,7 @@ class Model(base.OpenSeesObject):
 
     def tcl_code(self, formats=None) -> str:
         args = ['model', 'basic', '-ndm', self.ndm, '-ndf', self.ndf]
-        return self.format_objects(args, formats)
+        return ' '.join(self.format_objects(args, formats))
 
 
 @dataclasses.dataclass(init=False)
@@ -63,4 +63,4 @@ class Node(base.OpenSeesObject):
         if self.mass is not None:
             args.append('-mass')
             args.extend([coerce_numeric(m, float) for m in self.mass])
-        return self.format_objects(args, formats)
+        return ' '.join(self.format_objects(args, formats))

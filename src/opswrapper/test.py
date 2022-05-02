@@ -60,7 +60,7 @@ class Test(OpenSeesObject):
         method = self.__class__.__name__
         print_flag = PrintFlag(self.print_flag)
         args = [method, self.tolerance, self.max_iters, print_flag, self.norm_type]
-        return self.format_objects(args, formats, join=None)
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass

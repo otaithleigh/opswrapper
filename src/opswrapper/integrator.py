@@ -64,7 +64,7 @@ class LoadControl(StaticIntegrator):
         min_incr = self.incr if self.min_incr is None else self.min_incr
         max_incr = self.incr if self.max_incr is None else self.max_incr
         args = ['LoadControl', self.incr, self.num_iters, min_incr, max_incr]
-        return self.format_objects(args, formats, join=None)
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -106,7 +106,7 @@ class DisplacementControl(StaticIntegrator):
             min_incr,
             max_incr,
         ]
-        return self.format_objects(args, formats, join=None)
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -140,7 +140,7 @@ class MinUnbalDispNorm(StaticIntegrator):
         min_incr = self.incr if self.min_incr is None else self.min_incr
         max_incr = self.incr if self.max_incr is None else self.max_incr
         args = ['MinUnbalDispNorm', self.incr, self.Jd, min_incr, max_incr]
-        return self.format_objects(args, formats, join=None)
+        return self.format_objects(args, formats)
 
 
 @dataclasses.dataclass
@@ -165,7 +165,7 @@ class ArcLength(StaticIntegrator):
     alpha: float
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        return self.format_objects(['ArcLength', self.s, self.alpha], formats, join=None)
+        return self.format_objects(['ArcLength', self.s, self.alpha], formats)
 
 
 #===================================================================================================
@@ -219,7 +219,7 @@ class Newmark(TransientIntegrator):
     beta: float
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        return self.format_objects(['Newmark', self.gamma, self.beta], formats, join=None)
+        return self.format_objects(['Newmark', self.gamma, self.beta], formats)
 
 
 @dataclasses.dataclass
@@ -268,4 +268,4 @@ class HHT(TransientIntegrator):
             args.append(self.gamma if self.gamma is not None else self.default_gamma)
             args.append(self.beta if self.beta is not None else self.default_beta)
 
-        return self.format_objects(args, formats, join=None)
+        return self.format_objects(args, formats)
