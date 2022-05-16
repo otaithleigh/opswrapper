@@ -1,5 +1,6 @@
 import warnings
 from pathlib import Path
+from typing import Union
 
 import tomli
 
@@ -23,6 +24,10 @@ class PathOf():
 
     Configured paths may be accessed using either key (`path_of['opensees']`)
     or attribute (`path_of.opensees`) access.
+
+    Temporary overrides may be set using key-value syntax
+    (`path_of['opensees'] = '/path/to/OpenSees'`), but will be overridden if the
+    CWD changes and the configuration recalculates.
     """
     _default = {
         'opensees': Path('OpenSees'),
@@ -65,6 +70,9 @@ class PathOf():
             warnings.warn(f'Failed to apply config file {filename} due to exception: {exc}')
             self._config = config_bak
 
+    def __setitem__(self, key: str, value: Union[str, Path]):
+        self.set(key, value)
+
     def __getitem__(self, key: str) -> Path:
         return self.get(key)
 
@@ -96,6 +104,9 @@ class PathOf():
                 raise KeyError(f'{key!r} is unset and no default is provided') from exc
         else:
             return value
+
+    def set(self, key: str, value: Union[str, Path]):
+        self._config[key] = Path(value)
 
 
 path_of = PathOf()
