@@ -18,7 +18,7 @@ requirements:
   run:
     - python>=3.7.0
     - numpy
-    - toml
+    - tomli
     - xarray
 
 test:
