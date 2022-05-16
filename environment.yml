@@ -13,6 +13,7 @@ dependencies:
   - yapf
   - pytest
   # Needed for examples
+  - ipykernel
   - matplotlib
   # Documentation
   - sphinx
