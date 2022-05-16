@@ -1,63 +1,101 @@
-import dataclasses
+import warnings
 from pathlib import Path
 
-import toml
+import tomli
 
-from . import utils
-
-_ROOT = Path(__file__).parent
-_path_of_file = Path.home()/'.path_of.toml'
+_CONFIG_FILE_NAME = '.path_of.toml'
 
 
-@dataclasses.dataclass(repr=False)
-class _PathOf():
+class PathOf():
     """Paths to important files and directories.
 
-    Parameters
-    ----------
-    opensees
-        Path to the OpenSees binary.
-    scratch
-        Path of the scratch directory.
-    datadir
-        Path of the data directory (for e.g. ground motions)
+    Works by looking for `.path_of.toml` files, starting from the current
+    working directory and working back to the root, with the root having the
+    lowest priority and the CWD the highest. Any time the CWD changes, the
+    configuration is re-calculated.
+
+    The following config options have defaults:
+
+    - `'opensees'` -> `OpenSees` (i.e., look for it on the `PATH`)
+    - `'scratch'` -> `$HOME/Scratch` (Linux) or `%USERPROFILE%\\Scratch` (Windows)
+
+    These will be used if they are not defined in any configuration files.
+
+    Configured paths may be accessed using either key (`path_of['opensees']`)
+    or attribute (`path_of.opensees`) access.
     """
-    opensees: Path = Path('OpenSees')
-    scratch: Path = Path.home()/'Scratch'
-    datadir: Path = (_ROOT/"../../data").resolve()
+    _default = {
+        'opensees': Path('OpenSees'),
+        'scratch': Path.home()/'Scratch',
+    }
 
-    def __repr__(self):
-        return utils.list_dataclass_fields('path_of', self)
+    def __init__(self):
+        self._cwd = Path.cwd()
+        self._config: dict[str, Path] = {}
+        self._build_config()
 
-    def __setattr__(self, name, value):
-        if name in (field.name for field in dataclasses.fields(self)):
-            value = Path(value)
-        return super().__setattr__(name, value)
+    def _build_config(self):
+        """Starting from the CWD, walk up to root, accumulating .path_of.toml
+        files, then apply them starting from root.
+        """
+        config_files = []
+        if (p := self._cwd/_CONFIG_FILE_NAME).exists():
+            config_files.append(p)
 
-    def load_config(self, file):
-        """Load paths from a TOML configuration file.
+        for parent in self._cwd.parents:
+            if (p := parent/_CONFIG_FILE_NAME).exists():
+                config_files.append(p)
 
-        Overwrites existing object with settings from the given file, if the key
-        exists in the file. Example configuration file::
+        for file in reversed(config_files):
+            self._apply_config(file)
 
-            opensees = "/home/ptalley2/.local/bin/OpenSees"
-            scratch = "/home/ptalley2/Scratch"
+    def _apply_config(self, filename):
+        try:
+            with open(filename) as f:
+                config = tomli.load(f)
+        except Exception as exc:
+            warnings.warn(f'Could not load config file {filename} due to exception: {exc}')
+            return
+
+        config_bak = self._config.copy()
+        pathed_config = zip(config.keys(), map(Path, config.values()))
+        try:
+            self._config.update(pathed_config)
+        except Exception as exc:
+            warnings.warn(f'Failed to apply config file {filename} due to exception: {exc}')
+            self._config = config_bak
+
+    def __getitem__(self, key: str) -> Path:
+        return self.get(key)
+
+    def __getattr__(self, name: str) -> Path:
+        return self.get(name)
+
+    def get(self, key: str) -> Path:
+        """Retrieve a path from the configuration.
 
         Parameters
         ----------
-        file : path-like
-            Path to the configuration file.
+        key : str
+            Configured path to retrieve.
+
+        Raises
+        ------
+        KeyError
+            If `key` is not set in the configuration and is not present in
+            `_default`.
         """
-        file_paths = toml.load(file)
-        self.opensees = file_paths.get('opensees', self.opensees)
-        self.scratch = file_paths.get('scratch', self.scratch)
-        self.datadir = file_paths.get('datadir', self.datadir)
+        if self._cwd != (cwd := Path.cwd()):
+            self._cwd = cwd
+            self._build_config()
+        value = self._config.get(key)
+        if value is None:
+            try:
+                return self._default[key]
+            except KeyError as exc:
+                raise KeyError(f'{key!r} is unset and no default is provided') from exc
+        else:
+            return value
 
-    @classmethod
-    def from_config(cls, file):
-        return cls().load_config(file)
 
-
-path_of = _PathOf()
-if _path_of_file.exists():
-    path_of.load_config(_path_of_file)
+path_of = PathOf()
