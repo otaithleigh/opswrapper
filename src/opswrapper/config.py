@@ -56,7 +56,7 @@ class PathOf():
 
     def _apply_config(self, filename):
         try:
-            with open(filename) as f:
+            with open(filename, 'rb') as f:
                 config = tomli.load(f)
         except Exception as exc:
             warnings.warn(f'Could not load config file {filename} due to exception: {exc}')
