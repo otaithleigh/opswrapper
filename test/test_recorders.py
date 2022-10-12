@@ -59,6 +59,13 @@ def test_node_recorder_delayed_file_then_format():
     assert generated == expected
 
 
+def test_node_recorder_region():
+    recorder = NodeRecorder(file='/path/to/file', region=1, response='vel')
+    generated = recorder.tcl_code()
+    expected = 'recorder Node -file {/path/to/file} -region 1 vel'
+    assert generated == expected
+
+
 def test_node_recorder_all_nodes():
     recorder = NodeRecorder(
         file='/path/to/file',
@@ -138,6 +145,13 @@ def test_element_recorder_delayed_file_then_format():
     recorder = ElementRecorder(elements=1, dofs=1, response='force')
     generated = recorder.tcl_code().format(file='/path/to/file')
     expected = 'recorder Element -file {/path/to/file} -ele 1 -dof 1 force'
+    assert generated == expected
+
+
+def test_element_recorder_region():
+    recorder = ElementRecorder(file='/path/to/file', region=1, response='axialForce')
+    generated = recorder.tcl_code()
+    expected = 'recorder Element -file {/path/to/file} -region 1 axialForce'
     assert generated == expected
 
 

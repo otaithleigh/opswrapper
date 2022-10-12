@@ -30,6 +30,8 @@ class ElementRecorder(base.OpenSeesObject):
     elements : array-like or 'all'
         Element tags to record. If 'all', the `getEleTags` command is used to
         produce a list of all elements.
+    region : int, optional
+        Region tag whose elements to record.
     dofs : array-like, optional
         DOFs to record.
     response : str
@@ -45,6 +47,7 @@ class ElementRecorder(base.OpenSeesObject):
     fileformat: str = 'file'
     precision: int = None
     elements: np.ndarray = None
+    region: int = None
     dofs: np.ndarray = None
     response: str = None
 
@@ -63,9 +66,13 @@ class ElementRecorder(base.OpenSeesObject):
 
         if str(self.elements) == 'all':
             args.append(f'-ele {tcl_list_expansion}[getEleTags]')
-        else:
+        elif self.elements is not None:
             args.append('-ele')
             args.extend(utils.coerce_numeric(tag, int) for tag in np.asarray(self.elements).flat)
+
+        if self.region is not None:
+            args.append('-region')
+            args.append(self.region)
 
         if self.precision is not None:
             args.append('-precision')
@@ -108,6 +115,8 @@ class NodeRecorder(base.OpenSeesObject):
         produce a list of all nodes.
     node_range : 2-tuple or array-like, optional
         Pair of node tags that define the range to record.
+    region : int, optional
+        Region tag whose nodes to record.
     dofs : array-like, optional
         DOFs to record.
     response : str
@@ -140,6 +149,7 @@ class NodeRecorder(base.OpenSeesObject):
     time: bool = False
     nodes: np.ndarray = None
     node_range: np.ndarray = None
+    region: int = None
     dofs: np.ndarray = None
     response: str = None
 
@@ -176,6 +186,10 @@ class NodeRecorder(base.OpenSeesObject):
         if self.node_range is not None:
             args.append('-nodeRange')
             args.extend(self.node_range)
+
+        if self.region is not None:
+            args.append('-region')
+            args.append(self.region)
 
         if self.dofs is not None:
             args.append('-dof')
