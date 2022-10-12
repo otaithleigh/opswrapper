@@ -20,7 +20,7 @@ def coerce_numeric(obj, to_type: type):
     # If coercion doesn't work, just return the original object.
     try:
         coerced = to_type(obj)
-    except:
+    except Exception:
         return obj
 
     return coerced
@@ -145,7 +145,7 @@ def list_dataclass_fields(name, object, pad='', end='\n', exclude=None) -> str:
 
 def fill_out_numbers(peaks, rate):
     """Fill in numbers between peaks.
-    
+
     Parameters
     ----------
     peaks : array-like
@@ -164,7 +164,7 @@ def fill_out_numbers(peaks, rate):
            [ 0.5 ,  1.5 , -1.5 ],
            [ 0.75,  1.75, -1.75],
            [ 1.  ,  2.  , -2.  ]])
-    
+
     Ported from the MATLAB function written by Mark Denavit.
     """
     peaks = np.array(peaks)
