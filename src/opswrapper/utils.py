@@ -49,6 +49,7 @@ class Namespace(types.SimpleNamespace):
     >>> files.output
     'output.csv'
     """
+
     def __iter__(self):
         return iter(self.__dict__.items())
 
@@ -63,7 +64,7 @@ class Namespace(types.SimpleNamespace):
 
 
 def path_for_tcl(path) -> str:
-    return str(path).replace('\\', '/')
+    return str(path).replace("\\", "/")
 
 
 def print_model(model: List[str], file=None):
@@ -84,11 +85,11 @@ def print_model(model: List[str], file=None):
     except TypeError:
         file_is_descriptor = True
 
-    modeltext = '\n'.join([str(line) for line in model])
+    modeltext = "\n".join([str(line) for line in model])
     if file_is_descriptor:
         print(modeltext, file=file)
     else:
-        with open(file, 'w') as f:
+        with open(file, "w") as f:
             print(modeltext, file=f)
 
 
@@ -102,12 +103,12 @@ def tcllist(l: list) -> str:
     >>> tcllist([1.0, 2, "sam's the best!"])
     "[list {1.0} {2} {sam's the best!}]"
     """
-    list_items = ['{' + str(i) + '}' for i in l]
-    list_str = ' '.join(list_items)
-    return f'[list {list_str}]'
+    list_items = ["{" + str(i) + "}" for i in l]
+    list_str = " ".join(list_items)
+    return f"[list {list_str}]"
 
 
-def list_dataclass_fields(name, object, pad='', end='\n', exclude=None) -> str:
+def list_dataclass_fields(name, object, pad="", end="\n", exclude=None) -> str:
     """Represent the fields of a dataclass object.
 
     Parameters
@@ -132,13 +133,15 @@ def list_dataclass_fields(name, object, pad='', end='\n', exclude=None) -> str:
             gravity_columns.strain_hardening : 0.01
     """
     fields = dataclasses.fields(object)
-    lenname = lambda f: len(getattr(f, 'name'))
+    lenname = lambda f: len(getattr(f, "name"))
     max_key_len = max(map(lenname, fields))
     l = []
     for field in fields:
         if exclude is not None and field.name in exclude:
             continue
-        l.append(f'{pad}{name}.{field.name.ljust(max_key_len)} : {getattr(object, field.name)!r}')
+        l.append(
+            f"{pad}{name}.{field.name.ljust(max_key_len)} : {getattr(object, field.name)!r}"
+        )
 
     return end.join(l)
 
@@ -180,7 +183,7 @@ def fill_out_numbers(peaks, rate):
 
     for i in range(numpeaks - 1):
         diff = peaks[i + 1, :] - peaks[i, :]
-        numsteps = int(np.maximum(2, 1 + np.ceil(np.max(np.abs(diff/rate)))))
+        numsteps = int(np.maximum(2, 1 + np.ceil(np.max(np.abs(diff / rate)))))
         numbers_to_add = np.linspace(peaks[i, :], peaks[i + 1, :], numsteps)
         numbers.append(numbers_to_add[1:, :])
 
@@ -191,8 +194,8 @@ def fill_out_numbers(peaks, rate):
     return numbers
 
 
-KT = TypeVar('KT')
-VT = TypeVar('VT')
+KT = TypeVar("KT")
+VT = TypeVar("VT")
 
 
 @dataclasses.dataclass
@@ -217,6 +220,7 @@ class ValueTypeDispatch(Generic[KT, VT]):
     <Traceback>
     TypeError: Invalid tangent 'not_a_tangent'; must be one of ['current', 'initial']
     """
+
     name: str
     dispatch: Mapping[KT, VT]
 
@@ -225,5 +229,7 @@ class ValueTypeDispatch(Generic[KT, VT]):
             value = self.dispatch[key]
         except KeyError as exc:
             valid = list(self.dispatch)
-            raise TypeError(f'Invalid {self.name} {key!r}; must be one of {valid!r}') from exc
+            raise TypeError(
+                f"Invalid {self.name} {key!r}; must be one of {valid!r}"
+            ) from exc
         return value

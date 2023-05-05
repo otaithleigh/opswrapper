@@ -6,7 +6,7 @@ from .base import OpenSeesObject
 
 class Constraints(OpenSeesObject):
     def tcl_code(self, formats=None) -> str:
-        return ' '.join(['constraints', *self.tcl_args(formats=formats)])
+        return " ".join(["constraints", *self.tcl_args(formats=formats)])
 
 
 @dataclasses.dataclass
@@ -15,8 +15,9 @@ class Plain(Constraints):
 
     Only supports constraints applied using the 'fix' and 'equalDOF' commands.
     """
+
     def tcl_args(self, formats=None) -> t.List[str]:
-        return ['Plain']
+        return ["Plain"]
 
 
 @dataclasses.dataclass
@@ -38,8 +39,9 @@ class Transformation(Constraints):
     2. If multiple nodes are constrained, make sure that the retained node is
        not constrained in any other constraint.
     """
+
     def tcl_args(self, formats=None) -> t.List[str]:
-        return ['Transformation']
+        return ["Transformation"]
 
 
 @dataclasses.dataclass
@@ -60,11 +62,12 @@ class Lagrange(Constraints):
     unknowns is 0.0. This ensures that the system IS NOT symmetric positive
     definite.
     """
+
     alpha_s: float
     alpha_m: float
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['Lagrange', self.alpha_s, self.alpha_m]
+        args = ["Lagrange", self.alpha_s, self.alpha_m]
         return self.format_objects(args, formats)
 
 
@@ -86,9 +89,10 @@ class Penalty(Constraints):
     not enforced strongly enough) or too large (problems associated with
     conditioning of the system of equations).
     """
+
     alpha_s: float
     alpha_m: float
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['Penalty', self.alpha_s, self.alpha_m]
+        args = ["Penalty", self.alpha_s, self.alpha_m]
         return self.format_objects(args, formats)

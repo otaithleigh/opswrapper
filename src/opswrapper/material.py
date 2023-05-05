@@ -11,12 +11,12 @@ class UniaxialMaterial(base.OpenSeesObject):
     tag: int
 
     def tcl_code(self, formats=None) -> str:
-        return 'uniaxialMaterial ' + ' '.join(self.tcl_args(formats))
+        return "uniaxialMaterial " + " ".join(self.tcl_args(formats))
 
 
-#===================================================================================================
+# ======================================================================================
 # Elastic-ish materials
-#===================================================================================================
+# ======================================================================================
 @dataclasses.dataclass
 class Elastic(UniaxialMaterial):
     """Elastic uniaxial material.
@@ -36,12 +36,13 @@ class Elastic(UniaxialMaterial):
     Eneg : float, optional
         Tangent in compression (default = E)
     """
+
     E: float
     eta: float = 0.0
     Eneg: float = None
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['Elastic', self.tag, self.E]
+        args = ["Elastic", self.tag, self.E]
         if self.Eneg is not None:
             args.append(self.eta)
             args.append(self.Eneg)
@@ -73,13 +74,14 @@ class ElasticPP(UniaxialMaterial):
     eps0 : float, optional
         Initial strain/deformation. (default = 0.0)
     """
+
     E: float
     eps_y: float
     eps_yN: float = None
     eps0: float = 0.0
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['ElasticPP', self.tag, self.E, self.eps_y]
+        args = ["ElasticPP", self.tag, self.E, self.eps_y]
         eps_yN = self.eps_yN if self.eps_yN is not None else self.eps_y
         if self.eps0 != 0.0:
             args.append(eps_yN)
@@ -113,6 +115,7 @@ class Hardening(UniaxialMaterial):
     eta : float, optional
         Visco-plastic coefficient. (default = 0.0)
     """
+
     E: float
     sigma_y: float
     h_iso: float
@@ -121,7 +124,7 @@ class Hardening(UniaxialMaterial):
 
     def tcl_args(self, formats=None) -> t.List[str]:
         args = [
-            'Hardening',
+            "Hardening",
             self.tag,
             self.E,
             self.sigma_y,
@@ -134,9 +137,9 @@ class Hardening(UniaxialMaterial):
         return self.format_objects(args, formats)
 
 
-#===================================================================================================
+# ======================================================================================
 # Steels
-#===================================================================================================
+# ======================================================================================
 @dataclasses.dataclass
 class Steel01(UniaxialMaterial):
     """Bilinear steel model with optional isotropic hardening.
@@ -166,6 +169,7 @@ class Steel01(UniaxialMaterial):
     a4 : float, optional
         Isotropic hardening parameter; see `a3`.
     """
+
     Fy: float
     E: float
     b: float
@@ -181,11 +185,13 @@ class Steel01(UniaxialMaterial):
         super().__post_init__()
         nparams = self._num_iso_params_defined()
         if nparams not in [0, 4]:
-            raise ValueError('Steel01: isometric hardening definition incomplete '
-                             f'(expected 4 params, got {nparams})')
+            raise ValueError(
+                "Steel01: isometric hardening definition incomplete "
+                f"(expected 4 params, got {nparams})"
+            )
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['Steel01', self.tag, self.Fy, self.E, self.b]
+        args = ["Steel01", self.tag, self.Fy, self.E, self.b]
         if self._num_iso_params_defined() == 4:
             args.extend([self.a1, self.a2, self.a3, self.a4])
 
@@ -235,6 +241,7 @@ class Steel02(UniaxialMaterial):
         Initial stress. Initial strain is not zero; it is calculated from
         sigma_i/E. (default: 0.0)
     """
+
     Fy: float
     E: float
     b: float
@@ -252,7 +259,7 @@ class Steel02(UniaxialMaterial):
 
     def tcl_args(self, formats=None) -> t.List[str]:
         args = [
-            'Steel02',
+            "Steel02",
             self.tag,
             self.Fy,
             self.E,
@@ -274,9 +281,9 @@ class Steel02(UniaxialMaterial):
         return self.format_objects(args, formats)
 
 
-#===================================================================================================
+# ======================================================================================
 # Deterioration models
-#===================================================================================================
+# ======================================================================================
 @dataclasses.dataclass
 class Bilin(UniaxialMaterial):
     """Deterioration model with bilinear hysteretic response.
@@ -344,6 +351,7 @@ class Bilin(UniaxialMaterial):
         Elastic stiffness amplification factor, mainly for use with concentrated
         plastic hinge elements. (default: 0.0)
     """
+
     K0: float
     as_plus: float
     as_neg: float
@@ -370,10 +378,11 @@ class Bilin(UniaxialMaterial):
     nfactor: float = None
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['Bilin']
+        args = ["Bilin"]
         args += [
-            getattr(self, field.name) for field in dataclasses.fields(self)
-            if field.name not in ('nfactor', )
+            getattr(self, field.name)
+            for field in dataclasses.fields(self)
+            if field.name not in ("nfactor",)
         ]
         if self.nfactor is not None:
             args.append(self.nfactor)

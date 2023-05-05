@@ -33,6 +33,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         Path to the directory for storing temporary files. If None, uses the
         value from the global configuration. (default: None)
     """
+
     def __init__(
         self,
         material,
@@ -40,13 +41,13 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         echo_output=False,
         delete_files=True,
         opensees_path=None,
-        scratch_path=None
+        scratch_path=None,
     ):
         super().__init__(
             echo_output=echo_output,
             delete_files=delete_files,
             opensees_path=opensees_path,
-            scratch_path=scratch_path
+            scratch_path=scratch_path,
         )
         self.material = material
         self.tag = tag
@@ -66,7 +67,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         rate_type: str = None,
         rate_value: float = None,
         echo: bool = None,
-        analysis_id: str = None
+        analysis_id: str = None,
     ):
         """
         Parameters
@@ -98,41 +99,43 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         # Filenames
         scratch_file = self.create_scratch_filer(analysis_id)
         files = utils.Namespace()
-        files.input = scratch_file('input', '.tcl')
-        files.pattern = scratch_file('pattern', '.dat')
-        files.output_force = scratch_file('output_force', '.dat')
-        files.output_disp = scratch_file('output_disp', '.dat')
-        files.output_stiff = scratch_file('output_stiff', '.dat')
+        files.input = scratch_file("input", ".tcl")
+        files.pattern = scratch_file("pattern", ".dat")
+        files.output_force = scratch_file("output_force", ".dat")
+        files.output_disp = scratch_file("output_disp", ".dat")
+        files.output_stiff = scratch_file("output_stiff", ".dat")
 
-        numbers = self._generate_imposed_displacement(peak_points, rate_type, rate_value)
+        numbers = self._generate_imposed_displacement(
+            peak_points, rate_type, rate_value
+        )
         numsteps = numbers.size - 2
 
-        pattern_filepath = '{' + utils.path_for_tcl(files.pattern) + '}'
+        pattern_filepath = "{" + utils.path_for_tcl(files.pattern) + "}"
         new_recorder = functools.partial(ElementRecorder, precision=10, elements=1)
         material_definition = self._process_material_definition()
         model = [
             Model(ndm=1, ndf=1),
             Node(1, 0.0),
             Node(2, 1.0),
-            'fix 1 1',
+            "fix 1 1",
             *material_definition,
             element.Truss(1, 1, 2, 1.0, mat=self.tag),
             f'pattern Plain 1 "Series -dt 1.0 -filePath {pattern_filepath} -factor 1.0" {{',
-            '    sp 2 1 1.0',
-            '}',
-            new_recorder(file=files.output_force, response='force'),
-            new_recorder(file=files.output_disp, response='deformations'),
-            new_recorder(file=files.output_stiff, response='stiff'),
-            'system UmfPack',
+            "    sp 2 1 1.0",
+            "}",
+            new_recorder(file=files.output_force, response="force"),
+            new_recorder(file=files.output_disp, response="deformations"),
+            new_recorder(file=files.output_stiff, response="stiff"),
+            "system UmfPack",
             constraints.Transformation(),
             test.NormDispIncr(tolerance=1e-8, max_iters=10, print_flag=0),
-            'algorithm Newton',
-            'numberer RCM',
-            'integrator LoadControl 1.0',
-            'analysis Static',
-            f'set ok [analyze {numsteps:d}]',
-            'if {$ok != 0} {exit 2}',
-            'exit 1',
+            "algorithm Newton",
+            "numberer RCM",
+            "integrator LoadControl 1.0",
+            "analysis Static",
+            f"set ok [analyze {numsteps:d}]",
+            "if {$ok != 0} {exit 2}",
+            "exit 1",
         ]
 
         # Write files to disk
@@ -142,9 +145,9 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         # Run the analysis
         process = self.run_opensees(files.input, echo=echo)
         if process.returncode == 1:
-            status = 'Analysis successful'
+            status = "Analysis successful"
         elif process.returncode == 2:
-            status = 'Analysis failed'
+            status = "Analysis failed"
             warnings.warn("UniaxialMaterialAnalysis.run_analysis: analysis failed")
         else:
             raise RuntimeError(
@@ -153,19 +156,19 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
 
         # Read results
         disp = np.loadtxt(files.output_disp)
-        results['disp'] = xr.DataArray(disp, dims='time')
+        results["disp"] = xr.DataArray(disp, dims="time")
 
         force = np.loadtxt(files.output_force)
-        results['force'] = xr.DataArray(force[:, 1], dims='time')
+        results["force"] = xr.DataArray(force[:, 1], dims="time")
 
         with warnings.catch_warnings() as cw:
-            warnings.simplefilter('ignore')
+            warnings.simplefilter("ignore")
             stiff = np.loadtxt(files.output_stiff)
         if len(stiff) != 0:
-            results['stiff'] = xr.DataArray(stiff, dims='time')
+            results["stiff"] = xr.DataArray(stiff, dims="time")
 
-        results.attrs['status'] = status
-        results.attrs['stdout'] = process.stdout
+        results.attrs["status"] = status
+        results.attrs["stdout"] = process.stdout
 
         # Cleanup
         if self.delete_files:
@@ -183,8 +186,8 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             raise TypeError("rate_value must be specified if rate_type is not None")
 
         rate = {
-            'StrainRate': lambda: rate_value,
-            'Steps': lambda: np.sum(np.abs(np.diff(peak_points)))/rate_value,
+            "StrainRate": lambda: rate_value,
+            "Steps": lambda: np.sum(np.abs(np.diff(peak_points))) / rate_value,
             None: lambda: np.max(np.abs(np.diff(peak_points))),
         }[rate_type]()
 

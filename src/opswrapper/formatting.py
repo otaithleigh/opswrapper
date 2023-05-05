@@ -4,14 +4,15 @@ import dataclasses
 from typing import Dict, Union
 
 __all__ = [
-    'MultiFormatSpec',
-    'set_global_format_spec',
+    "MultiFormatSpec",
+    "set_global_format_spec",
 ]
 
 
 @dataclasses.dataclass
-class MultiFormatSpec():
+class MultiFormatSpec:
     """Specifiers for formatting of different types."""
+
     _spec: SpecDict = dataclasses.field(default_factory=dict)
 
     # Properties for temporary backwards compatibility
@@ -25,8 +26,10 @@ class MultiFormatSpec():
 
     def __repr__(self) -> str:
         clsname = self.__class__.__name__
-        specs = ', '.join([f'{cls.__name__}={fmt!r}' for cls, fmt in self._spec.items()])
-        return f'{clsname}({specs})'
+        specs = ", ".join(
+            [f"{cls.__name__}={fmt!r}" for cls, fmt in self._spec.items()]
+        )
+        return f"{clsname}({specs})"
 
     def copy(self):
         """Return a copy of the object."""
@@ -80,7 +83,7 @@ class MultiFormatSpec():
                 if isinstance(obj, type):
                     break
             else:
-                fmt = ''
+                fmt = ""
         return fmt
 
     def register_format(self, cls: type, fmt: str):
@@ -94,7 +97,7 @@ class MultiFormatSpec():
             The format string to register.
         """
         if not isinstance(cls, type):
-            raise TypeError(f'cls must be a type, not a {cls.__class__!r}')
+            raise TypeError(f"cls must be a type, not a {cls.__class__!r}")
 
         self._spec[cls] = fmt
 
@@ -103,10 +106,10 @@ SpecDict = Dict[type, str]
 SpecLike = Union[SpecDict, MultiFormatSpec]
 
 _GLOBAL_FORMAT_SPEC = MultiFormatSpec()
-_GLOBAL_FORMAT_SPEC.register_format(bool, 'd')
-_GLOBAL_FORMAT_SPEC.register_format(int, 'd')
-_GLOBAL_FORMAT_SPEC.register_format(float, 'g')
-_GLOBAL_FORMAT_SPEC.register_format(str, '')
+_GLOBAL_FORMAT_SPEC.register_format(bool, "d")
+_GLOBAL_FORMAT_SPEC.register_format(int, "d")
+_GLOBAL_FORMAT_SPEC.register_format(float, "g")
+_GLOBAL_FORMAT_SPEC.register_format(str, "")
 
 
 def set_global_format_spec(formats: SpecDict):

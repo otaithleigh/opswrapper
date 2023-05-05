@@ -12,7 +12,7 @@ class Element(base.OpenSeesObject):
     jnode: int
 
     def tcl_code(self, formats=None) -> str:
-        return 'element ' + ' '.join(self.tcl_args(formats))
+        return "element " + " ".join(self.tcl_args(formats))
 
 
 @dataclasses.dataclass
@@ -43,6 +43,7 @@ class ElasticBeamColumn2D(Element):
         If True, use a consistent mass matrix instead of a lumped mass matrix.
         (default: False)
     """
+
     A: float
     E: float
     Iz: float
@@ -52,13 +53,19 @@ class ElasticBeamColumn2D(Element):
 
     def tcl_args(self, formats=None) -> t.List[str]:
         args = [
-            'elasticBeamColumn', self.tag, self.inode, self.jnode, self.A, self.E, self.Iz,
-            self.transf
+            "elasticBeamColumn",
+            self.tag,
+            self.inode,
+            self.jnode,
+            self.A,
+            self.E,
+            self.Iz,
+            self.transf,
         ]
         if self.mass is not None:
-            args.extend(['-mass', self.mass])
+            args.extend(["-mass", self.mass])
         if self.cmass:
-            args.append('-cMass')
+            args.append("-cMass")
         return self.format_objects(args, formats)
 
 
@@ -76,13 +83,22 @@ class ElasticBeamColumn3D(Element):
 
     def tcl_args(self, formats=None) -> t.List[str]:
         args = [
-            'elasticBeamColumn', self.tag, self.inode, self.jnode, self.A, self.E, self.G, self.J,
-            self.Iy, self.Iz, self.transf
+            "elasticBeamColumn",
+            self.tag,
+            self.inode,
+            self.jnode,
+            self.A,
+            self.E,
+            self.G,
+            self.J,
+            self.Iy,
+            self.Iz,
+            self.transf,
         ]
         if self.mass is not None:
-            args.extend(['-mass', self.mass])
+            args.extend(["-mass", self.mass])
         if self.cmass:
-            args.append('-cMass')
+            args.append("-cMass")
         return self.format_objects(args, formats)
 
 
@@ -111,6 +127,7 @@ class ForceBeamColumn(Element):
     itertol : float, optional
         Tolerance for the iterative form. (default: 1e-12)
     """
+
     transf: int
     integration: t.Union[str, integration.Integration]
     mass: float = None
@@ -119,11 +136,18 @@ class ForceBeamColumn(Element):
     itertol: float = 1e-12
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['forceBeamColumn', self.tag, self.inode, self.jnode, self.transf, self.integration]
+        args = [
+            "forceBeamColumn",
+            self.tag,
+            self.inode,
+            self.jnode,
+            self.transf,
+            self.integration,
+        ]
         if self.mass is not None:
-            args.extend(['-mass', self.mass])
+            args.extend(["-mass", self.mass])
         if self.iterative:
-            args.extend(['-iter', self.maxiters, self.itertol])
+            args.extend(["-iter", self.maxiters, self.itertol])
         return self.format_objects(args, formats)
 
 
@@ -154,37 +178,40 @@ class DispBeamColumn(Element):
         Integration method to use: 'Lobotto', 'Legendre', 'Radau', 'NewtonCotes',
         or 'Trapezoidal'. (default: 'Legendre')
     """
+
     npoints: int
     section: int
     transf: int
     mass: float = None
     cmass: bool = False
-    integration: str = 'Legendre'
+    integration: str = "Legendre"
 
     def tcl_args(self, formats=None) -> t.List[str]:
         try:
             nsections = len(self.section)
             if nsections != self.npoints and nsections != 1:
-                raise ValueError("DispBeamColumn: number of sections must be 1 or npoints")
+                raise ValueError(
+                    "DispBeamColumn: number of sections must be 1 or npoints"
+                )
             sections = self.section
         except TypeError:
             nsections = 1
             sections = [self.section]
 
-        args = ['dispBeamColumn', self.tag, self.inode, self.jnode, self.npoints]
+        args = ["dispBeamColumn", self.tag, self.inode, self.jnode, self.npoints]
         if nsections == 1:
             args.append(self.section)
             args.append(self.transf)
         else:
-            args.append('-sections')
+            args.append("-sections")
             args.extend(sections)
             args.append(self.transf)
         if self.mass is not None:
-            args.extend(['-mass', self.mass])
+            args.extend(["-mass", self.mass])
         if self.cmass:
-            args.append('-cMass')
-        if self.integration != 'Legendre':
-            args.extend('-integration', self.integration)
+            args.append("-cMass")
+        if self.integration != "Legendre":
+            args.extend("-integration", self.integration)
 
         return self.format_objects(args, formats)
 
@@ -214,6 +241,7 @@ class Truss(Element):
     corot : bool, optional
         If True, construct a corotTruss instead of a truss. (default: False)
     """
+
     A: float
     mat: int
     rho: float = None
@@ -222,14 +250,14 @@ class Truss(Element):
     corot: bool = False
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        element = 'corotTruss' if self.corot else 'truss'
+        element = "corotTruss" if self.corot else "truss"
         args = [element, self.tag, self.inode, self.jnode, self.A, self.mat]
         if self.rho is not None:
-            args.extend(['-rho', self.rho])
+            args.extend(["-rho", self.rho])
         if self.cmass:
-            args.extend(['-cMass', self.cmass])
+            args.extend(["-cMass", self.cmass])
         if self.do_rayleigh:
-            args.extend(['-doRayleigh', self.do_rayleigh])
+            args.extend(["-doRayleigh", self.do_rayleigh])
         return self.format_objects(args, formats)
 
 
@@ -256,6 +284,7 @@ class TrussSection(Element):
     corot : bool, optional
         If True, construct a corotTruss instead of a truss. (default: False)
     """
+
     section: int
     rho: float = None
     cmass: bool = False
@@ -263,12 +292,12 @@ class TrussSection(Element):
     corot: bool = False
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        element = 'corotTrussSection' if self.corot else 'trussSection'
+        element = "corotTrussSection" if self.corot else "trussSection"
         args = [element, self.tag, self.inode, self.jnode, self.section]
         if self.rho is not None:
-            args.extend(['-rho', self.rho])
+            args.extend(["-rho", self.rho])
         if self.cmass:
-            args.extend(['-cMass', self.cmass])
+            args.extend(["-cMass", self.cmass])
         if self.do_rayleigh:
-            args.extend(['-doRayleigh', self.do_rayleigh])
+            args.extend(["-doRayleigh", self.do_rayleigh])
         return self.format_objects(args, formats)

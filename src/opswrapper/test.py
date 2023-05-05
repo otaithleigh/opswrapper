@@ -28,7 +28,7 @@ _standard_test_parameters = """Parameters
 
 class PrintFlag(IntEnum):
     """Print flag for convergence tests.
-    
+
     Options
     -------
     - 0: print nothing
@@ -39,6 +39,7 @@ class PrintFlag(IntEnum):
     - 5: if test fails to converge after `max_iters`, print an error message
          BUT RETURN A SUCCESSFUL TEST.
     """
+
     NOTHING = 0
     NORMS = 1
     NORMS_AND_ITERS = 2
@@ -54,7 +55,7 @@ class Test(OpenSeesObject):
     norm_type: int = 2
 
     def tcl_code(self, formats=None) -> str:
-        return ' '.join(['test', *self.tcl_args(formats=formats)])
+        return " ".join(["test", *self.tcl_args(formats=formats)])
 
     def tcl_args(self, formats=None) -> t.List[str]:
         method = self.__class__.__name__
@@ -282,4 +283,4 @@ class RelativeEnergyIncr(Test):
 
 
 for subclass in Test.__subclasses__():
-    subclass.__doc__ %= {'parameters': _standard_test_parameters}
+    subclass.__doc__ %= {"parameters": _standard_test_parameters}

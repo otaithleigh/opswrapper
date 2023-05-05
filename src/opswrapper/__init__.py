@@ -20,4 +20,4 @@ from .base import *
 from .formatting import *
 from .model import *
 
-__version__ = importlib.resources.read_text(__name__, '__version__')
+__version__ = importlib.resources.read_text(__name__, "__version__")

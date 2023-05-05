@@ -17,7 +17,7 @@ def _get_default_scratch_path():
     return config.path_of.scratch
 
 
-class ScratchFile():
+class ScratchFile:
     """Create a scratch file path generator.
 
     Parameters
@@ -43,11 +43,12 @@ class ScratchFile():
     >>> scratch_file('disp', '.dat')
     PosixPath('/tmp/TestoPresto_0_disp.dat')
     """
+
     def __init__(
         self,
         analysis_type: str,
         analysis_id: Optional[str] = None,
-        scratch_path: Optional[Path] = None
+        scratch_path: Optional[Path] = None,
     ):
         if analysis_id is None:
             analysis_id = _get_str_uuid4()
@@ -62,9 +63,9 @@ class ScratchFile():
         analysis_type = self.analysis_type
         analysis_id = self.analysis_id
         scratch_path = self.scratch_path
-        return f'ScratchFile({analysis_type=}, {analysis_id=}, {scratch_path=})'
+        return f"ScratchFile({analysis_type=}, {analysis_id=}, {scratch_path=})"
 
-    def __call__(self, name: str, suffix: str = '') -> Path:
+    def __call__(self, name: str, suffix: str = "") -> Path:
         """
         Parameters
         ----------
@@ -83,15 +84,17 @@ class ScratchFile():
             components.append(self.analysis_type)
         if self.analysis_id:
             components.append(self.analysis_id)
-        components.append(f'{name}{suffix}')
-        filename = '_'.join(components)
+        components.append(f"{name}{suffix}")
+        filename = "_".join(components)
 
-        return self.scratch_path/filename
+        return self.scratch_path / filename
 
 
 def scratch_file_factory(*args, **kwargs):
-    warnings.warn('opswrapper.analysis.scratch_file_factory is deprecated.'
-                  'Use opswrapper.analysis.ScratchFile instead.')
+    warnings.warn(
+        "opswrapper.analysis.scratch_file_factory is deprecated."
+        "Use opswrapper.analysis.ScratchFile instead."
+    )
     return ScratchFile(*args, **kwargs)
 
 
@@ -105,11 +108,12 @@ class AnalysisResults(NamedTuple):
     stdout : str
         Captured console output from OpenSees.
     """
+
     returncode: int
     stdout: str
 
 
-class OpenSeesAnalysis():
+class OpenSeesAnalysis:
     """Wrapper for an OpenSees analysis.
 
     Parameters
@@ -127,6 +131,7 @@ class OpenSeesAnalysis():
         Path to the directory for storing temporary files. If None, uses the
         value from the global configuration. (default: None)
     """
+
     def __init__(
         self,
         name: str = None,
@@ -145,8 +150,8 @@ class OpenSeesAnalysis():
         self.scratch_path = scratch_path
 
     def __repr__(self):
-        clsname = self.__class__.__module__ + '.' + self.__class__.__name__
-        return f'<{clsname} {self.name!r} at {id(self):#x}>'
+        clsname = self.__class__.__module__ + "." + self.__class__.__name__
+        return f"<{clsname} {self.name!r} at {id(self):#x}>"
 
     @property
     def opensees_path(self):
@@ -221,17 +226,22 @@ class OpenSeesAnalysis():
         cmd = [str(self.opensees_path), str(inputfile)]
         stdout = []
         if echo:
+
             def handle_stdout(line):
-                print(line, end='')
+                print(line, end="")
                 stdout.append(line)
+
         else:
+
             def handle_stdout(line):
                 stdout.append(line)
 
-        with sub.Popen(cmd, bufsize=1, stdout=sub.PIPE, stderr=sub.STDOUT, text=True) as p:
+        with sub.Popen(
+            cmd, bufsize=1, stdout=sub.PIPE, stderr=sub.STDOUT, text=True
+        ) as p:
             for line in p.stdout:
                 handle_stdout(line)
 
-        stdout = ''.join(stdout)
+        stdout = "".join(stdout)
 
         return AnalysisResults(p.returncode, stdout)

@@ -4,27 +4,27 @@ import typing as t
 from .base import OpenSeesObject
 
 __all__ = [
-    'ArcLength',
-    'CentralDifference',
-    'DisplacementControl',
-    'HHT',
-    'Integrator',
-    'LoadControl',
-    'MinUnbalDispNorm',
-    'Newmark',
-    'StaticIntegrator',
-    'TransientIntegrator',
+    "ArcLength",
+    "CentralDifference",
+    "DisplacementControl",
+    "HHT",
+    "Integrator",
+    "LoadControl",
+    "MinUnbalDispNorm",
+    "Newmark",
+    "StaticIntegrator",
+    "TransientIntegrator",
 ]
 
 
 class Integrator(OpenSeesObject):
     def tcl_code(self, formats=None) -> str:
-        return ' '.join(['integrator', *self.tcl_args(formats)])
+        return " ".join(["integrator", *self.tcl_args(formats)])
 
 
-#===================================================================================================
+# ======================================================================================
 # Static integrators
-#===================================================================================================
+# ======================================================================================
 class StaticIntegrator(Integrator):
     pass
 
@@ -55,6 +55,7 @@ class LoadControl(StaticIntegrator):
        where convergence is too fast and slow down the step size in cases where
        convergence is too slow.
     """
+
     incr: float
     num_iters: int = 1
     min_incr: float = None
@@ -63,7 +64,7 @@ class LoadControl(StaticIntegrator):
     def tcl_args(self, formats=None) -> t.List[str]:
         min_incr = self.incr if self.min_incr is None else self.min_incr
         max_incr = self.incr if self.max_incr is None else self.max_incr
-        args = ['LoadControl', self.incr, self.num_iters, min_incr, max_incr]
+        args = ["LoadControl", self.incr, self.num_iters, min_incr, max_incr]
         return self.format_objects(args, formats)
 
 
@@ -87,6 +88,7 @@ class DisplacementControl(StaticIntegrator):
     max_incr : float, optional
         The maximum step size to allow. (default: `incr`)
     """
+
     node: int
     dof: int
     incr: float
@@ -98,7 +100,7 @@ class DisplacementControl(StaticIntegrator):
         min_incr = self.incr if self.min_incr is None else self.min_incr
         max_incr = self.incr if self.max_incr is None else self.max_incr
         args = [
-            'DisplacementControl',
+            "DisplacementControl",
             self.node,
             self.dof,
             self.incr,
@@ -131,6 +133,7 @@ class MinUnbalDispNorm(StaticIntegrator):
     max_incr : float, optional
         Maximum load increment. (default: `incr`)
     """
+
     incr: float
     Jd: float = 1.0
     min_incr: float = None
@@ -139,7 +142,7 @@ class MinUnbalDispNorm(StaticIntegrator):
     def tcl_args(self, formats=None) -> t.List[str]:
         min_incr = self.incr if self.min_incr is None else self.min_incr
         max_incr = self.incr if self.max_incr is None else self.max_incr
-        args = ['MinUnbalDispNorm', self.incr, self.Jd, min_incr, max_incr]
+        args = ["MinUnbalDispNorm", self.incr, self.Jd, min_incr, max_incr]
         return self.format_objects(args, formats)
 
 
@@ -161,16 +164,17 @@ class ArcLength(StaticIntegrator):
     alpha : float
         Scaling factor on the reference loads.
     """
+
     s: float
     alpha: float
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        return self.format_objects(['ArcLength', self.s, self.alpha], formats)
+        return self.format_objects(["ArcLength", self.s, self.alpha], formats)
 
 
-#===================================================================================================
+# ======================================================================================
 # Transient integrators
-#===================================================================================================
+# ======================================================================================
 class TransientIntegrator(Integrator):
     pass
 
@@ -187,8 +191,9 @@ class CentralDifference(TransientIntegrator):
        mass matrix a diagonal solver can (and should) be used.
     3. For stability, Δt/Tn < 1/π.
     """
+
     def tcl_args(self, formats) -> t.List[str]:
-        return ['CentralDifference']
+        return ["CentralDifference"]
 
 
 @dataclasses.dataclass
@@ -215,11 +220,12 @@ class Newmark(TransientIntegrator):
     4. The method is second order accurate if and only if γ = 1/2
     5. The method is conditionally stable for β >= γ/2 >= 1/4
     """
+
     gamma: float
     beta: float
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        return self.format_objects(['Newmark', self.gamma, self.beta], formats)
+        return self.format_objects(["Newmark", self.gamma, self.beta], formats)
 
 
 @dataclasses.dataclass
@@ -249,20 +255,21 @@ class HHT(TransientIntegrator):
     3. The default values for γ and β ensure the method is second-order accurate
        and unconditionally stable when α is between 2/3 and 1.
     """
+
     alpha: float
     gamma: float = None
     beta: float = None
 
     @property
     def default_gamma(self):
-        return 0.25*(2 - self.alpha)**2
+        return 0.25 * (2 - self.alpha) ** 2
 
     @property
     def default_beta(self):
         return 1.5 - self.alpha
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['HHT', self.alpha]
+        args = ["HHT", self.alpha]
         if self.gamma is not None or self.beta is not None:
             # OpenSees wants gamma and beta both specified if either is not default
             args.append(self.gamma if self.gamma is not None else self.default_gamma)

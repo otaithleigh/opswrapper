@@ -44,7 +44,7 @@ class ElementRecorder(base.OpenSeesObject):
     'recorder Element -file {/path/to/file} -ele 1 -dof 1 2 localForce'
     """
     file: Optional[Union[str, Path]] = None
-    fileformat: str = 'file'
+    fileformat: str = "file"
     precision: int = None
     elements: np.ndarray = None
     region: int = None
@@ -52,38 +52,42 @@ class ElementRecorder(base.OpenSeesObject):
     response: str = None
 
     def __post_init__(self):
-        if self.fileformat not in ['file', 'xml', 'binary']:
+        if self.fileformat not in ["file", "xml", "binary"]:
             raise ValueError(
                 "ElementRecorder: given file format is not recognized "
                 f"(expected one of 'file', 'xml', 'binary'; got {self.fileformat!r}"
             )
 
     def tcl_code(self, formats=None) -> str:
-        args = ['recorder Element', f'-{self.fileformat}']
+        args = ["recorder Element", f"-{self.fileformat}"]
 
         file_arg, tcl_list_expansion = _format_file_arg(self.file)
         args.append(file_arg)
 
-        if str(self.elements) == 'all':
-            args.append(f'-ele {tcl_list_expansion}[getEleTags]')
+        if str(self.elements) == "all":
+            args.append(f"-ele {tcl_list_expansion}[getEleTags]")
         elif self.elements is not None:
-            args.append('-ele')
-            args.extend(utils.coerce_numeric(tag, int) for tag in np.asarray(self.elements).flat)
+            args.append("-ele")
+            args.extend(
+                utils.coerce_numeric(tag, int) for tag in np.asarray(self.elements).flat
+            )
 
         if self.region is not None:
-            args.append('-region')
+            args.append("-region")
             args.append(self.region)
 
         if self.precision is not None:
-            args.append('-precision')
+            args.append("-precision")
             args.append(self.precision)
 
         if self.dofs is not None:
-            args.append('-dof')
-            args.extend(utils.coerce_numeric(dof, int) for dof in np.asarray(self.dofs).flat)
+            args.append("-dof")
+            args.extend(
+                utils.coerce_numeric(dof, int) for dof in np.asarray(self.dofs).flat
+            )
 
         args.append(self.response)
-        return ' '.join(self.format_objects(args, formats))
+        return " ".join(self.format_objects(args, formats))
 
 
 @dataclasses.dataclass
@@ -143,7 +147,7 @@ class NodeRecorder(base.OpenSeesObject):
     'recorder Node -file {/path/to/file} -node 1 -dof 1 2 disp'
     """
     file: Optional[Union[str, Path]] = None
-    fileformat: str = 'file'
+    fileformat: str = "file"
     precision: int = None
     time_series: int = None
     time: bool = False
@@ -154,61 +158,65 @@ class NodeRecorder(base.OpenSeesObject):
     response: str = None
 
     def __post_init__(self):
-        if self.fileformat not in ['file', 'xml', 'binary']:
+        if self.fileformat not in ["file", "xml", "binary"]:
             raise ValueError(
                 "NodeRecorder: given file format is not recognized "
                 f"(expected one of 'file', 'xml', 'binary'; got {self.fileformat!r}"
             )
 
     def tcl_code(self, formats=None) -> str:
-        args = ['recorder Node', f'-{self.fileformat}']
+        args = ["recorder Node", f"-{self.fileformat}"]
 
         file_arg, tcl_list_expansion = _format_file_arg(self.file)
         args.append(file_arg)
 
         if self.precision is not None:
-            args.append('-precision')
+            args.append("-precision")
             args.append(self.precision)
 
         if self.time_series is not None:
-            args.append('-timeSeries')
+            args.append("-timeSeries")
             args.append(self.time_series)
 
         if self.time:
-            args.append('-time')
+            args.append("-time")
 
-        if str(self.nodes) == 'all':
-            args.append(f'-node {tcl_list_expansion}[getNodeTags]')
+        if str(self.nodes) == "all":
+            args.append(f"-node {tcl_list_expansion}[getNodeTags]")
         elif self.nodes is not None:
-            args.append('-node')
-            args.extend(utils.coerce_numeric(tag, int) for tag in np.asarray(self.nodes).flat)
+            args.append("-node")
+            args.extend(
+                utils.coerce_numeric(tag, int) for tag in np.asarray(self.nodes).flat
+            )
 
         if self.node_range is not None:
-            args.append('-nodeRange')
+            args.append("-nodeRange")
             args.extend(self.node_range)
 
         if self.region is not None:
-            args.append('-region')
+            args.append("-region")
             args.append(self.region)
 
         if self.dofs is not None:
-            args.append('-dof')
-            args.extend(utils.coerce_numeric(dof, int) for dof in np.asarray(self.dofs).flat)
+            args.append("-dof")
+            args.extend(
+                utils.coerce_numeric(dof, int) for dof in np.asarray(self.dofs).flat
+            )
 
         args.append(self.response)
-        return ' '.join(self.format_objects(args, formats))
+        return " ".join(self.format_objects(args, formats))
 
 
 def _format_file_arg(file: Union[str, Path] = None) -> Tuple[str, str]:
     if file is None:
         # Escape enclosing brackets for a total of three brackets on either side
-        file_arg = '{{{file}}}'
+        file_arg = "{{{file}}}"
         # If the returned string is being returned with '{file}' in it to be formatted later,
         # need to escape the brackets in the list expansion operator. Otherwise, a completely
         # baffling KeyError will be raised when calling '.format'.
-        tcl_list_expansion = '{{*}}'
+        tcl_list_expansion = "{{*}}"
     else:
         file = utils.path_for_tcl(file)
-        file_arg = '{%s}' % file
-        tcl_list_expansion = '{*}'
+        file_arg = "{%s}" % file
+        tcl_list_expansion = "{*}"
     return file_arg, tcl_list_expansion

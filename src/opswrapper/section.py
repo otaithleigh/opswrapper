@@ -9,7 +9,7 @@ class Section(base.OpenSeesObject):
     tag: int
 
     def tcl_code(self, formats=None) -> str:
-        return 'section ' + ' '.join(self.tcl_args(formats))
+        return "section " + " ".join(self.tcl_args(formats))
 
 
 @dataclasses.dataclass
@@ -35,6 +35,7 @@ class Elastic2D(Section):
         Shear shape factor. Both `G` and `alphaY` must be set to create a
         section with shear deformations. (default: None)
     """
+
     E: float
     A: float
     Iz: float
@@ -44,9 +45,9 @@ class Elastic2D(Section):
     def tcl_code(self, formats=None) -> str:
         fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
-        code = f'section Elastic {self.tag:{i}} {self.E:{f}} {self.A:{f}} {self.Iz:{f}}'
+        code = f"section Elastic {self.tag:{i}} {self.E:{f}} {self.A:{f}} {self.Iz:{f}}"
         if self.G is not None and self.alphaY is not None:
-            code += f' {self.G:{f}} {self.alphaY:{f}}'
+            code += f" {self.G:{f}} {self.alphaY:{f}}"
         return code
 
 
@@ -79,6 +80,7 @@ class Elastic3D(Section):
         Shear shape factor along the local z-axis. Both `alphaY` and `alphaZ`
         must be set to create a section with shear deformations. (default: None)
     """
+
     E: float
     A: float
     Iz: float
@@ -92,20 +94,20 @@ class Elastic3D(Section):
         fmt = self.get_format_spec(formats)
         i, f = fmt.int, fmt.float
         code = (
-            f'section Elastic {self.tag:{i}} {self.E:{f}} {self.A:{f}}'
-            f' {self.Iz:{f}} {self.Iy:{f}} {self.G:{f}} {self.J:{f}}'
+            f"section Elastic {self.tag:{i}} {self.E:{f}} {self.A:{f}}"
+            f" {self.Iz:{f}} {self.Iy:{f}} {self.G:{f}} {self.J:{f}}"
         )
         if self.alphaY is not None and self.alphaZ is not None:
-            code += f' {self.alphaY:{f}} {self.alphaZ:{f}}'
+            code += f" {self.alphaY:{f}} {self.alphaZ:{f}}"
         return code
 
 
-#===================================================================================================
+# ======================================================================================
 # Fiber section
-#===================================================================================================
+# ======================================================================================
 class FiberSectionCommand(base.OpenSeesObject):
     def tcl_code(self, formats=None) -> str:
-        return ' '.join(self.tcl_args(formats))
+        return " ".join(self.tcl_args(formats))
 
 
 @dataclasses.dataclass
@@ -116,7 +118,9 @@ class fiber(FiberSectionCommand):
     mat: int
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        return self.format_objects(['    fiber', self.y, self.z, self.A, self.mat], formats)
+        return self.format_objects(
+            ["    fiber", self.y, self.z, self.A, self.mat], formats
+        )
 
 
 @dataclasses.dataclass
@@ -134,10 +138,24 @@ class patch_quad(FiberSectionCommand):
     zL: float
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        return self.format_objects([
-            '    patch', 'quad', self.mat, self.nfIJ, self.nfJK, self.yI, self.zI, self.yJ, self.zJ,
-            self.yK, self.zK, self.yL, self.zL
-        ], formats)
+        return self.format_objects(
+            [
+                "    patch",
+                "quad",
+                self.mat,
+                self.nfIJ,
+                self.nfJK,
+                self.yI,
+                self.zI,
+                self.yJ,
+                self.zJ,
+                self.yK,
+                self.zK,
+                self.yL,
+                self.zL,
+            ],
+            formats,
+        )
 
 
 @dataclasses.dataclass
@@ -151,9 +169,20 @@ class patch_rect(FiberSectionCommand):
     zJ: float
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        return self.format_objects([
-            '    patch', 'rect', self.mat, self.nfY, self.nfZ, self.yI, self.zI, self.yJ, self.zJ
-        ], formats)
+        return self.format_objects(
+            [
+                "    patch",
+                "rect",
+                self.mat,
+                self.nfY,
+                self.nfZ,
+                self.yI,
+                self.zI,
+                self.yJ,
+                self.zJ,
+            ],
+            formats,
+        )
 
 
 @dataclasses.dataclass
@@ -177,6 +206,7 @@ class Fiber(Section):
     >>> ops.section.Fiber(1).fiber(0, 1, 1.0, 2).fiber(0, -1, 1.0, 2)
     Fiber(tag=1, GJ=None, commands=[fiber(y=0, z=1, A=1.0, mat=2), fiber(y=0, z=-1, A=1.0, mat=2)])
     """
+
     GJ: float = None
     commands: t.List[FiberSectionCommand] = dataclasses.field(default_factory=list)
 
@@ -230,9 +260,13 @@ class Fiber(Section):
         elif len(coords) == 8:
             yI, zI, yJ, zJ, yK, zK, yL, zL = coords
         else:
-            raise ValueError("patch_quad: coords must either be 4 2-tuples or 8 coordinates")
+            raise ValueError(
+                "patch_quad: coords must either be 4 2-tuples or 8 coordinates"
+            )
 
-        self.commands.append(patch_quad(mat, nfIJ, nfJK, yI, zI, yJ, zJ, yK, zK, yL, zL))
+        self.commands.append(
+            patch_quad(mat, nfIJ, nfJK, yI, zI, yJ, zJ, yK, zK, yL, zL)
+        )
         return self
 
     def patch_rect(self, mat, nfY, nfZ, *coords):
@@ -263,22 +297,24 @@ class Fiber(Section):
         elif len(coords) == 4:
             yI, zI, yJ, zJ = coords
         else:
-            raise ValueError("patch_rect: coords must either be 2 2-tuples or 4 coordinates")
+            raise ValueError(
+                "patch_rect: coords must either be 2 2-tuples or 4 coordinates"
+            )
 
         self.commands.append(patch_rect(mat, nfY, nfZ, yI, zI, yJ, zJ))
         return self
 
     def tcl_code(self, formats=None) -> str:
-        args = ['section', 'Fiber', self.tag]
+        args = ["section", "Fiber", self.tag]
         if self.GJ is not None:
-            args.append('-GJ')
+            args.append("-GJ")
             args.append(self.GJ)
-        args.append('{')
-        section_command = ' '.join(self.format_objects(args, formats))
+        args.append("{")
+        section_command = " ".join(self.format_objects(args, formats))
 
         code = [
             section_command,
             *self.commands,
-            '}',
+            "}",
         ]
-        return '\n'.join(self.format_objects(code, formats))
+        return "\n".join(self.format_objects(code, formats))

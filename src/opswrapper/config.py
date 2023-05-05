@@ -4,10 +4,10 @@ from typing import Union
 
 import tomli
 
-_CONFIG_FILE_NAME = '.path_of.toml'
+_CONFIG_FILE_NAME = ".path_of.toml"
 
 
-class PathOf():
+class PathOf:
     """Paths to important files and directories.
 
     Works by looking for `.path_of.toml` files, starting from the current
@@ -29,9 +29,10 @@ class PathOf():
     (`path_of['opensees'] = '/path/to/OpenSees'`), but will be overridden if the
     CWD changes and the configuration recalculates.
     """
+
     _default = {
-        'opensees': Path('OpenSees'),
-        'scratch': Path.home()/'Scratch',
+        "opensees": Path("OpenSees"),
+        "scratch": Path.home() / "Scratch",
     }
 
     def __init__(self):
@@ -44,11 +45,11 @@ class PathOf():
         files, then apply them starting from root.
         """
         config_files = []
-        if (p := self._cwd/_CONFIG_FILE_NAME).exists():
+        if (p := self._cwd / _CONFIG_FILE_NAME).exists():
             config_files.append(p)
 
         for parent in self._cwd.parents:
-            if (p := parent/_CONFIG_FILE_NAME).exists():
+            if (p := parent / _CONFIG_FILE_NAME).exists():
                 config_files.append(p)
 
         for file in reversed(config_files):
@@ -56,10 +57,12 @@ class PathOf():
 
     def _apply_config(self, filename):
         try:
-            with open(filename, 'rb') as f:
+            with open(filename, "rb") as f:
                 config = tomli.load(f)
         except Exception as exc:
-            warnings.warn(f'Could not load config file {filename} due to exception: {exc}')
+            warnings.warn(
+                f"Could not load config file {filename} due to exception: {exc}"
+            )
             return
 
         config_bak = self._config.copy()
@@ -67,7 +70,9 @@ class PathOf():
         try:
             self._config.update(pathed_config)
         except Exception as exc:
-            warnings.warn(f'Failed to apply config file {filename} due to exception: {exc}')
+            warnings.warn(
+                f"Failed to apply config file {filename} due to exception: {exc}"
+            )
             self._config = config_bak
 
     def __setitem__(self, key: str, value: Union[str, Path]):
@@ -101,7 +106,7 @@ class PathOf():
             try:
                 return self._default[key]
             except KeyError as exc:
-                raise KeyError(f'{key!r} is unset and no default is provided') from exc
+                raise KeyError(f"{key!r} is unset and no default is provided") from exc
         else:
             return value
 

@@ -10,7 +10,7 @@ from .utils import coerce_numeric
 @dataclasses.dataclass
 class Integration(base.OpenSeesObject):
     def tcl_code(self, formats=None) -> str:
-        return '"' + ' '.join(self.tcl_args(formats)) + '"'
+        return '"' + " ".join(self.tcl_args(formats)) + '"'
 
 
 @dataclasses.dataclass
@@ -28,11 +28,12 @@ class Lobatto(Integration):
     npoints : int
         Number of integration points to use.
     """
+
     section: int
     npoints: int
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['Lobatto', self.section, self.npoints]
+        args = ["Lobatto", self.section, self.npoints]
         return self.format_objects(args, formats)
 
 
@@ -51,11 +52,12 @@ class Legendre(Integration):
     npoints : int
         Number of integration points to use.
     """
+
     section: int
     npoints: int
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['Legendre', self.section, self.npoints]
+        args = ["Legendre", self.section, self.npoints]
         return self.format_objects(args, formats)
 
 
@@ -75,11 +77,12 @@ class Radau(Integration):
     npoints : int
         Number of integration points to use.
     """
+
     section: int
     npoints: int
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['Radau', self.section, self.npoints]
+        args = ["Radau", self.section, self.npoints]
         return self.format_objects(args, formats)
 
 
@@ -97,11 +100,12 @@ class NewtonCotes(Integration):
     npoints : int
         Number of integration points to use.
     """
+
     section: int
     npoints: int
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['NewtonCotes', self.section, self.npoints]
+        args = ["NewtonCotes", self.section, self.npoints]
         return self.format_objects(args, formats)
 
 
@@ -116,6 +120,7 @@ class FixedLocation(Integration):
     locations : tuple[float]
         Tuple of locations, specified as factors of the element length.
     """
+
     sections: t.Tuple[int, ...]
     locations: t.Tuple[float, ...]
 
@@ -124,7 +129,7 @@ class FixedLocation(Integration):
             raise ValueError("FixedLocation: len(sections) must equal len(locations)")
 
     def tcl_args(self, formats=None) -> t.List[str]:
-        args = ['FixedLocation', len(self.sections)]
+        args = ["FixedLocation", len(self.sections)]
         args.extend([coerce_numeric(tag, int) for tag in self.sections])
         args.extend([coerce_numeric(loc, float) for loc in self.locations])
         return self.format_objects(args, formats)

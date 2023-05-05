@@ -6,7 +6,7 @@ from .formatting import MultiFormatSpec, SpecLike, _GLOBAL_FORMAT_SPEC
 from .utils import coerce_numeric
 
 __all__ = [
-    'OpenSeesObject',
+    "OpenSeesObject",
 ]
 
 
@@ -46,6 +46,7 @@ class OpenSeesObject(abc.ABC):
     Each of these methods return the previously-set modifiers if you wish to restore
     them later.
     """
+
     _format_spec: MultiFormatSpec = _GLOBAL_FORMAT_SPEC
 
     def __post_init__(self):
