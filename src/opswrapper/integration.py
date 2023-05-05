@@ -128,3 +128,94 @@ class FixedLocation(Integration):
         args.extend([coerce_numeric(tag, int) for tag in self.sections])
         args.extend([coerce_numeric(loc, float) for loc in self.locations])
         return self.format_objects(args, formats)
+
+
+@dataclasses.dataclass
+class PlasticHinge(Integration):
+    sec_i: int
+    lp_i: float
+    sec_j: int
+    lp_j: float
+    sec_e: int
+
+    def tcl_args(self, formats=None) -> t.List[str]:
+        typ = type(self).__name__
+        return self.format_objects(
+            [typ, self.sec_i, self.lp_i, self.sec_j, self.lp_j, self.sec_e], formats
+        )
+
+
+@dataclasses.dataclass
+class HingeMidpoint(PlasticHinge):
+    """One-point plastic hinge integration.
+
+    Midpoint integration over each hinge region is the most accurate one-point
+    integration rule. However, it does not place integration points at the
+    element ends and there is a small integration error for linear curvature
+    distributions along the element.
+
+    Parameters
+    ----------
+    sec_i : int
+        Tag of section to use for the hinge at the i-end of element.
+    lp_i : float
+        Length of plastic hinge at i-end of element.
+    sec_j : int
+        Tag of section to use for the hinge at the j-end of element.
+    lp_j : float
+        Length of plastic hinge at j-end of element.
+    sec_e : int
+        Tag of section to use in the middle of the element; usually, but
+        not necessarily, elastic.
+    """
+
+
+@dataclasses.dataclass
+class HingeRadau(PlasticHinge):
+    """Modified two-point Gauss-Radau integration.
+
+    Places an integration point at the element ends and at 8/3 the hinge length
+    inside the element. This approach represents linear curvature distributions
+    exactly and the characteristic length for softening plastic hinges is equal
+    to the assumed plastic hinge length.
+
+    Parameters
+    ----------
+    sec_i : int
+        Tag of section to use for the hinge at the i-end of element.
+    lp_i : float
+        Length of plastic hinge at i-end of element.
+    sec_j : int
+        Tag of section to use for the hinge at the j-end of element.
+    lp_j : float
+        Length of plastic hinge at j-end of element.
+    sec_e : int
+        Tag of section to use in the middle of the element; usually, but
+        not necessarily, elastic.
+    """
+
+
+@dataclasses.dataclass
+class HingeRadauTwo(PlasticHinge):
+    """Two-point Gauss-Radau integration.
+
+    Places an integration point at the element ends and at 2/3 the hinge length
+    inside the element. This approach represents linear curvature distributions
+    exactly. However, the characteristic length for softening plastic hinges is
+    not equal to the assumed plastic hinge length, and is instead equal to 1/4
+    the plastic hinge length.
+
+    Parameters
+    ----------
+    sec_i : int
+        Tag of section to use for the hinge at the i-end of element.
+    lp_i : float
+        Length of plastic hinge at i-end of element.
+    sec_j : int
+        Tag of section to use for the hinge at the j-end of element.
+    lp_j : float
+        Length of plastic hinge at j-end of element.
+    sec_e : int
+        Tag of section to use in the middle of the element; usually, but
+        not necessarily, elastic.
+    """

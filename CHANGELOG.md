@@ -4,6 +4,10 @@ Changelog
 [Upcoming]
 ----------
 
+### Added
+
+- Added plastic hinge methods to the integration module.
+
 ### Fixed
 
 - Typing on `Node` now correctly identifies the stored type of `coords` and
