@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[Upcoming]
+----------
+
+### Fixed
+
+- Typing on `Node` now correctly identifies the stored type of `coords` and
+  `mass` as `ndarray` and `Optional[ndarray]`, respectively.
+
 
 [5.1.0] - 2022-10-13
 --------------------

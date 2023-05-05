@@ -1,6 +1,7 @@
 """Basic OpenSees modeling commands."""
 
 import dataclasses
+from typing import Iterable, Optional, Union
 
 import numpy as np
 
@@ -16,7 +17,7 @@ __all__ = [
 @dataclasses.dataclass
 class Model(base.OpenSeesObject):
     """Model constructor.
-    
+
     Parameters
     ----------
     ndm: int
@@ -35,7 +36,7 @@ class Model(base.OpenSeesObject):
 @dataclasses.dataclass(init=False)
 class Node(base.OpenSeesObject):
     """Node in the model.
-    
+
     Parameters
     ----------
     tag : int
@@ -46,10 +47,13 @@ class Node(base.OpenSeesObject):
         NDF-length tuple of nodal masses.
     """
     tag: int
-    coords: tuple
-    mass: tuple = None
+    coords: np.ndarray
+    mass: Optional[np.ndarray] = None
 
-    def __init__(self, tag, *coords, mass=None):
+    def __init__(self,
+                 tag: int,
+                 *coords: Union[float, Iterable[float]],
+                 mass: Optional[Iterable[float]] = None):
         super().__init__()
         self.tag = tag
         self.coords = np.array(coords).flatten()
