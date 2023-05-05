@@ -13,6 +13,9 @@ class Integration(base.OpenSeesObject):
         return '"' + " ".join(self.tcl_args(formats)) + '"'
 
 
+# ======================================================================================
+# Distributed plasticity
+# ======================================================================================
 @dataclasses.dataclass
 class Lobatto(Integration):
     """Gauss-Lobatto integration.
@@ -135,6 +138,9 @@ class FixedLocation(Integration):
         return self.format_objects(args, formats)
 
 
+# ======================================================================================
+# Plastic hinge
+# ======================================================================================
 @dataclasses.dataclass
 class PlasticHinge(Integration):
     sec_i: int
