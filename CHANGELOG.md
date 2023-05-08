@@ -8,6 +8,10 @@ Changelog
 
 - Added plastic hinge methods to the integration module.
 
+## Changed
+
+- Increased default float precision from 6 to 12 significant figures.
+
 ### Fixed
 
 - Typing on `Node` now correctly identifies the stored type of `coords` and

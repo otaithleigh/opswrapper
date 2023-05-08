@@ -13,12 +13,12 @@ def test_Transformation():
 
 def test_Lagrange():
     generated = constraints.Lagrange(1e6, 1e6).tcl_code()
-    assert generated == "constraints Lagrange 1e+06 1e+06"
+    assert generated == "constraints Lagrange 1000000 1000000"
 
 
 def test_Lagrange_other_format():
-    generated = constraints.Lagrange(1e6, 1e6).tcl_code({float: ".0f"})
-    assert generated == "constraints Lagrange 1000000 1000000"
+    generated = constraints.Lagrange(1e6, 1e6).tcl_code({float: ".1f"})
+    assert generated == "constraints Lagrange 1000000.0 1000000.0"
 
 
 def test_Penalty():
