@@ -2,7 +2,7 @@ import dataclasses
 import numbers
 import types
 from pathlib import Path
-from typing import Generic, List, Mapping, TypeVar
+from typing import Callable, Generic, Iterable, List, Mapping, TypeVar
 
 import numpy as np
 
@@ -93,19 +93,38 @@ def print_model(model: List[str], file=None):
             print(modeltext, file=f)
 
 
-def tcllist(l: list) -> str:
-    """Translate a Python list to the equivalent Tcl command.
+def tclescape(text: str) -> str:
+    """Escape a string for use as a literal in Tcl."""
+    # Based on:
+    # - https://stackoverflow.com/a/27086669 (fast Python algorithms for doing this)
+    # - https://stackoverflow.com/a/70082148 (which characters actually need escaping?)
+    chars = R'\[$"'
+    for c in chars:
+        if c in text:
+            text = text.replace(c, "\\" + c)
+    return f'"{text}"'
 
-    All elements in the list are quoted using brackets and will not support
-    variable substitution. Do that on the Python side.
 
-    Example:
-    >>> tcllist([1.0, 2, "sam's the best!"])
-    "[list {1.0} {2} {sam's the best!}]"
+def tcllist(it: Iterable[object], stringify: Callable[[object], str] = str) -> str:
+    R"""Generate code for a Tcl list.
+
+    All elements in the list are escaped and will not support commands
+    or variable substitution. Do that on the Python side.
+
+    Parameters
+    ----------
+    it : iterable
+        Iterable to convert to Tcl list.
+    stringify : (object) -> str
+        Function called to convert the objects to ``str`` before being escaped.
+        (default: ``str``)
+
+    Example
+    -------
+    >>> tcllist([1.0, 2, "sam's the best!", "[this_wont_run]", "$no_substitutes"])
+    '[list "1.0" "2" "sam\'s the best!" "\\[this_wont_run]" "\\$no_substitutes"]'
     """
-    list_items = ["{" + str(i) + "}" for i in l]
-    list_str = " ".join(list_items)
-    return f"[list {list_str}]"
+    return f"[list {' '.join(tclescape(stringify(i)) for i in it)}]"
 
 
 def list_dataclass_fields(name, object, pad="", end="\n", exclude=None) -> str:
