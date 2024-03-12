@@ -64,7 +64,7 @@ class Namespace(types.SimpleNamespace):
 
 
 def path_for_tcl(path) -> str:
-    return str(path).replace("\\", "/")
+    return Path(path).as_posix()
 
 
 def print_model(model: List[str], file=None):
