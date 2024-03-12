@@ -85,7 +85,7 @@ def print_model(model: List[str], file=None):
     except TypeError:
         file_is_descriptor = True
 
-    modeltext = "\n".join([str(line) for line in model])
+    modeltext = "\n".join(str(line) for line in model)
     if file_is_descriptor:
         print(modeltext, file=file)
     else:
