@@ -1,6 +1,23 @@
 Changelog
 =========
 
+Upcoming
+--------
+
+### Added
+
+- `tclescape()` function to escape Tcl meta-characters.
+- `tcllist()` has a new argument `stringify`, which specifies the function used
+  to convert objects to `str` before being escaped.
+
+### Changed
+
+- `tcllist()` uses `tclescape()` to escape arguments instead of enclosing in
+  curly brackets.
+- `path_for_tcl()` uses `pathlib.Path.as_posix()` instead of blindly replacing
+  backslashes, which is technically incorrect on POSIX platforms.
+
+
 [5.2.0] - 2023-05-08
 --------------------
 
