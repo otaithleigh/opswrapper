@@ -1,5 +1,6 @@
 import functools
 import warnings
+from typing import Optional
 
 import numpy as np
 import xarray as xr
@@ -64,10 +65,10 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
     def run_analysis(
         self,
         peak_points,
-        rate_type: str = None,
-        rate_value: float = None,
-        echo: bool = None,
-        analysis_id: str = None,
+        rate_type: Optional[str] = None,
+        rate_value: Optional[float] = None,
+        echo: Optional[bool] = None,
+        analysis_id: Optional[str] = None,
     ):
         """
         Parameters

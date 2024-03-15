@@ -207,7 +207,7 @@ class NodeRecorder(base.OpenSeesObject):
         return " ".join(self.format_objects(args, formats))
 
 
-def _format_file_arg(file: Union[str, Path] = None) -> Tuple[str, str]:
+def _format_file_arg(file: Union[str, Path, None] = None) -> Tuple[str, str]:
     if file is None:
         # Escape enclosing brackets for a total of three brackets on either side
         file_arg = "{{{file}}}"

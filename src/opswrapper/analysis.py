@@ -4,7 +4,7 @@ import subprocess as sub
 import uuid
 import warnings
 from pathlib import Path
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, Union
 
 from . import config
 
@@ -134,11 +134,11 @@ class OpenSeesAnalysis:
 
     def __init__(
         self,
-        name: str = None,
+        name: Union[str, None] = None,
         echo_output: bool = False,
         delete_files: bool = True,
-        opensees_path: Path = None,
-        scratch_path: Path = None,
+        opensees_path: Union[Path, None] = None,
+        scratch_path: Union[Path, None] = None,
     ):
         if name is None:
             name = self.__class__.__name__
@@ -202,7 +202,9 @@ class OpenSeesAnalysis:
         """
         return ScratchFile(self.name, analysis_id, self.scratch_path)
 
-    def run_opensees(self, inputfile: str, echo: bool = None) -> AnalysisResults:
+    def run_opensees(
+        self, inputfile: str, echo: Union[bool, None] = None
+    ) -> AnalysisResults:
         """Run an OpenSees script.
 
         Note that all script output is redirected to stdout.
