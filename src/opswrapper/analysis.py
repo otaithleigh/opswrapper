@@ -229,8 +229,10 @@ class OpenSeesAnalysis:
             def handle_stdout(line):
                 stdout.append(line)
 
+        LINE_BUFFERED = 1
+
         with sub.Popen(
-            cmd, bufsize=1, stdout=sub.PIPE, stderr=sub.STDOUT, text=True
+            cmd, bufsize=LINE_BUFFERED, stdout=sub.PIPE, stderr=sub.STDOUT, text=True
         ) as p:
             for line in p.stdout:
                 handle_stdout(line)
