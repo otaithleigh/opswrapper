@@ -22,6 +22,10 @@ Upcoming
   changes. The configuration is loaded the first time any of the keys are
   accessed.
 
+### Removed
+
+- `analysis.scratch_file_factory()` has been removed. Use `ScratchFile` instead.
+
 
 [5.2.0] - 2023-05-08
 --------------------

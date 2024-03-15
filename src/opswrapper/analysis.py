@@ -2,7 +2,6 @@
 
 import subprocess as sub
 import uuid
-import warnings
 from pathlib import Path
 from typing import NamedTuple, Optional, Union
 
@@ -88,14 +87,6 @@ class ScratchFile:
         filename = "_".join(components)
 
         return self.scratch_path / filename
-
-
-def scratch_file_factory(*args, **kwargs):
-    warnings.warn(
-        "opswrapper.analysis.scratch_file_factory is deprecated."
-        "Use opswrapper.analysis.ScratchFile instead."
-    )
-    return ScratchFile(*args, **kwargs)
 
 
 class AnalysisResults(NamedTuple):
