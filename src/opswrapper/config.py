@@ -1,6 +1,6 @@
 import warnings
 from pathlib import Path
-from typing import Union
+from typing import ClassVar, Dict, Union
 
 import tomli
 
@@ -30,7 +30,7 @@ class PathOf:
     CWD changes and the configuration recalculates.
     """
 
-    _default = {
+    _default: ClassVar[Dict[str, Path]] = {
         "opensees": Path("OpenSees"),
         "scratch": Path.home() / "Scratch",
     }
@@ -61,7 +61,8 @@ class PathOf:
                 config = tomli.load(f)
         except Exception as exc:
             warnings.warn(
-                f"Could not load config file {filename} due to exception: {exc}"
+                f"Could not load config file {filename} due to exception: {exc}",
+                stacklevel=1,
             )
             return
 
@@ -71,7 +72,8 @@ class PathOf:
             self._config.update(pathed_config)
         except Exception as exc:
             warnings.warn(
-                f"Failed to apply config file {filename} due to exception: {exc}"
+                f"Failed to apply config file {filename} due to exception: {exc}",
+                stacklevel=1,
             )
             self._config = config_bak
 
