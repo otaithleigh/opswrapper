@@ -9,6 +9,13 @@ import numpy as np
 
 def coerce_numeric(obj, to_type: type):
     """Gently attempt to coerce between numeric types."""
+    # If to_type is a parameterized generic, issubclass() freaks out
+    # in an unhelpful way. isinstance(to_type, type) returns True,
+    # so I guess the only thing to do is check if to_type has
+    # annotations.
+    if hasattr(to_type, "__args__"):
+        return obj
+
     # Only try to coerce *to* numbers
     if not issubclass(to_type, numbers.Number):
         return obj
