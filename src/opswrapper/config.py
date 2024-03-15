@@ -1,4 +1,8 @@
+import keyword
+import os
 import warnings
+from collections.abc import MutableMapping
+from functools import cached_property
 from pathlib import Path
 from typing import ClassVar, Dict, Union
 
@@ -7,13 +11,17 @@ import tomli
 _CONFIG_FILE_NAME = ".path_of.toml"
 
 
-class PathOf:
+class PathOf(MutableMapping[str, Path]):
     """Paths to important files and directories.
 
-    Works by looking for `.path_of.toml` files, starting from the current
-    working directory and working back to the root, with the root having the
-    lowest priority and the CWD the highest. Any time the CWD changes, the
-    configuration is re-calculated.
+    Paths are collected from the following sources, in order of increasing
+    priority:
+
+    - Default values
+    - `.path_of.toml` files, starting from the root directory and down to
+      the current directory
+    - Environment variables starting with `OPENSEES_` (e.g., `OPENSEES_SCRATCH`)
+    - Values set directly on the config object
 
     The following config options have defaults:
 
@@ -25,95 +33,94 @@ class PathOf:
     Configured paths may be accessed using either key (`path_of['opensees']`)
     or attribute (`path_of.opensees`) access.
 
-    Temporary overrides may be set using key-value syntax
-    (`path_of['opensees'] = '/path/to/OpenSees'`), but will be overridden if the
-    CWD changes and the configuration recalculates.
+    Overrides may be set using either key-value or attribute syntax::
+
+        path_of['opensees'] = '/path/to/OpenSees'
+        path_of.opensees = '/path/to/OpenSees'
     """
 
     _default: ClassVar[Dict[str, Path]] = {
         "opensees": Path("OpenSees"),
         "scratch": Path.home() / "Scratch",
     }
+    _env_prefix = "OPENSEES_"
 
-    def __init__(self):
-        self._cwd = Path.cwd()
-        self._config: dict[str, Path] = {}
-        self._build_config()
+    def _load_config_files(self):
+        config = {}
 
-    def _build_config(self):
-        """Starting from the CWD, walk up to root, accumulating .path_of.toml
-        files, then apply them starting from root.
-        """
-        config_files = []
-        if (p := self._cwd / _CONFIG_FILE_NAME).exists():
-            config_files.append(p)
+        cwd = Path.cwd()
+        for directory in [*reversed(cwd.parents), cwd]:
+            possible_config = directory / _CONFIG_FILE_NAME
+            try:
+                contents = possible_config.read_text(encoding="utf-8")
+            except FileNotFoundError:
+                continue
+            except Exception as exc:
+                warnings.warn(
+                    f"error reading config file {str(possible_config)!r}: {exc}",
+                    stacklevel=1,
+                )
+                continue
 
-        for parent in self._cwd.parents:
-            if (p := parent / _CONFIG_FILE_NAME).exists():
-                config_files.append(p)
+            try:
+                config.update(
+                    {key: Path(value) for key, value in tomli.loads(contents).items()}
+                )
+            except Exception as exc:
+                warnings.warn(
+                    f"error reading config file {str(possible_config)!r}: {exc}",
+                    stacklevel=1,
+                )
+                continue
 
-        for file in reversed(config_files):
-            self._apply_config(file)
+        return config
 
-    def _apply_config(self, filename):
-        try:
-            with open(filename, "rb") as f:
-                config = tomli.load(f)
-        except Exception as exc:
-            warnings.warn(
-                f"Could not load config file {filename} due to exception: {exc}",
-                stacklevel=1,
-            )
-            return
+    def _load_env(self):
+        return {
+            key[len(self._env_prefix) :].lower(): Path(value)
+            for key, value in os.environ.items()
+            if key.startswith(self._env_prefix)
+        }
 
-        config_bak = self._config.copy()
-        pathed_config = zip(config.keys(), map(Path, config.values()))
-        try:
-            self._config.update(pathed_config)
-        except Exception as exc:
-            warnings.warn(
-                f"Failed to apply config file {filename} due to exception: {exc}",
-                stacklevel=1,
-            )
-            self._config = config_bak
+    @cached_property
+    def _config(self):
+        config = self._default.copy()
+        config.update(self._load_config_files())
+        config.update(self._load_env())
+        return config
 
     def __setitem__(self, key: str, value: Union[str, Path]):
-        self.set(key, value)
+        self._config[key] = Path(value)
 
     def __getitem__(self, key: str) -> Path:
-        return self.get(key)
+        return self._config[key]
 
     def __getattr__(self, name: str) -> Path:
-        return self.get(name)
+        try:
+            return self._config[name]
+        except KeyError:
+            raise AttributeError(repr(name)) from None
 
-    def get(self, key: str) -> Path:
-        """Retrieve a path from the configuration.
+    def __setattr__(self, name, value):
+        self._config[name] = Path(value)
 
-        Parameters
-        ----------
-        key : str
-            Configured path to retrieve.
+    def __iter__(self):
+        return iter(self._config)
 
-        Raises
-        ------
-        KeyError
-            If `key` is not set in the configuration and is not present in
-            `_default`.
-        """
-        if self._cwd != (cwd := Path.cwd()):
-            self._cwd = cwd
-            self._build_config()
-        value = self._config.get(key)
-        if value is None:
-            try:
-                return self._default[key]
-            except KeyError as exc:
-                raise KeyError(f"{key!r} is unset and no default is provided") from exc
-        else:
-            return value
+    def __len__(self):
+        return len(self._config)
 
-    def set(self, key: str, value: Union[str, Path]):
-        self._config[key] = Path(value)
+    def __delitem__(self, key: str):
+        del self._config[key]
+
+    def __dir__(self):
+        return super().__dir__() + [
+            key
+            for key in self._config.keys()
+            if isinstance(key, str)
+            and key.isidentifier()
+            and not keyword.iskeyword(key)
+        ]
 
 
 path_of = PathOf()
