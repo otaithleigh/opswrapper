@@ -1,5 +1,5 @@
 import dataclasses
-import typing as t
+from typing import ClassVar, Optional, Union
 
 from .base import OpenSeesObject
 from .utils import ValueTypeDispatch
@@ -18,10 +18,10 @@ __all__ = [
 
 
 class Algorithm(OpenSeesObject):
-    _tangent_flag_dispatch: t.ClassVar[ValueTypeDispatch[str, t.Union[str, None]]]
+    _tangent_flag_dispatch: ClassVar[ValueTypeDispatch[str, Union[str, None]]]
 
     def __init_subclass__(
-        cls, tangent_dispatch: t.Optional[dict] = None, **kwargs
+        cls, tangent_dispatch: Optional[dict] = None, **kwargs
     ) -> None:
         super().__init_subclass__(**kwargs)
         if tangent_dispatch is not None:
@@ -34,7 +34,7 @@ class Algorithm(OpenSeesObject):
     # here by `_tangent_flag_dispatch`. Since these are just str, they don't
     # need to go through `format_objects`.
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = [self.__class__.__name__]
         tangent_flag = self._tangent_flag_dispatch[self.tangent]
         if tangent_flag is not None:
@@ -71,7 +71,7 @@ class Linear(
     tangent: str = "current"
     factor_once: bool = False
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = super().tcl_args(formats)
         if self.factor_once:
             args.append("-factorOnce")
@@ -179,7 +179,7 @@ class NewtonLineSearch(Algorithm):
         },
     )
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = [
             "NewtonLineSearch",
             "-typeSearch",
@@ -225,7 +225,7 @@ class _AcceleratedNewton(
     increment: str = "current"
     max_dim: int = 3
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = [self.__class__.__name__]
         tangent_iter = self._tangent_flag_dispatch[self.iterate]
         tangent_incr = self._tangent_flag_dispatch[self.increment]
@@ -301,7 +301,7 @@ class _Broyden(
     tangent: str = "current"
     count: int = 10
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = super().tcl_args(formats)
         args.extend(self.format_objects(["-count", self.count], formats))
         return args

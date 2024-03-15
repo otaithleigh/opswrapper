@@ -1,7 +1,6 @@
 """Uniaxial material wrappers."""
 
 import dataclasses
-import typing as t
 
 from . import base
 
@@ -41,7 +40,7 @@ class Elastic(UniaxialMaterial):
     eta: float = 0.0
     Eneg: float = None
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["Elastic", self.tag, self.E]
         if self.Eneg is not None:
             args.append(self.eta)
@@ -80,7 +79,7 @@ class ElasticPP(UniaxialMaterial):
     eps_yN: float = None
     eps0: float = 0.0
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["ElasticPP", self.tag, self.E, self.eps_y]
         eps_yN = self.eps_yN if self.eps_yN is not None else self.eps_y
         if self.eps0 != 0.0:
@@ -122,7 +121,7 @@ class Hardening(UniaxialMaterial):
     h_kin: float
     eta: float = 0.0
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = [
             "Hardening",
             self.tag,
@@ -190,7 +189,7 @@ class Steel01(UniaxialMaterial):
                 f"(expected 4 params, got {nparams})"
             )
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["Steel01", self.tag, self.Fy, self.E, self.b]
         if self._num_iso_params_defined() == 4:
             args.extend([self.a1, self.a2, self.a3, self.a4])
@@ -257,7 +256,7 @@ class Steel02(UniaxialMaterial):
     def _num_iso_params_defined(self):
         return sum([a is not None for a in (self.a1, self.a2, self.a3, self.a4)])
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = [
             "Steel02",
             self.tag,
@@ -377,7 +376,7 @@ class Bilin(UniaxialMaterial):
     D_neg: float = 1.0
     nfactor: float = None
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["Bilin"]
         args += [
             getattr(self, field.name)

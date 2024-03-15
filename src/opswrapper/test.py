@@ -1,5 +1,4 @@
 import dataclasses
-import typing as t
 from enum import IntEnum
 
 from .base import OpenSeesObject
@@ -57,7 +56,7 @@ class Test(OpenSeesObject):
     def tcl_code(self, formats=None) -> str:
         return " ".join(["test", *self.tcl_args(formats=formats)])
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         method = self.__class__.__name__
         print_flag = PrintFlag(self.print_flag)
         args = [method, self.tolerance, self.max_iters, print_flag, self.norm_type]

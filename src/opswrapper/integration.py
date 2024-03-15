@@ -35,7 +35,7 @@ class Lobatto(Integration):
     section: int
     npoints: int
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["Lobatto", self.section, self.npoints]
         return self.format_objects(args, formats)
 
@@ -59,7 +59,7 @@ class Legendre(Integration):
     section: int
     npoints: int
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["Legendre", self.section, self.npoints]
         return self.format_objects(args, formats)
 
@@ -84,7 +84,7 @@ class Radau(Integration):
     section: int
     npoints: int
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["Radau", self.section, self.npoints]
         return self.format_objects(args, formats)
 
@@ -107,7 +107,7 @@ class NewtonCotes(Integration):
     section: int
     npoints: int
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["NewtonCotes", self.section, self.npoints]
         return self.format_objects(args, formats)
 
@@ -131,7 +131,7 @@ class FixedLocation(Integration):
         if len(self.sections) != len(self.locations):
             raise ValueError("FixedLocation: len(sections) must equal len(locations)")
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["FixedLocation", len(self.sections)]
         args.extend([coerce_numeric(tag, int) for tag in self.sections])
         args.extend([coerce_numeric(loc, float) for loc in self.locations])
@@ -149,7 +149,7 @@ class PlasticHinge(Integration):
     lp_j: float
     sec_e: int
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         typ = type(self).__name__
         return self.format_objects(
             [typ, self.sec_i, self.lp_i, self.sec_j, self.lp_j, self.sec_e], formats

@@ -1,5 +1,4 @@
 import dataclasses
-import typing as t
 
 from .base import OpenSeesObject
 
@@ -16,7 +15,7 @@ class Plain(Constraints):
     Only supports constraints applied using the 'fix' and 'equalDOF' commands.
     """
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         return ["Plain"]
 
 
@@ -40,7 +39,7 @@ class Transformation(Constraints):
        not constrained in any other constraint.
     """
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         return ["Transformation"]
 
 
@@ -66,7 +65,7 @@ class Lagrange(Constraints):
     alpha_s: float
     alpha_m: float
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["Lagrange", self.alpha_s, self.alpha_m]
         return self.format_objects(args, formats)
 
@@ -93,6 +92,6 @@ class Penalty(Constraints):
     alpha_s: float
     alpha_m: float
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["Penalty", self.alpha_s, self.alpha_m]
         return self.format_objects(args, formats)

@@ -1,5 +1,4 @@
 import dataclasses
-import typing as t
 
 from . import base
 
@@ -117,7 +116,7 @@ class fiber(FiberSectionCommand):
     A: float
     mat: int
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         return self.format_objects(
             ["    fiber", self.y, self.z, self.A, self.mat], formats
         )
@@ -137,7 +136,7 @@ class patch_quad(FiberSectionCommand):
     yL: float
     zL: float
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         return self.format_objects(
             [
                 "    patch",
@@ -168,7 +167,7 @@ class patch_rect(FiberSectionCommand):
     yJ: float
     zJ: float
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         return self.format_objects(
             [
                 "    patch",
@@ -208,7 +207,7 @@ class Fiber(Section):
     """
 
     GJ: float = None
-    commands: t.List[FiberSectionCommand] = dataclasses.field(default_factory=list)
+    commands: list[FiberSectionCommand] = dataclasses.field(default_factory=list)
 
     def fiber(self, y, z, A, mat):
         """Add a single fiber.

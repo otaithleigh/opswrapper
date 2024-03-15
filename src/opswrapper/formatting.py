@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Dict, Union
+from typing import Union
 
 __all__ = [
     "MultiFormatSpec",
@@ -102,7 +102,7 @@ class MultiFormatSpec:
         self._spec[cls] = fmt
 
 
-SpecDict = Dict[type, str]
+SpecDict = dict[type, str]
 SpecLike = Union[SpecDict, MultiFormatSpec]
 
 _GLOBAL_FORMAT_SPEC = MultiFormatSpec()

@@ -2,7 +2,7 @@ import dataclasses
 import numbers
 import types
 from pathlib import Path
-from typing import Callable, Generic, Iterable, List, Mapping, TypeVar
+from typing import Callable, Generic, Iterable, Mapping, TypeVar
 
 import numpy as np
 
@@ -67,7 +67,7 @@ def path_for_tcl(path) -> str:
     return Path(path).as_posix()
 
 
-def print_model(model: List[str], file=None):
+def print_model(model: Iterable[str], file=None):
     """Print a model definition to a file.
 
     Parameters

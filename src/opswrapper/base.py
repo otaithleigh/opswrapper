@@ -1,6 +1,6 @@
 import abc
 import dataclasses
-import typing
+from typing import TextIO, Union
 
 from .formatting import MultiFormatSpec, SpecLike, _GLOBAL_FORMAT_SPEC
 from .utils import coerce_numeric
@@ -175,7 +175,7 @@ class OpenSeesObject(abc.ABC):
         """
         pass
 
-    def tcl_args(self, formats: SpecLike = None) -> typing.List[str]:
+    def tcl_args(self, formats: SpecLike = None) -> list[str]:
         """Return the formatted arguments to the Tcl command to create this
         object.
 
@@ -201,7 +201,7 @@ class OpenSeesObject(abc.ABC):
     def use_global_format(self):
         self._format_spec = _GLOBAL_FORMAT_SPEC
 
-    def dump(self, fid: typing.TextIO, formats: SpecLike = None):
+    def dump(self, fid: TextIO, formats: SpecLike = None):
         """Write the Tcl code for this object to the given file descriptor.
 
         Parameters
@@ -214,4 +214,4 @@ class OpenSeesObject(abc.ABC):
         print(self.tcl_code(formats), file=fid)
 
 
-OpenSeesDef = typing.Union[str, OpenSeesObject]
+OpenSeesDef = Union[str, OpenSeesObject]

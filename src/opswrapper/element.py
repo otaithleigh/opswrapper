@@ -1,5 +1,5 @@
 import dataclasses
-import typing as t
+from typing import Union
 
 from . import base
 from . import integration
@@ -51,7 +51,7 @@ class ElasticBeamColumn2D(Element):
     mass: float = None
     cmass: bool = False
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = [
             "elasticBeamColumn",
             self.tag,
@@ -81,7 +81,7 @@ class ElasticBeamColumn3D(Element):
     mass: float = None
     cmass: bool = False
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = [
             "elasticBeamColumn",
             self.tag,
@@ -129,13 +129,13 @@ class ForceBeamColumn(Element):
     """
 
     transf: int
-    integration: t.Union[str, integration.Integration]
+    integration: Union[str, integration.Integration]
     mass: float = None
     iterative: bool = False
     maxiters: int = 10
     itertol: float = 1e-12
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = [
             "forceBeamColumn",
             self.tag,
@@ -186,7 +186,7 @@ class DispBeamColumn(Element):
     cmass: bool = False
     integration: str = "Legendre"
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         try:
             nsections = len(self.section)
             if nsections != self.npoints and nsections != 1:
@@ -249,7 +249,7 @@ class Truss(Element):
     do_rayleigh: bool = False
     corot: bool = False
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         element = "corotTruss" if self.corot else "truss"
         args = [element, self.tag, self.inode, self.jnode, self.A, self.mat]
         if self.rho is not None:
@@ -291,7 +291,7 @@ class TrussSection(Element):
     do_rayleigh: bool = False
     corot: bool = False
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         element = "corotTrussSection" if self.corot else "trussSection"
         args = [element, self.tag, self.inode, self.jnode, self.section]
         if self.rho is not None:

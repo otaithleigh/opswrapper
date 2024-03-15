@@ -1,5 +1,4 @@
 import dataclasses
-import typing as t
 
 from .base import OpenSeesObject
 
@@ -61,7 +60,7 @@ class LoadControl(StaticIntegrator):
     min_incr: float = None
     max_incr: float = None
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         min_incr = self.incr if self.min_incr is None else self.min_incr
         max_incr = self.incr if self.max_incr is None else self.max_incr
         args = ["LoadControl", self.incr, self.num_iters, min_incr, max_incr]
@@ -96,7 +95,7 @@ class DisplacementControl(StaticIntegrator):
     min_incr: float = None
     max_incr: float = None
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         min_incr = self.incr if self.min_incr is None else self.min_incr
         max_incr = self.incr if self.max_incr is None else self.max_incr
         args = [
@@ -139,7 +138,7 @@ class MinUnbalDispNorm(StaticIntegrator):
     min_incr: float = None
     max_incr: float = None
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         min_incr = self.incr if self.min_incr is None else self.min_incr
         max_incr = self.incr if self.max_incr is None else self.max_incr
         args = ["MinUnbalDispNorm", self.incr, self.Jd, min_incr, max_incr]
@@ -168,7 +167,7 @@ class ArcLength(StaticIntegrator):
     s: float
     alpha: float
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         return self.format_objects(["ArcLength", self.s, self.alpha], formats)
 
 
@@ -192,7 +191,7 @@ class CentralDifference(TransientIntegrator):
     3. For stability, Δt/Tn < 1/π.
     """
 
-    def tcl_args(self, formats) -> t.List[str]:
+    def tcl_args(self, formats) -> list[str]:
         return ["CentralDifference"]
 
 
@@ -224,7 +223,7 @@ class Newmark(TransientIntegrator):
     gamma: float
     beta: float
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         return self.format_objects(["Newmark", self.gamma, self.beta], formats)
 
 
@@ -268,7 +267,7 @@ class HHT(TransientIntegrator):
     def default_beta(self):
         return 1.5 - self.alpha
 
-    def tcl_args(self, formats=None) -> t.List[str]:
+    def tcl_args(self, formats=None) -> list[str]:
         args = ["HHT", self.alpha]
         if self.gamma is not None or self.beta is not None:
             # OpenSees wants gamma and beta both specified if either is not default
