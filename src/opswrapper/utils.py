@@ -152,17 +152,12 @@ def list_dataclass_fields(name, object, pad="", end="\n", exclude=None) -> str:
             gravity_columns.strain_hardening : 0.01
     """
     fields = dataclasses.fields(object)
-    lenname = lambda f: len(getattr(f, "name"))
-    max_key_len = max(map(lenname, fields))
-    l = []
-    for field in fields:
-        if exclude is not None and field.name in exclude:
-            continue
-        l.append(
-            f"{pad}{name}.{field.name.ljust(max_key_len)} : {getattr(object, field.name)!r}"
-        )
-
-    return end.join(l)
+    max_key_len = max(len(f.name) for f in fields)
+    return end.join(
+        f"{pad}{name}.{field.name.ljust(max_key_len)} : {getattr(object, field.name)!r}"
+        for field in fields
+        if exclude is None or field.name not in exclude
+    )
 
 
 def fill_out_numbers(peaks, rate):
