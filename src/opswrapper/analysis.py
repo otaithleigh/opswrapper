@@ -1,7 +1,9 @@
 """Helpers for running OpenSees."""
 
+import shutil
 import subprocess as sub
 import uuid
+from functools import partial
 from pathlib import Path
 from typing import NamedTuple, Optional, Union
 
@@ -220,27 +222,30 @@ class OpenSeesAnalysis:
         if echo is None:
             echo = self.echo_output
 
-        cmd = [str(self.opensees_path), str(inputfile)]
-        stdout = []
-        if echo:
-
-            def handle_stdout(line):
-                print(line, end="")
-                stdout.append(line)
-
-        else:
-
-            def handle_stdout(line):
-                stdout.append(line)
+        opensees = shutil.which(self.opensees_path)
+        if opensees is None:
+            raise RuntimeError(f"No executable found at {str(self.opensees_path)!r}")
 
         LINE_BUFFERED = 1
+        popen = partial(
+            sub.Popen,
+            [opensees, str(inputfile)],
+            bufsize=LINE_BUFFERED,
+            stdout=sub.PIPE,
+            stderr=sub.STDOUT,
+            text=True,
+        )
 
-        with sub.Popen(
-            cmd, bufsize=LINE_BUFFERED, stdout=sub.PIPE, stderr=sub.STDOUT, text=True
-        ) as p:
-            for line in p.stdout:
-                handle_stdout(line)
+        stdout = []
+        if echo:
+            with popen() as p:
+                for line in p.stdout:
+                    print(line, end="")
+                    stdout.append(line)
+        else:
+            with popen() as p:
+                for line in p.stdout:
+                    stdout.append(line)
 
         stdout = "".join(stdout)
-
         return AnalysisResults(p.returncode, stdout)
