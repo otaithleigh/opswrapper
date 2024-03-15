@@ -14,6 +14,7 @@ Upcoming
 
 ### Changed
 
+- Minimum Python has been updated to 3.9.
 - `tcllist()` uses `tclescape()` to escape arguments instead of enclosing in
   curly brackets.
 - `path_for_tcl()` uses `pathlib.Path.as_posix()` instead of blindly replacing
