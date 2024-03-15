@@ -68,7 +68,6 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         rate_type: Optional[str] = None,
         rate_value: Optional[float] = None,
         echo: Optional[bool] = None,
-        analysis_id: Optional[str] = None,
     ):
         """
         Parameters
@@ -84,8 +83,6 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             Rate for rate types 'StrainRate' and 'Steps'.
         echo : bool, optional
             Whether to echo OpenSees output to console. (default: `self.echo_output`)
-        analysis_id : optional
-            Unique identifier for the analysis.
 
         Example
         -------
@@ -98,7 +95,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         results = xr.Dataset()
 
         # Filenames
-        scratch_file = self.create_scratch_filer(analysis_id)
+        scratch_file = self.create_scratch_filer()
         files = utils.Namespace()
         files.input = scratch_file("input", ".tcl")
         files.pattern = scratch_file("pattern", ".dat")
@@ -172,14 +169,6 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
 
         results.attrs["status"] = status
         results.attrs["stdout"] = process.stdout
-
-        # Cleanup
-        if self.delete_files:
-            for _, file in files:
-                try:
-                    file.unlink()
-                except FileNotFoundError:
-                    continue
 
         return results
 

@@ -15,6 +15,8 @@ Upcoming
 ### Changed
 
 - Minimum Python has been updated to 3.9.
+- `ScratchFile()` now creates a temporary directory, which by default is
+  automatically cleaned up upon finalization.
 - `tcllist()` uses `tclescape()` to escape arguments instead of enclosing in
   curly brackets.
 - `path_for_tcl()` uses `pathlib.Path.as_posix()` instead of blindly replacing
@@ -26,6 +28,8 @@ Upcoming
 ### Removed
 
 - `analysis.scratch_file_factory()` has been removed. Use `ScratchFile` instead.
+- The `analysis_id` argument to `ScratchFile` has been removed, as the temporary
+  directory mechanism makes it completely redundant.
 
 
 [5.2.0] - 2023-05-08

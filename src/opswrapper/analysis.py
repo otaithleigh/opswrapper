@@ -2,16 +2,12 @@
 
 import shutil
 import subprocess as sub
-import uuid
 from functools import partial
 from pathlib import Path
 from typing import NamedTuple, Optional, Union
 
 from . import config
-
-
-def _get_str_uuid4():
-    return str(uuid.uuid4())
+from .backports import TemporaryDirectory
 
 
 def _get_default_scratch_path():
@@ -21,50 +17,57 @@ def _get_default_scratch_path():
 class ScratchFile:
     """Create a scratch file path generator.
 
+    Generates paths to scratch files inside a temporary directory.
+
     Parameters
     ----------
-    analysis_type : str
-        Type of the analysis, e.g. 'SectionAnalysis'.
-    analysis_id : optional
-        Unique ID for the analysis. Useful for parallel execution. If None, a
-        random UUID is generated. (default: None)
-    scratch_path : path_like
+    name : str
+        Name prefixed onto the temporary directory. Commonly the type of the
+        analysis, e.g. ``'SectionAnalysis'``.
+    scratch_path : path_like, optional
         Path to the scratch directory. If None, uses `config.path_of.scratch`.
         (default: None)
+    delete : bool, optional
+        If True, automatically remove the temporary directory. This removal
+        is triggered on object finalization. If False, be sure to remove the
+        temporary directory by calling `cleanup()`.
 
     Returns
     -------
     scratch_file : (name: str, suffix: str = '') -> Path
-        A function that takes two arguments, 'name' and 'suffix', returning a
-        Path object.
+        A callable object that takes two arguments, 'name' and 'suffix',
+        returning a Path object.
 
     Example
     -------
-    >>> scratch_file = scratch_file_factory('TestoPresto', 0)
+    >>> scratch_file = ScratchFile('TestoPresto')
     >>> scratch_file('disp', '.dat')
-    PosixPath('/tmp/TestoPresto_0_disp.dat')
+    PosixPath('/tmp/TestoPresto-5psb4f7s/disp.dat')
     """
 
     def __init__(
         self,
-        analysis_type: str,
-        analysis_id: Optional[str] = None,
+        name: str,
         scratch_path: Optional[Path] = None,
+        delete: bool = True,
     ):
-        if analysis_id is None:
-            analysis_id = _get_str_uuid4()
         if scratch_path is None:
             scratch_path = _get_default_scratch_path()
 
-        self.analysis_type = str(analysis_type)
-        self.analysis_id = str(analysis_id)
-        self.scratch_path = Path(scratch_path).resolve()
+        prefix = str(name) + "-"
+
+        # TODO: Replace backported TemporaryDirectory with stdlib
+        # once Python 3.12 becomes minimum supported version.
+        self._tempdir = TemporaryDirectory(
+            prefix=prefix,
+            dir=scratch_path,
+            ignore_cleanup_errors=True,
+            delete=delete,
+        )
+        self.tempdir = self._tempdir.name
 
     def __repr__(self) -> str:
-        analysis_type = self.analysis_type
-        analysis_id = self.analysis_id
-        scratch_path = self.scratch_path
-        return f"ScratchFile({analysis_type=}, {analysis_id=}, {scratch_path=})"
+        return f"<ScratchFile {self.tempdir!r}>"
 
     def __call__(self, name: str, suffix: str = "") -> Path:
         """
@@ -80,15 +83,10 @@ class ScratchFile:
         path : Path
             Path to the scratch file.
         """
-        components = []
-        if self.analysis_type:
-            components.append(self.analysis_type)
-        if self.analysis_id:
-            components.append(self.analysis_id)
-        components.append(f"{name}{suffix}")
-        filename = "_".join(components)
+        return Path(self.tempdir, name + suffix)
 
-        return self.scratch_path / filename
+    def cleanup(self):
+        self._tempdir.cleanup()
 
 
 class AnalysisResults(NamedTuple):
@@ -116,7 +114,7 @@ class OpenSeesAnalysis:
     echo_output : bool, optional
         If True, echo OpenSees output to stdout. (default: False)
     delete_files : bool, optional
-        If True, delete temporary files after each run. (default: True)
+        If True, automatically delete temporary files. (default: True)
     opensees_path : Path, optional
         Path to the OpenSees binary to use. If None, uses the value from the
         global configuration. (default: None)
@@ -174,30 +172,32 @@ class OpenSeesAnalysis:
             value = config.path_of.scratch
         self._scratch_path = Path(value)
 
-    def create_scratch_filer(self, analysis_id=None):
-        """Create a new scratch file function with a particular analysis id.
+    def create_scratch_filer(self, *, delete: Union[bool, None] = None):
+        """Create a new scratch filer.
 
         Parameters
         ----------
-        analysis_id : optional
-            Unique analysis ID. If not provided, a random UUID is generated to
-            serve as the analysis ID.
+        delete : bool, optional
+            Automatically remove the temporary directory created by the
+            scratch filer upon finalization. (default: `self.delete_files`)
 
         Example
         -------
-        >>> analysis = UniaxialMaterialAnalysis(...)
-        >>> scratch_file = analysis.create_scratch_filer('foo')
+        >>> analysis = OpenSeesAnalysis(scratch_path='/path/to/scratchdir')
+        >>> scratch_file = analysis.create_scratch_filer()
         >>> scratch_file('disp', '.dat')
-        PosixPath('/path/to/scratchdir/UniaxialMaterialAnalysis_foo_disp.dat')
+        PosixPath('/path/to/scratchdir/OpenSeesAnalysis-5psb4f7s/disp.dat')
 
         Non-default name:
 
-        >>> analysis = UniaxialMaterialAnalysis(name='Steel04Test', ...)
-        >>> scratch_file = analysis.create_scratch_filer('bar')
+        >>> analysis = OpenSeesAnalysis(name='Steel04Test', scratch_path='/path/to/scratchdir')
+        >>> scratch_file = analysis.create_scratch_filer()
         >>> scratch_file('disp', '.dat')
-        PosixPath('/path/to/scratchdir/Steel04Test_bar_disp.dat')
+        PosixPath('/path/to/scratchdir/Steel04Test-5psb4f7s/disp.dat')
         """
-        return ScratchFile(self.name, analysis_id, self.scratch_path)
+        if delete is None:
+            delete = self.delete_files
+        return ScratchFile(self.name, self.scratch_path, delete=delete)
 
     def run_opensees(
         self, inputfile: str, echo: Union[bool, None] = None
