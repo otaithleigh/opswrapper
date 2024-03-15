@@ -1,12 +1,16 @@
 import keyword
 import os
+import sys
 import warnings
 from collections.abc import MutableMapping
 from functools import cached_property
 from pathlib import Path
 from typing import ClassVar, Dict, Union
 
-import tomli
+if sys.version_info < (3, 11):
+    import tomli as tomllib
+else:
+    import tomllib
 
 _CONFIG_FILE_NAME = ".path_of.toml"
 
@@ -64,7 +68,7 @@ class PathOf(MutableMapping[str, Path]):
 
             try:
                 config.update(
-                    {key: Path(value) for key, value in tomli.loads(contents).items()}
+                    {key: Path(value) for key, value in tomllib.loads(contents).items()}
                 )
             except Exception as exc:
                 warnings.warn(
