@@ -216,7 +216,6 @@ def _format_file_arg(file: Union[str, Path] = None) -> Tuple[str, str]:
         # baffling KeyError will be raised when calling '.format'.
         tcl_list_expansion = "{{*}}"
     else:
-        file = utils.path_for_tcl(file)
-        file_arg = "{%s}" % file
+        file_arg = utils.tclescape(utils.path_for_tcl(file))
         tcl_list_expansion = "{*}"
     return file_arg, tcl_list_expansion
