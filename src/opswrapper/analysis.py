@@ -148,7 +148,7 @@ class OpenSeesAnalysis:
     def opensees_path(self):
         """Path to the OpenSees binary to use.
 
-        If None, looks for 'OpenSees' on the system PATH.
+        If None, uses the value of ``config.path_of.opensees``.
         """
         return self._opensees_path
 
@@ -160,6 +160,10 @@ class OpenSeesAnalysis:
 
     @property
     def scratch_path(self):
+        """Path to the base scratch directory.
+
+        If None, uses the value of ``config.path_of.scratch``.
+        """
         return self._scratch_path
 
     @scratch_path.setter
