@@ -173,7 +173,6 @@ class OpenSeesObject(abc.ABC):
         >>> ops.material.Elastic(1, 29000.0).tcl_code({float: 'e'})
         'uniaxialMaterial Elastic 1 2.900000e+04'
         """
-        pass
 
     def tcl_args(self, formats: SpecLike = None) -> list[str]:
         """Return the formatted arguments to the Tcl command to create this

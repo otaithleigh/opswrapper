@@ -149,7 +149,9 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             status = "Analysis successful"
         elif process.returncode == 2:
             status = "Analysis failed"
-            warnings.warn("UniaxialMaterialAnalysis.run_analysis: analysis failed")
+            warnings.warn(
+                "UniaxialMaterialAnalysis.run_analysis: analysis failed", stacklevel=2
+            )
         else:
             raise RuntimeError(
                 f"Analysis ended in an unknown manner, exit code: {process.returncode}"
@@ -162,7 +164,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         force = np.loadtxt(files.output_force)
         results["force"] = xr.DataArray(force[:, 1], dims="time")
 
-        with warnings.catch_warnings() as cw:
+        with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             stiff = np.loadtxt(files.output_stiff)
         if len(stiff) != 0:

@@ -189,7 +189,7 @@ class DispBeamColumn(Element):
     def tcl_args(self, formats=None) -> list[str]:
         try:
             nsections = len(self.section)
-            if nsections != self.npoints and nsections != 1:
+            if nsections not in (self.npoints, 1):
                 raise ValueError(
                     "DispBeamColumn: number of sections must be 1 or npoints"
                 )

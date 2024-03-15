@@ -79,7 +79,7 @@ class MultiFormatSpec:
         try:
             fmt = self._spec[obj.__class__]
         except KeyError:
-            for type, fmt in self._spec.items():
+            for type, fmt in self._spec.items():  # noqa: B007
                 if isinstance(obj, type):
                     break
             else:

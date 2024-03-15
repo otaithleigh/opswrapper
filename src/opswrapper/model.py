@@ -56,7 +56,7 @@ class Node(base.OpenSeesObject):
         self,
         tag: int,
         *coords: Union[float, Iterable[float]],
-        mass: Optional[Iterable[float]] = None
+        mass: Optional[Iterable[float]] = None,
     ):
         super().__init__()
         self.tag = tag

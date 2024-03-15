@@ -43,6 +43,7 @@ class ElementRecorder(base.OpenSeesObject):
     ... response='localForce').tcl_code()
     'recorder Element -file {/path/to/file} -ele 1 -dof 1 2 localForce'
     """
+
     file: Optional[Union[str, Path]] = None
     fileformat: str = "file"
     precision: int = None
@@ -146,6 +147,7 @@ class NodeRecorder(base.OpenSeesObject):
     >>> NodeRecorder(file='/path/to/file', nodes=1, dofs=[1, 2], response='disp').tcl_code()
     'recorder Node -file {/path/to/file} -node 1 -dof 1 2 disp'
     """
+
     file: Optional[Union[str, Path]] = None
     fileformat: str = "file"
     precision: int = None
