@@ -9,28 +9,38 @@ source:
 
 build:
   noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
+  script: {{ PYTHON }} -m pip install --no-deps -vv .
 
 requirements:
   host:
     - python
     - pip
   run:
-    - python>=3.7.0
+    - python>=3.9.0
     - numpy
-    - tomli
+    - tomli  # [py<3.11]
     - xarray
 
 test:
   imports:
     - opswrapper
+    - opswrapper.algorithm
     - opswrapper.analysis
+    - opswrapper.backports
+    - opswrapper.base
     - opswrapper.config
+    - opswrapper.constraints
     - opswrapper.element
+    - opswrapper.formatting
     - opswrapper.integration
+    - opswrapper.integrator
     - opswrapper.material
+    - opswrapper.model
     - opswrapper.output
     - opswrapper.section
+    - opswrapper.test
+    - opswrapper.uniaxialmaterialanalysis
+    - opswrapper.utils
   requires:
     - pytest
   source_files:
