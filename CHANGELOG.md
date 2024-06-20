@@ -14,8 +14,11 @@ Changelog
 
 ### Removed
 
-- Removed `utils.list_dataclass_fields()` and `utils.Namespace`, as these don't
-  add much and don't really belong in this package.
+- Removed several miscellaneous functions and classes from `utils`:
+  - `utils.Namespace`
+  - `utils.fill_out_numbers` -- moved to `uniaxialmaterialanalysis`
+  - `utils.list_dataclass_fields()`
+  - `utils.print_model()`
 
 
 [6.0.0] - 2024-03-15
