@@ -134,39 +134,6 @@ def tcllist(it: Iterable[object], stringify: Callable[[object], str] = str) -> s
     return f"[list {' '.join(tclescape(stringify(i)) for i in it)}]"
 
 
-def list_dataclass_fields(name, object, pad="", end="\n", exclude=None) -> str:
-    """Represent the fields of a dataclass object.
-
-    Parameters
-    ----------
-    name : str
-        The name to use for the object in the representation.
-    object : dataclass
-        Object to describe.
-    pad : str, optional
-        String to pad the left side with. (default: '')
-    end : str, optional
-        String to end each entry with. (default: '\\n')
-    exclude : list[str], optional
-        Field names to exclude. (default: None)
-
-    Example
-    -------
-    >>> print(list_dataclass_fields('gravity_columns', self.gravity_columns, pad=' '*8))
-            gravity_columns.include          : True
-            gravity_columns.num_points       : 4
-            gravity_columns.material_model   : Steel01
-            gravity_columns.strain_hardening : 0.01
-    """
-    fields = dataclasses.fields(object)
-    max_key_len = max(len(f.name) for f in fields)
-    return end.join(
-        f"{pad}{name}.{field.name.ljust(max_key_len)} : {getattr(object, field.name)!r}"
-        for field in fields
-        if exclude is None or field.name not in exclude
-    )
-
-
 def fill_out_numbers(peaks, rate):
     """Fill in numbers between peaks.
 
