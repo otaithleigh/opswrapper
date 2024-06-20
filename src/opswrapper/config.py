@@ -126,5 +126,8 @@ class PathOf(MutableMapping[str, Path]):
             and not keyword.iskeyword(key)
         ]
 
+    def _ipython_key_completions_(self):
+        return self._config.keys()
+
 
 path_of = PathOf()

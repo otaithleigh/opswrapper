@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[Upcoming]
+----------
+
+### Added
+
+- Added support for IPython's key completion feature to `PathOf`.
+
+
 [6.0.0] - 2024-03-15
 --------------------
 
