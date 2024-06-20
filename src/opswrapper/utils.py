@@ -1,9 +1,12 @@
 import dataclasses
 import numbers
+import os
 from pathlib import Path
-from typing import Callable, Generic, Iterable, Mapping, TypeVar
+from typing import Callable, Generic, Iterable, Mapping, TypeVar, Union
 
 import numpy as np
+
+StrPath = Union[str, os.PathLike[str]]
 
 
 def coerce_numeric(obj, to_type: type):
@@ -32,7 +35,7 @@ def coerce_numeric(obj, to_type: type):
     return coerced
 
 
-def path_for_tcl(path) -> str:
+def path_for_tcl(path: StrPath) -> str:
     return Path(path).as_posix()
 
 
