@@ -96,19 +96,20 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
 
         # Filenames
         scratch_file = self.create_scratch_filer()
-        files = utils.Namespace()
-        files.input = scratch_file("input", ".tcl")
-        files.pattern = scratch_file("pattern", ".dat")
-        files.output_force = scratch_file("output_force", ".dat")
-        files.output_disp = scratch_file("output_disp", ".dat")
-        files.output_stiff = scratch_file("output_stiff", ".dat")
+        files = {
+            "input": scratch_file("input", ".tcl"),
+            "pattern": scratch_file("pattern", ".dat"),
+            "output_force": scratch_file("output_force", ".dat"),
+            "output_disp": scratch_file("output_disp", ".dat"),
+            "output_stiff": scratch_file("output_stiff", ".dat"),
+        }
 
         numbers = self._generate_imposed_displacement(
             peak_points, rate_type, rate_value
         )
         numsteps = numbers.size - 2
 
-        pattern_filepath = "{" + utils.path_for_tcl(files.pattern) + "}"
+        pattern_filepath = "{" + utils.path_for_tcl(files["pattern"]) + "}"
         new_recorder = functools.partial(ElementRecorder, precision=10, elements=1)
         material_definition = self._process_material_definition()
         model = [
@@ -121,9 +122,9 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             f'pattern Plain 1 "Series -dt 1.0 -filePath {pattern_filepath} -factor 1.0" {{',
             "    sp 2 1 1.0",
             "}",
-            new_recorder(file=files.output_force, response="force"),
-            new_recorder(file=files.output_disp, response="deformations"),
-            new_recorder(file=files.output_stiff, response="stiff"),
+            new_recorder(file=files["output_force"], response="force"),
+            new_recorder(file=files["output_disp"], response="deformations"),
+            new_recorder(file=files["output_stiff"], response="stiff"),
             "system UmfPack",
             constraints.Transformation(),
             test.NormDispIncr(tolerance=1e-8, max_iters=10, print_flag=0),
@@ -137,11 +138,11 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         ]
 
         # Write files to disk
-        np.savetxt(files.pattern, numbers)
-        utils.print_model(model, file=files.input)
+        np.savetxt(files["pattern"], numbers)
+        utils.print_model(model, file=files["input"])
 
         # Run the analysis
-        process = self.run_opensees(files.input, echo=echo)
+        process = self.run_opensees(files["input"], echo=echo)
         if process.returncode == 1:
             status = "Analysis successful"
         elif process.returncode == 2:
@@ -155,15 +156,15 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             )
 
         # Read results
-        disp = np.loadtxt(files.output_disp)
+        disp = np.loadtxt(files["output_disp"])
         results["disp"] = xr.DataArray(disp, dims="time")
 
-        force = np.loadtxt(files.output_force)
+        force = np.loadtxt(files["output_force"])
         results["force"] = xr.DataArray(force[:, 1], dims="time")
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            stiff = np.loadtxt(files.output_stiff)
+            stiff = np.loadtxt(files["output_stiff"])
         if len(stiff) != 0:
             results["stiff"] = xr.DataArray(stiff, dims="time")
 

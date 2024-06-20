@@ -1,6 +1,5 @@
 import dataclasses
 import numbers
-import types
 from pathlib import Path
 from typing import Callable, Generic, Iterable, Mapping, TypeVar
 
@@ -31,43 +30,6 @@ def coerce_numeric(obj, to_type: type):
         return obj
 
     return coerced
-
-
-class Namespace(types.SimpleNamespace):
-    """Extension of the SimpleNamespace class to make it more dict-like.
-
-    Examples
-    --------
-    Iterating over name-value pairs (a la dict.items):
-
-    >>> files = Namespace()
-    >>> files.input = 'input.tcl'
-    >>> files.output = 'output.dat'
-    >>> for name, path in files:
-    ...     print(name, ':', path)
-    input : input.tcl
-    output : output.dat
-
-    Programmatic get and set access:
-
-    >>> files['input']
-    'input.tcl'
-    >>> files['output'] = 'output.csv'
-    >>> files.output
-    'output.csv'
-    """
-
-    def __iter__(self):
-        return iter(self.__dict__.items())
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        setattr(self, key, value)
-
-    def __delitem__(self, key):
-        delattr(self, key)
 
 
 def path_for_tcl(path) -> str:
