@@ -36,32 +36,6 @@ def path_for_tcl(path) -> str:
     return Path(path).as_posix()
 
 
-def print_model(model: Iterable[str], file=None):
-    """Print a model definition to a file.
-
-    Parameters
-    ----------
-    model : list
-        List of strings and/or OpenSeesObjects that define a model and/or its
-        analysis routine.
-    file : file-like, optional
-        Name of a file or an open file descriptor. If None, print to stdout.
-        (default: None)
-    """
-    try:
-        file = Path(file)
-        file_is_descriptor = False
-    except TypeError:
-        file_is_descriptor = True
-
-    modeltext = "\n".join(str(line) for line in model)
-    if file_is_descriptor:
-        print(modeltext, file=file)
-    else:
-        with open(file, "w") as f:
-            print(modeltext, file=f)
-
-
 def tclescape(text: str) -> str:
     """Escape a string for use as a literal in Tcl."""
     # Based on:

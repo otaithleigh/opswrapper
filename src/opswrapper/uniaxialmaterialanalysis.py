@@ -139,7 +139,8 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
 
         # Write files to disk
         np.savetxt(files["pattern"], numbers)
-        utils.print_model(model, file=files["input"])
+        script = "\n".join(str(line) for line in model)
+        files["input"].write_text(script)
 
         # Run the analysis
         process = self.run_opensees(files["input"], echo=echo)
@@ -169,6 +170,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             results["stiff"] = xr.DataArray(stiff, dims="time")
 
         results.attrs["status"] = status
+        results.attrs["script"] = script
         results.attrs["stdout"] = process.stdout
 
         return results
