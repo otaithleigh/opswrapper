@@ -8,6 +8,11 @@ Changelog
 
 - Added support for IPython's key completion feature to `PathOf`.
 
+### Removed
+
+- Removed `utils.list_dataclass_fields()` and `utils.Namespace`, as these don't
+  add much and don't really belong in this package.
+
 
 [6.0.0] - 2024-03-15
 --------------------
