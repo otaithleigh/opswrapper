@@ -8,6 +8,10 @@ Changelog
 
 - Added support for IPython's key completion feature to `PathOf`.
 
+### Changed
+
+- Use stdlib `TemporaryDirectory` on Python 3.12+.
+
 ### Removed
 
 - Removed `utils.list_dataclass_fields()` and `utils.Namespace`, as these don't

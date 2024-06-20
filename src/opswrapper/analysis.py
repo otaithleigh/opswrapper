@@ -2,12 +2,17 @@
 
 import shutil
 import subprocess as sub
+import sys
 from functools import partial
 from pathlib import Path
 from typing import NamedTuple, Optional, Union
 
 from . import config
-from .backports import TemporaryDirectory
+
+if sys.version_info < (3, 12):
+    from .backports import TemporaryDirectory
+else:
+    from tempfile import TemporaryDirectory
 
 
 def _get_default_scratch_path():
