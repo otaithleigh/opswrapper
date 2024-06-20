@@ -186,5 +186,53 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
             None: lambda: np.max(np.abs(np.diff(peak_points))),
         }[rate_type]()
 
-        numbers = utils.fill_out_numbers(peak_points, rate).flatten()
+        numbers = fill_out_numbers(peak_points, rate).flatten()
         return np.array([numbers[0], *numbers, numbers[-1]])
+
+
+def fill_out_numbers(peaks, rate):
+    """Fill in numbers between peaks.
+
+    Parameters
+    ----------
+    peaks : array-like
+        Peaks to fill between.
+    rate : float
+        Rate to use between peaks.
+
+    Examples
+    --------
+    >>> fill_out_numbers([0, 1, -1], rate=0.25)
+    array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ,  0.75,  0.5 ,  0.25,  0.  ,
+           -0.25, -0.5 , -0.75, -1.  ])
+    >>> fill_out_numbers([[0, 1, -1], [1, 2, -2]], rate=0.25)
+    array([[ 0.  ,  1.  , -1.  ],
+           [ 0.25,  1.25, -1.25],
+           [ 0.5 ,  1.5 , -1.5 ],
+           [ 0.75,  1.75, -1.75],
+           [ 1.  ,  2.  , -2.  ]])
+
+    Ported from the MATLAB function written by Mark Denavit.
+    """
+    peaks = np.array(peaks)
+
+    if len(peaks.shape) == 1:
+        peaks = peaks.reshape(peaks.size, 1)
+
+    if peaks.shape[0] == 1:
+        peaks = peaks.T
+
+    numpeaks = peaks.shape[0]
+    numbers = [peaks[0, :]]
+
+    for i in range(numpeaks - 1):
+        diff = peaks[i + 1, :] - peaks[i, :]
+        numsteps = int(np.maximum(2, 1 + np.ceil(np.max(np.abs(diff / rate)))))
+        numbers_to_add = np.linspace(peaks[i, :], peaks[i + 1, :], numsteps)
+        numbers.append(numbers_to_add[1:, :])
+
+    numbers = np.vstack(numbers)
+    if 1 in numbers.shape:
+        numbers = numbers.flatten()
+
+    return numbers
