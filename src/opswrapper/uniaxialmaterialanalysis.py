@@ -109,7 +109,7 @@ class UniaxialMaterialAnalysis(OpenSeesAnalysis):
         )
         numsteps = numbers.size - 2
 
-        pattern_filepath = "{" + utils.path_for_tcl(files["pattern"]) + "}"
+        pattern_filepath = utils.tclescape(utils.path_for_tcl(files["pattern"]))
         new_recorder = functools.partial(ElementRecorder, precision=10, elements=1)
         material_definition = self._process_material_definition()
         model = [
